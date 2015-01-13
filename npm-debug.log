@@ -1,0 +1,197 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'jugglindb',
+1 verbose cli   'jugglingdb-cozy-adapter',
+1 verbose cli   '--save' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.33
+4 verbose readDependencies using package.json deps
+5 verbose cache add [ 'jugglindb', null ]
+6 verbose cache add name=undefined spec="jugglindb" args=["jugglindb",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'jugglindb',
+7 verbose parsed url   path: 'jugglindb',
+7 verbose parsed url   href: 'jugglindb' }
+8 verbose cache add [ 'jugglingdb-cozy-adapter', null ]
+9 verbose cache add name=undefined spec="jugglingdb-cozy-adapter" args=["jugglingdb-cozy-adapter",null]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: 'jugglingdb-cozy-adapter',
+10 verbose parsed url   path: 'jugglingdb-cozy-adapter',
+10 verbose parsed url   href: 'jugglingdb-cozy-adapter' }
+11 silly lockFile 41d951e4-jugglindb jugglindb
+12 verbose lock jugglindb /home/paul/.npm/41d951e4-jugglindb.lock
+13 silly lockFile bee885d3-jugglingdb-cozy-adapter jugglingdb-cozy-adapter
+14 verbose lock jugglingdb-cozy-adapter /home/paul/.npm/bee885d3-jugglingdb-cozy-adapter.lock
+15 silly lockFile bee885d3-jugglingdb-cozy-adapter jugglingdb-cozy-adapter
+16 silly lockFile bee885d3-jugglingdb-cozy-adapter jugglingdb-cozy-adapter
+17 silly lockFile 41d951e4-jugglindb jugglindb
+18 silly lockFile 41d951e4-jugglindb jugglindb
+19 verbose addNamed [ 'jugglingdb-cozy-adapter', '' ]
+20 verbose addNamed [ null, '*' ]
+21 silly lockFile 34ce03ed-jugglingdb-cozy-adapter jugglingdb-cozy-adapter@
+22 verbose lock jugglingdb-cozy-adapter@ /home/paul/.npm/34ce03ed-jugglingdb-cozy-adapter.lock
+23 verbose addNamed [ 'jugglindb', '' ]
+24 verbose addNamed [ null, '*' ]
+25 silly lockFile b966d3d9-jugglindb jugglindb@
+26 verbose lock jugglindb@ /home/paul/.npm/b966d3d9-jugglindb.lock
+27 silly addNameRange { name: 'jugglingdb-cozy-adapter', range: '*', hasData: false }
+28 silly addNameRange { name: 'jugglindb', range: '*', hasData: false }
+29 verbose request where is /jugglindb
+30 verbose request registry https://registry.npmjs.org/
+31 verbose request id a8dcf7da1d520db0
+32 verbose url raw /jugglindb
+33 verbose url resolving [ 'https://registry.npmjs.org/', './jugglindb' ]
+34 verbose url resolved https://registry.npmjs.org/jugglindb
+35 verbose request where is https://registry.npmjs.org/jugglindb
+36 info trying registry request attempt 1 at 12:05:43
+37 http GET https://registry.npmjs.org/jugglindb
+38 verbose request where is /jugglingdb-cozy-adapter
+39 verbose request registry https://registry.npmjs.org/
+40 verbose url raw /jugglingdb-cozy-adapter
+41 verbose url resolving [ 'https://registry.npmjs.org/', './jugglingdb-cozy-adapter' ]
+42 verbose url resolved https://registry.npmjs.org/jugglingdb-cozy-adapter
+43 verbose request where is https://registry.npmjs.org/jugglingdb-cozy-adapter
+44 info trying registry request attempt 1 at 12:05:43
+45 verbose etag "6KQA68K275FOZHH23VXB167H2"
+46 http GET https://registry.npmjs.org/jugglingdb-cozy-adapter
+47 http 304 https://registry.npmjs.org/jugglingdb-cozy-adapter
+48 silly registry.get cb [ 304,
+48 silly registry.get   { date: 'Tue, 13 Jan 2015 11:05:43 GMT',
+48 silly registry.get     server: 'Apache',
+48 silly registry.get     via: '1.1 varnish',
+48 silly registry.get     'last-modified': 'Tue, 13 Jan 2015 11:05:44 GMT',
+48 silly registry.get     'cache-control': 'max-age=60',
+48 silly registry.get     etag: '"6KQA68K275FOZHH23VXB167H2"',
+48 silly registry.get     age: '0',
+48 silly registry.get     'x-served-by': 'cache-fra1236-FRA',
+48 silly registry.get     'x-cache': 'MISS',
+48 silly registry.get     'x-cache-hits': '0',
+48 silly registry.get     'x-timer': 'S1421147143.492303,VS0,VE622',
+48 silly registry.get     vary: 'Accept',
+48 silly registry.get     'content-length': '0',
+48 silly registry.get     'keep-alive': 'timeout=10, max=50',
+48 silly registry.get     connection: 'Keep-Alive' } ]
+49 verbose etag https://registry.npmjs.org/jugglingdb-cozy-adapter from cache
+50 silly addNameRange number 2 { name: 'jugglingdb-cozy-adapter', range: '*', hasData: true }
+51 silly addNameRange versions [ 'jugglingdb-cozy-adapter',
+51 silly addNameRange   [ '0.0.1',
+51 silly addNameRange     '0.0.2',
+51 silly addNameRange     '0.1.0',
+51 silly addNameRange     '0.1.1',
+51 silly addNameRange     '0.1.2',
+51 silly addNameRange     '0.1.3',
+51 silly addNameRange     '0.1.4',
+51 silly addNameRange     '0.2.0',
+51 silly addNameRange     '0.2.1',
+51 silly addNameRange     '0.2.2',
+51 silly addNameRange     '0.2.3',
+51 silly addNameRange     '0.3.0',
+51 silly addNameRange     '0.3.1',
+51 silly addNameRange     '0.3.2',
+51 silly addNameRange     '0.3.3',
+51 silly addNameRange     '0.3.5',
+51 silly addNameRange     '0.3.6',
+51 silly addNameRange     '0.3.7',
+51 silly addNameRange     '0.3.8',
+51 silly addNameRange     '0.3.9',
+51 silly addNameRange     '0.3.11',
+51 silly addNameRange     '0.3.12',
+51 silly addNameRange     '0.3.14',
+51 silly addNameRange     '0.4.0',
+51 silly addNameRange     '0.4.1',
+51 silly addNameRange     '0.4.3',
+51 silly addNameRange     '0.4.4',
+51 silly addNameRange     '0.4.5',
+51 silly addNameRange     '0.4.6',
+51 silly addNameRange     '0.4.7',
+51 silly addNameRange     '0.4.8',
+51 silly addNameRange     '0.4.9',
+51 silly addNameRange     '0.4.10',
+51 silly addNameRange     '0.4.11',
+51 silly addNameRange     '0.4.12',
+51 silly addNameRange     '0.4.13',
+51 silly addNameRange     '0.4.14',
+51 silly addNameRange     '0.4.15' ] ]
+52 verbose addNamed [ 'jugglingdb-cozy-adapter', '0.4.15' ]
+53 verbose addNamed [ '0.4.15', '0.4.15' ]
+54 silly lockFile aa247eac-jugglingdb-cozy-adapter-0-4-15 jugglingdb-cozy-adapter@0.4.15
+55 verbose lock jugglingdb-cozy-adapter@0.4.15 /home/paul/.npm/aa247eac-jugglingdb-cozy-adapter-0-4-15.lock
+56 silly lockFile 60136225-gglingdb-cozy-adapter-0-4-15-tgz https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+57 verbose lock https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz /home/paul/.npm/60136225-gglingdb-cozy-adapter-0-4-15-tgz.lock
+58 verbose addRemoteTarball [ 'https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz',
+58 verbose addRemoteTarball   '29bd73b489d426a7b58ad2d0439a74b7aac08005' ]
+59 info retry fetch attempt 1 at 12:05:44
+60 verbose fetch to= /tmp/npm-7163-f1GBsvwU/registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+61 http GET https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+62 http 404 https://registry.npmjs.org/jugglindb
+63 verbose headers { date: 'Tue, 13 Jan 2015 11:05:44 GMT',
+63 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+63 verbose headers   'content-type': 'application/json',
+63 verbose headers   'cache-control': 'max-age=0',
+63 verbose headers   'content-length': '52',
+63 verbose headers   'accept-ranges': 'bytes',
+63 verbose headers   via: '1.1 varnish',
+63 verbose headers   age: '0',
+63 verbose headers   'x-served-by': 'cache-fra1246-FRA',
+63 verbose headers   'x-cache': 'MISS',
+63 verbose headers   'x-cache-hits': '0',
+63 verbose headers   'x-timer': 'S1421147144.231248,VS0,VE102',
+63 verbose headers   'keep-alive': 'timeout=10, max=50',
+63 verbose headers   connection: 'Keep-Alive' }
+64 silly registry.get cb [ 404,
+64 silly registry.get   { date: 'Tue, 13 Jan 2015 11:05:44 GMT',
+64 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+64 silly registry.get     'content-type': 'application/json',
+64 silly registry.get     'cache-control': 'max-age=0',
+64 silly registry.get     'content-length': '52',
+64 silly registry.get     'accept-ranges': 'bytes',
+64 silly registry.get     via: '1.1 varnish',
+64 silly registry.get     age: '0',
+64 silly registry.get     'x-served-by': 'cache-fra1246-FRA',
+64 silly registry.get     'x-cache': 'MISS',
+64 silly registry.get     'x-cache-hits': '0',
+64 silly registry.get     'x-timer': 'S1421147144.231248,VS0,VE102',
+64 silly registry.get     'keep-alive': 'timeout=10, max=50',
+64 silly registry.get     connection: 'Keep-Alive' } ]
+65 silly lockFile b966d3d9-jugglindb jugglindb@
+66 silly lockFile b966d3d9-jugglindb jugglindb@
+67 http 200 https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+68 silly lockFile 60136225-gglingdb-cozy-adapter-0-4-15-tgz https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+69 silly lockFile 60136225-gglingdb-cozy-adapter-0-4-15-tgz https://registry.npmjs.org/jugglingdb-cozy-adapter/-/jugglingdb-cozy-adapter-0.4.15.tgz
+70 silly lockFile aa247eac-jugglingdb-cozy-adapter-0-4-15 jugglingdb-cozy-adapter@0.4.15
+71 silly lockFile aa247eac-jugglingdb-cozy-adapter-0-4-15 jugglingdb-cozy-adapter@0.4.15
+72 silly lockFile 34ce03ed-jugglingdb-cozy-adapter jugglingdb-cozy-adapter@
+73 silly lockFile 34ce03ed-jugglingdb-cozy-adapter jugglingdb-cozy-adapter@
+74 error 404 404 Not Found: jugglindb
+74 error 404
+74 error 404 'jugglindb' is not in the npm registry.
+74 error 404 You should bug the author to publish it
+74 error 404 It was specified as a dependency of 'cozy-plug'
+74 error 404
+74 error 404 Note that you can also install from a
+74 error 404 tarball, folder, or http url, or git url.
+75 error System Linux 3.16.0-28-generic
+76 error command "/usr/local/bin/node" "/usr/local/bin/npm" "install" "jugglindb" "jugglingdb-cozy-adapter" "--save"
+77 error cwd /media/Data/paul/Documents/Dev/cozy-plugdb
+78 error node -v v0.10.33
+79 error npm -v 1.4.28
+80 error code E404
+81 verbose exit [ 1, true ]

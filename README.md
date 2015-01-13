@@ -1,6 +1,5 @@
 # cozy-plugdb
 Cozy app to communicate with plugdb
 
-Prerequites
-
+Prerequisite : 
 You need a PlugDB running on /dev/ttyACM0

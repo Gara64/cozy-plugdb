@@ -11,7 +11,6 @@ var app = express();
 var couchUrl = "http://127.0.0.1:5985/";
 var couchClient = request.newClient(couchUrl);
 
-var target = "http://admin1:admin@localhost:5984/mysharedb";
 
 // The data system listens to localhost:9101
 //dataSystem = new Client('http://localhost:9101');
@@ -98,6 +97,16 @@ var deleteDoc = function(id) {
 
 File = db.define('File', {
   "id": String,
+  "name": String,
+  "content": { "type": String, "default": ""}
+});
+
+Note = db.define('Note', {
+  "id": String,
+  "title": String,
+  "parent_id" :String,
+  "path": String,
+  "version": Number,
   "content": { "type": String, "default": ""}
 });
 
@@ -106,10 +115,11 @@ var server = http.createServer(app).listen(port, host, function() {
   	console.log("Server listening to %s:%d within %s environment",
               host, port, app.get('env'));
 
+  	var target = "http://192.168.0.20:5984/cozy_backup";
+
 	plug.init(function(){
-		//deleteAllFiles();
-		createFiles(2);
-		getFiles(insertFiles);
+		deleteAllFiles(createNotes, 2);
+		getNotes(insertFiles, target);
 	});
 	
 
@@ -125,7 +135,8 @@ app.get('/', function(req, res) {
 
 var createFiles = function(nDocs) {
 	for(var i=0;i<nDocs;i++){
-		File.create({"content":"doc"}, function(err, file) {
+		var docName = "gen_doc_" + i;
+		File.create({"name":"test", "content":"doc"}, function(err, file) {
 			if(err)
 	    		console.error(err);
 	    	else
@@ -134,17 +145,44 @@ var createFiles = function(nDocs) {
 	}
 };
 
-var getFiles = function(callback) {
+var createNotes = function(nNotes) {
+	for(var i=0;i<nNotes;i++){
+		var noteName = "gen_note " + i;
+		Note.create({"title":noteName, "parent_id":"tree-node-all", "path":noteName, "version":1, "content":"coucou"}, function(err, note) {
+			if(err)
+	    		console.error(err);
+	    	else
+	    		console.log('note created : ' + note.id);
+		});
+	}
+};
+
+var getFiles = function(callback, target) {
 	// Getting request results
 	File.request("all", function (err, files) {
 		if(err)
 			console.error(err);
 		else{
-			var res = [];
+			var ids = [];
 		    for(var i=0;i<files.length;i++){
-		    	res.push(files[i].id);
+		    	ids.push(files[i].id);
 		    }
-	   		callback(res);
+	   		callback(ids, target);
+	   	}
+	});
+};
+
+var getNotes = function(callback, target) {
+	// Getting request results
+	Note.request("all", function (err, files) {
+		if(err)
+			console.error(err);
+		else{
+			var ids = [];
+		    for(var i=0;i<files.length;i++){
+		    	ids.push(files[i].id);
+		    }
+	   		callback(ids, target);
 	   	}
 	});
 };
@@ -157,29 +195,22 @@ var insertFiles = function(ids) {
 	});
 };
 
-var deleteAllFiles = function() {
+var deleteAllFiles = function(callback, nDocs) {
 	File.requestDestroy("all", function(err) {
 		if(err)
     		console.log(err);
     	else
     		console.log("all files deleted");
+    	callback(nDocs);
 	});
 };
 
-var replicateDocs = function(ids) {
+var replicateDocs = function(ids, target) {
 	var data = { 
 		source: "cozy", 
-		target: "http://gara.ovh:5984/cozy_backup",
+		target: "http://192.168.0.20:5984/cozy_backup",
 		doc_ids: ids 
 	};
-		/*'{"source": "cozy",
-		"target": "'+ target+'",
-		"doc_ids" : "' + ids + '"
-		}';
-		*/
-
-	//configureCouchClient();
-
 	return couchClient.post("_replicate", data, function(err, res, body){
 		if(err || !body.ok)
 			return handleError(err, body, "Backup failed ");
@@ -191,13 +222,9 @@ var replicateDocs = function(ids) {
 	});
 }
 
-var configureCouchClient = function(callback) {
-    var password, username, _ref;
-    _ref = getAuthCouchdb(), username = _ref[0], password = _ref[1];
-    return couchClient.setBasicAuth(username, password);
-  };
 
-var  handleError = function(err, body, msg) {
+
+var handleError = function(err, body, msg) {
     log.error("An error occured:");
     if (err) {
       log.raw(err);

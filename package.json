@@ -13,7 +13,8 @@
     "java": "~0.4.0",
     "jugglingdb": "^0.3.0",
     "jugglingdb-cozy-adapter": "^0.4.15",
-    "request-json": "^0.5.0"
+    "printit": "^0.1.5",
+    "request-json-light": "^0.5.12"
   },
   "engines": [
     "node = 0.8.x"

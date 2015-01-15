@@ -1,12 +1,18 @@
 // Generate a new instance of express server.
 var express = require('express')
   , http = require('http')
-  , Client = require('request-json').JsonClient
+  , request = require('request-json-light')
   , plug = require('./lib/plug.js')
+  , log = require('printit')()
   , Schema = require('jugglingdb').Schema;
 
 var db = new Schema('cozy-adapter', { url: 'http://localhost:9101/' });
 var app = express();
+var couchUrl = "http://127.0.0.1:5985/";
+var couchClient = request.newClient(couchUrl);
+
+var target = "http://admin1:admin@localhost:5984/mysharedb";
+
 // The data system listens to localhost:9101
 //dataSystem = new Client('http://localhost:9101');
 
@@ -97,24 +103,15 @@ File = db.define('File', {
 
 // Starts the server itself
 var server = http.createServer(app).listen(port, host, function() {
-  console.log("Server listening to %s:%d within %s environment",
+  	console.log("Server listening to %s:%d within %s environment",
               host, port, app.get('env'));
 
-  /*plug.init( function(){
-  	createFiles(5);
-  	getFiles(insertFiles);
-  	deleteAllFiles(function(){
-  		plug.close();
-  	});
-  });
-*/
-plug.init(function(){
-	createFiles(5);
-	getFiles(insertFiles);
-});
+	plug.init(function(){
+		//deleteAllFiles();
+		createFiles(2);
+		getFiles(insertFiles);
+	});
 	
-
-
 
 });
 
@@ -155,6 +152,7 @@ var getFiles = function(callback) {
 var insertFiles = function(ids) {
 	console.log(ids);
 	plug.insert(ids, function(){
+		replicateDocs(ids);
 		plug.close();
 	});
 };
@@ -167,3 +165,71 @@ var deleteAllFiles = function() {
     		console.log("all files deleted");
 	});
 };
+
+var replicateDocs = function(ids) {
+	var data = { 
+		source: "cozy", 
+		target: "http://gara.ovh:5984/cozy_backup",
+		doc_ids: ids 
+	};
+		/*'{"source": "cozy",
+		"target": "'+ target+'",
+		"doc_ids" : "' + ids + '"
+		}';
+		*/
+
+	//configureCouchClient();
+
+	return couchClient.post("_replicate", data, function(err, res, body){
+		if(err || !body.ok)
+			return handleError(err, body, "Backup failed ");
+		else{
+			console.log('Backup suceeded \o/');
+			log.raw(body);
+			return process.exit(1);
+		}
+	});
+}
+
+var configureCouchClient = function(callback) {
+    var password, username, _ref;
+    _ref = getAuthCouchdb(), username = _ref[0], password = _ref[1];
+    return couchClient.setBasicAuth(username, password);
+  };
+
+var  handleError = function(err, body, msg) {
+    log.error("An error occured:");
+    if (err) {
+      log.raw(err);
+    }
+    log.raw(msg);
+    if (body != null) {
+      if (body.msg != null) {
+        log.raw(body.msg);
+      } else if (body.error != null) {
+        if (body.error.message != null) {
+          log.raw(body.error.message);
+        }
+        if (body.message != null) {
+          log.raw(body.message);
+        }
+        if (body.error.result != null) {
+          log.raw(body.error.result);
+        }
+        if (body.error.code != null) {
+          log.raw("Request error code " + body.error.code);
+        }
+        if (body.error.blame != null) {
+          log.raw(body.error.blame);
+        }
+        if (typeof body.error === "string") {
+          log.raw(body.error);
+        }
+        if (body.reason != null )
+        	log.raw(body.reason);
+      } else {
+        log.raw(body);
+      }
+    }
+    return process.exit(1);
+  };

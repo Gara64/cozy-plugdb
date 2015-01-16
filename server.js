@@ -56,11 +56,11 @@ var post = function(data) {
 	    	code = res.statusCode; 
 	    else 
 	    	code = "no status code";
-	    console.log("An error occurred -- [" + code + "] " + err);
+	    log.raw("An error occurred -- [" + code + "] " + err);
 	  }
 	  else {
-	    console.log("created doc : ");
-	    console.log(body);
+	    log.raw("created doc : ");
+	    log.raw(body);
 	  }
 	});
 };
@@ -69,14 +69,14 @@ var listDocs = function() {
 	dataSystem.post('/request/file/all/', {}, function(err, res, body) {
 	  if(err !== null || (res !== null && res.statusCode != 200)) {
 	    if(res !== null) {code = res.statusCode;} else { code = "no status code"; }
-	    console.log("An error occurred -- [" + code + "] " + err);
+	    log.raw("An error occurred -- [" + code + "] " + err);
 	  }
 	  else {
-	    console.log("List of all the files");
+	    log.raw("List of all the files");
 	    var ids = [];
 	    for(var i=0;i<body.length;i++){
 	    	ids.push(body[i].id);
-	    	console.log("id : " + ids[i]);
+	    	log.raw("id : " + ids[i]);
 	    }
 	    return ids;
 	  }
@@ -87,10 +87,10 @@ var deleteDoc = function(id) {
 	dataSystem.delete('/data/' + id, function(err, res, body) {
 	  if(err !== null || (res !== null && res.statusCode != 204)) {
 	    if(res !== null) {code = res.statusCode;} else { code = "no status code"; }
-	    console.log("An error occurred -- [" + code + "] " + err);
+	    log.raw("An error occurred -- [" + code + "] " + err);
 	  }
 	  else {
-	 	console.log("doc with id " + id);
+	 	log.raw("doc with id " + id);
 	  }
 	});
 };
@@ -113,7 +113,7 @@ Note = db.define('Note', {
 
 // Starts the server itself
 var server = http.createServer(app).listen(port, host, function() {
-  	//console.log("Server listening to %s:%d within %s environment",
+  	//log.raw("Server listening to %s:%d within %s environment",
       //        host, port, app.get('env'));
 
 
@@ -142,7 +142,7 @@ var createFiles = function(nDocs) {
 			if(err)
 	    		console.error(err);
 	    	else
-	    		console.log('file created : ' + file.id);
+	    		log.raw('file created : ' + file.id);
 		});
 	}
 };
@@ -154,7 +154,7 @@ var createNotes = function(nNotes) {
 			if(err)
 	    		console.error(err);
 	    	else
-	    		console.log('note created : ' + note.id);
+	    		log.raw('note created : ' + note.id);
 		});
 	}
 };
@@ -190,7 +190,7 @@ var getNotes = function(callback, target) {
 };
 
 var insertFiles = function(ids) {
-	console.log(ids);
+	log.raw(ids);
 	plug.insert(ids, function(){
 		replicateDocs(ids);
 		plug.close();
@@ -200,9 +200,9 @@ var insertFiles = function(ids) {
 var deleteAllFiles = function(callback, nDocs) {
 	File.requestDestroy("all", function(err) {
 		if(err)
-    		console.log(err);
+    		log.raw(err);
     	else
-    		console.log("all files deleted");
+    		log.raw("all files deleted");
     	callback(nDocs);
 	});
 };
@@ -217,7 +217,7 @@ var replicateDocs = function(ids, target) {
 		if(err || !body.ok)
 			return handleError(err, body, "Backup failed ");
 		else{
-			console.log('Backup suceeded \o/');
+			log.raw('Backup suceeded \o/');
 			log.raw(body);
 			return process.exit(1);
 		}

@@ -4,7 +4,8 @@ var express = require('express')
   , request = require('request-json-light')
   , plug = require('./lib/plug.js')
   , log = require('printit')()
-  , Schema = require('jugglingdb').Schema;
+  , Schema = require('jugglingdb').Schema
+  , crypto = require('crypto');
 
 var db = new Schema('cozy-adapter', { url: 'http://localhost:9101/' });
 var app = express();
@@ -115,12 +116,13 @@ var server = http.createServer(app).listen(port, host, function() {
   	console.log("Server listening to %s:%d within %s environment",
               host, port, app.get('env'));
 
-  	var target = "http://192.168.0.20:5984/cozy_backup";
+
+  	/*var target = "http://192.168.0.20:5984/cozy_backup";
 
 	plug.init(function(){
 		deleteAllFiles(createNotes, 2);
 		getNotes(insertFiles, target);
-	});
+	});*/
 	
 
 });
@@ -220,7 +222,14 @@ var replicateDocs = function(ids, target) {
 			return process.exit(1);
 		}
 	});
-}
+};
+
+var generateKey = function(){
+	return crypto.randomBytes(256, function(ex, buf) {
+  		if (ex) throw ex;
+  		return buf;
+	});
+};
 
 
 

@@ -18,80 +18,16 @@ var couchClient = request.newClient(couchUrl);
 
 
 // In production we must authentificate the application
-/*if(process.env.NODE_ENV === 'production') {
+if(process.env.NODE_ENV === 'production') {
   user = process.env.NAME;
   password = process.env.TOKEN;
   dataSystem.setBasicAuth(user, password);
-}*/
-
-
-
-
-
-
-
-
-/*
-// The request must be created first, let's say it is
-var generateDocs = function(nDocs) {
-
-	for(var i=0;i<nDocs;i++)
-	{
-		//var doc = "doc " + i;
-		var data = {
-			"docType" : "file",
-			"doc" : "testy"
-		};
-		post(data);
-	}
 }
 
-var post = function(data) {
-	dataSystem.post('data/', data, function(err, res, body) {
-	  if(err !== null || (res !== null && res.statusCode != 201)) {
-	    if(res !== null) 
-	    	code = res.statusCode; 
-	    else 
-	    	code = "no status code";
-	    log.raw("An error occurred -- [" + code + "] " + err);
-	  }
-	  else {
-	    log.raw("created doc : ");
-	    log.raw(body);
-	  }
-	});
-};
 
-var listDocs = function() {
-	dataSystem.post('/request/file/all/', {}, function(err, res, body) {
-	  if(err !== null || (res !== null && res.statusCode != 200)) {
-	    if(res !== null) {code = res.statusCode;} else { code = "no status code"; }
-	    log.raw("An error occurred -- [" + code + "] " + err);
-	  }
-	  else {
-	    log.raw("List of all the files");
-	    var ids = [];
-	    for(var i=0;i<body.length;i++){
-	    	ids.push(body[i].id);
-	    	log.raw("id : " + ids[i]);
-	    }
-	    return ids;
-	  }
-	});
-};
 
-var deleteDoc = function(id) {
-	dataSystem.delete('/data/' + id, function(err, res, body) {
-	  if(err !== null || (res !== null && res.statusCode != 204)) {
-	    if(res !== null) {code = res.statusCode;} else { code = "no status code"; }
-	    log.raw("An error occurred -- [" + code + "] " + err);
-	  }
-	  else {
-	 	log.raw("doc with id " + id);
-	  }
-	});
-};
-*/
+
+
 
 File = db.define('File', {
   "id": String,

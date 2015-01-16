@@ -113,8 +113,8 @@ Note = db.define('Note', {
 
 // Starts the server itself
 var server = http.createServer(app).listen(port, host, function() {
-  	console.log("Server listening to %s:%d within %s environment",
-              host, port, app.get('env'));
+  	//console.log("Server listening to %s:%d within %s environment",
+      //        host, port, app.get('env'));
 
 
   	/*var target = "http://192.168.0.20:5984/cozy_backup";

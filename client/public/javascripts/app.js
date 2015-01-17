@@ -110,7 +110,7 @@ module.exports = Application;
 
 });
 
-;require.register("initialize", function(exports, require, module) {
+require.register("initialize", function(exports, require, module) {
 var application = require('application');
 
 $(function () {
@@ -120,7 +120,7 @@ $(function () {
 
 });
 
-;require.register("lib/router", function(exports, require, module) {
+require.register("lib/router", function(exports, require, module) {
 var application = require('application');
 
 module.exports = Backbone.Router.extend({
@@ -135,7 +135,7 @@ module.exports = Backbone.Router.extend({
 
 });
 
-;require.register("lib/view_helper", function(exports, require, module) {
+require.register("lib/view_helper", function(exports, require, module) {
 // Put your handlebars.js helpers here.
 
 });
@@ -147,14 +147,14 @@ module.exports = Backbone.Collection.extend({
 
 });
 
-;require.register("models/model", function(exports, require, module) {
+require.register("models/model", function(exports, require, module) {
 // Base class for all models.
 module.exports = Backbone.Model.extend({
 });
 
 });
 
-;require.register("views/home_view", function(exports, require, module) {
+require.register("views/home_view", function(exports, require, module) {
 var View = require('./view');
 var template = require('./templates/home');
 
@@ -165,19 +165,19 @@ module.exports = View.extend({
 
 });
 
-;require.register("views/templates/home", function(exports, require, module) {
+require.register("views/templates/home", function(exports, require, module) {
 module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div id="content"><h1>Cozy template</h1><h2>Welcome</h2><ul><li> <a href="https://github.com/mycozycloud/cozy-setup/wiki">Documentation</a></li><li> <a href="https://github.com/mycozycloud/cozy-setup/wiki/Getting-started">Getting Started</a></li><li> <a href="https://github.com/mycozycloud">Github</a></li></ul></div>');
+buf.push('<div id="content"><h1>Plug app</h1><h2>Welcome</h2><ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li></ul></div>');
 }
 return buf.join("");
 };
 });
 
-;require.register("views/view", function(exports, require, module) {
+require.register("views/view", function(exports, require, module) {
 require('lib/view_helper');
 
 // Base class for all views.
@@ -200,5 +200,5 @@ module.exports = Backbone.View.extend({
 
 });
 
-;
+
 //# sourceMappingURL=app.js.map

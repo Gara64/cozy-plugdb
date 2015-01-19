@@ -3,11 +3,15 @@
 var plug = require('./plug');
 
 module.exports = {
-  'plug': {
-    get: plug.main
-  }, 
+  '': {
+      get: plug.main
+  },
+
   'init' : {
       get: plug.init
+  },
+  'insert' : {
+      get: plug.insert
   },
   'close' : {
       get: plug.close

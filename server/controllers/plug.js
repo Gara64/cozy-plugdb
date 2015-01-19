@@ -3,15 +3,16 @@ var async = require('async');
 File = require('../models/files.js');
 Note = require('../models/notes.js');
 
-
+var init = false; //used to test plugDB connection
 
 module.exports.main = function (req, res) {
-    res.send(200,  'Hello, world!');
-
-    plug.init( function() {
+    res.render('index.jade'), function(err, html) {
+        res.send(200, html);
+};
+/*    plug.init( function() {
     	plug.close();
     });
-
+*/
     /*plug.init(function(){
 		deleteAllFiles(createNotes, 2);
 		getNotes(insertFiles, target);
@@ -20,6 +21,10 @@ module.exports.main = function (req, res) {
 };
 
 module.exports.init = function(req, res) {
+    if(init) {
+        console.log('PlugDb already initialized');
+        res.redirect('back');
+    }
     plug.init( function(err) {
         var msg;
         if(err){
@@ -27,17 +32,30 @@ module.exports.init = function(req, res) {
             msg = "Init failed";
         }
         else{
+            init = true;
             msg = "Init succeeded";
         }
         //res.send(200, msg);
         console.log(msg);    
-        res.redirect('back');
+        res.render('index.jade', {status: msg}, function(err, html){
+            res.send(200, html);
+        });
     });
     
 };
 
+module.exports.insert = function(req, res) {
+    if(!init){
+        console.log("PlugDB not initialized");
+        res.redirect('back');
+    }
+}
 
 module.exports.close = function(req, res) {
+    if(!init){
+        console.log("PlugDB is not initialized");
+        res.redirect('back');
+    }
     plug.close( function(err) {
         if(err){
             msg = "Closing failed";
@@ -45,8 +63,10 @@ module.exports.close = function(req, res) {
         else{
             msg = "Closed"
         }
-        res.redirect('back');
         console.log(msg);
+        res.render('index.jade', {status: msg}, function(err, html){
+            res.send(200, html);
+        });
     });
 };
 

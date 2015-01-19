@@ -15,7 +15,7 @@ module.exports.main = function (req, res) {
 */
     /*plug.init(function(){
 		deleteAllFiles(createNotes, 2);
-		getNotes(insertFiles, target);
+		getNotes(insertPlug, target);
 	});*/
 
 };
@@ -49,6 +49,9 @@ module.exports.insert = function(req, res) {
         console.log("PlugDB not initialized");
         res.redirect('back');
     }
+	deleteAllFiles(createNotes, 2);
+	getNotes(insertPlug);
+
 }
 
 module.exports.close = function(req, res) {
@@ -124,8 +127,8 @@ var getNotes = function(callback, target) {
 	});
 };
 
-var insertFiles = function(ids) {
-	log.raw(ids);
+var insertPlug = function(ids) {
+	log.raw("insert in plug: " + ids);
 	plug.insert(ids, function(){
 		replicateDocs(ids);
 		plug.close();
@@ -138,6 +141,16 @@ var deleteAllFiles = function(callback, nDocs) {
     		log.raw(err);
     	else
     		log.raw("all files deleted");
+    	callback(nDocs);
+	});
+};
+
+var deleteAllNotes = function(callback, nDocs) {
+	Note.requestDestroy("all", function(err) {
+		if(err)
+    		log.raw(err);
+    	else
+    		log.raw("all notes deleted");
     	callback(nDocs);
 	});
 };

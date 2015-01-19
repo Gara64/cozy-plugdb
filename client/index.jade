@@ -11,10 +11,6 @@ html(lang="fr")
         br
         form(action="init")
             input(type="submit", value="Start PlugDB" onclick='updateStatus("Initialization...")')
-            - if(msgInit) { 
-                p.
-                    Status : #{msgInit} 
-            - }
         br
 
 
@@ -22,19 +18,11 @@ html(lang="fr")
             p Generate n Docs and insert the ids in PlugDB : 
             input(type="text" name="nDocs" size="5")
             input(type="submit", value="Generate") 
-            - if(msgInsert) { 
-                p.
-                    Insertion : #{msgInsert} 
-            - }
         br
         br
 
         form(action="close")
             input(type="submit", value="Close PlugDB" onclick='updateStatus("Closing plugDB...")')
-            - if(msgClose) { 
-                p.
-                    Status close : #{msgClose} 
-            - }
 
 
 script.

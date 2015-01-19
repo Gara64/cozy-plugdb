@@ -3,12 +3,14 @@ var jdbcJar = './plug/plug_api.jar';
 java.classpath.push(jdbcJar);
 var plug = java.newInstanceSync('org.cozy.plugtest.Plug');
 
-var close = function(){
+var close = function(callback){
+    console.log("Closing plugDB connexion...");
 	plug.plugClose( function(err, result) {
-		if(err) { console.error(err); return; }
-		else
-			console.log("closed");
-	});
+		if(err) {  callback(err); }
+		else{
+	        callback();
+        }
+    });
 };
 
 var select = function(){
@@ -57,13 +59,13 @@ var getIds = function(){
 
 var init = function (callback){
 	plug.plugInit('/dev/ttyACM0', function(err, result) {
-		if(err) { console.error(err); return; }
+		if(err) { callback(err);  }
 		else {
 			//getIds();
 			callback();
-			console.log('init ok');
 		}
 	});
+    
 };
 
 

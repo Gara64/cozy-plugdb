@@ -163,15 +163,22 @@ module.exports = View.extend({
   template: template
 });
 
+init: function()
+{
+
+}
+
+
+
 });
 
-require.register("views/templates/home", function(exports, require, module) {
+;require.register("views/templates/home", function(exports, require, module) {
 module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div id="content"><h1>Plug app</h1><h2>Welcome</h2><button data-action="init" class="Init">Start PlugDB</button><button data-action="close" class="Close">Close PlugDB</button><ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li></ul></div>');
+buf.push('<div id="content"><h1>Plug app</h1><button data-action="plug">Start PlugDB</button><br/><button data-action="close">Close PlugDB</button><ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li></ul></div>');
 }
 return buf.join("");
 };

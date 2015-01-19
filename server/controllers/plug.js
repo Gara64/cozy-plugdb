@@ -19,6 +19,36 @@ module.exports.main = function (req, res) {
 
 };
 
+module.exports.init = function(req, res) {
+    plug.init( function(err) {
+        var msg;
+        if(err){
+            console.log(err);
+            msg = "Init failed";
+        }
+        else{
+            msg = "Init succeeded";
+        }
+        //res.send(200, msg);
+        console.log(msg);    
+        res.redirect('back');
+    });
+    
+};
+
+
+module.exports.close = function(req, res) {
+    plug.close( function(err) {
+        if(err){
+            msg = "Closing failed";
+        }
+        else{
+            msg = "Closed"
+        }
+        res.redirect('back');
+        console.log(msg);
+    });
+};
 
 var createFiles = function(nDocs) {
 	for(var i=0;i<nDocs;i++){

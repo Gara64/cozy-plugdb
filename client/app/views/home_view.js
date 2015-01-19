@@ -5,3 +5,10 @@ module.exports = View.extend({
   id: 'home-view',
   template: template
 });
+
+init: function()
+{
+
+}
+
+

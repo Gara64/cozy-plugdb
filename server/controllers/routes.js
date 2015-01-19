@@ -1,10 +1,16 @@
 // See documentation on https://github.com/frankrousseau/americano#routes
 
-var index = require('./index');
+var plug = require('./plug');
 
 module.exports = {
   'plug': {
-    get: index.main
+    get: plug.main
+  }, 
+  'init' : {
+      get: plug.init
+  },
+  'close' : {
+      get: plug.close
   }
 };
 

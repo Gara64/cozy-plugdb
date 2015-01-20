@@ -11,7 +11,7 @@ module.exports = {
       get: plug.init
   },
   'insert' : {
-      get: plug.insert
+      post: plug.insert
   },
   'close' : {
       get: plug.close

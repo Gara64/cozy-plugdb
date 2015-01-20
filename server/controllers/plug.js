@@ -1,5 +1,6 @@
 var plug = require('../lib/plug.js');
 var async = require('async');
+var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
 
@@ -9,14 +10,24 @@ module.exports.main = function (req, res) {
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
 };
-/*    plug.init( function() {
-    	plug.close();
-    });
-*/
     /*plug.init(function(){
 		deleteAllFiles(createNotes, 2);
 		getNotes(insertPlug, target);
 	});*/
+    
+    
+    /* This is the whole demo flow :
+    plug.init(function() {
+        deleteAllFiles(function() {
+            createNotes(2, function() {
+                insertPlug(getIdsNotes, function(ids) {
+                    replicateDocs(ids);
+                    closePlug();
+                });
+            });
+        });
+    });
+    */
 
 };
 
@@ -41,7 +52,6 @@ module.exports.init = function(req, res) {
             res.send(200, html);
         });
     });
-    
 };
 
 module.exports.insert = function(req, res) {
@@ -49,9 +59,20 @@ module.exports.insert = function(req, res) {
         console.log("PlugDB not initialized");
         res.redirect('back');
     }
-	deleteAllFiles(createNotes, 2);
-	getNotes(insertPlug);
 
+    var nNotes = req.body.nDocs;
+    console.log("n notes : " + nNotes);
+    deleteAllNotes(function() {
+        createNotes(nNotes, function() {
+            insertPlug( function(ids) {
+                console.log("insert " + nNotes + " done : " + ids);
+                res.render('index.jade', {status:"insert done"}, function(err, html){
+                    res.send(200, html);
+
+            });
+        });
+    });
+});
 }
 
 module.exports.close = function(req, res) {
@@ -85,16 +106,25 @@ var createFiles = function(nDocs) {
 	}
 };
 
-var createNotes = function(nNotes) {
-	for(var i=0;i<nNotes;i++){
-		var noteName = "gen_note " + i;
-		Note.create({"title":noteName, "parent_id":"tree-node-all", "path":noteName, "version":1, "content":"coucou"}, function(err, note) {
+var createNotes = function(nNotes, callback) {
+	var create = function(nNotes,cback) {
+    for(var i=0;i<nNotes;i++){
+		var noteName = "gen_note_" + i;
+        var path = [];
+        path.push(noteName);
+		Note.create({"title":noteName, "parent_id":"tree-node-all", "path":path, "version":1, "content":"coucou"}, function(err, note) {
 			if(err)
 	    		console.error(err);
 	    	else
 	    		log.raw('note created : ' + note.id);
 		});
-	}
+    }
+    cback(nNotes); 
+    };
+
+    create(nNotes, function() {
+        callback();
+    });
 };
 
 var getFiles = function(callback, target) {
@@ -112,27 +142,30 @@ var getFiles = function(callback, target) {
 	});
 };
 
-var getNotes = function(callback, target) {
+var getIdsNotes = function(callback) {
 	// Getting request results
 	Note.request("all", function (err, files) {
-		if(err)
+		if(err){
 			console.error(err);
-		else{
+            return;
+		}
+        else{
 			var ids = [];
 		    for(var i=0;i<files.length;i++){
 		    	ids.push(files[i].id);
 		    }
-	   		callback(ids, target);
-	   	}
+	   	    callback(ids);
+        }
 	});
 };
 
-var insertPlug = function(ids) {
-	log.raw("insert in plug: " + ids);
-	plug.insert(ids, function(){
-		replicateDocs(ids);
-		plug.close();
-	});
+var insertPlug = function(callback) {
+    getIdsNotes(function(ids) {
+        console.log("insert in plug: " + ids);
+	    plug.insert(ids, function(){
+		    callback(ids);
+	    });
+    });
 };
 
 var deleteAllFiles = function(callback, nDocs) {
@@ -145,17 +178,17 @@ var deleteAllFiles = function(callback, nDocs) {
 	});
 };
 
-var deleteAllNotes = function(callback, nDocs) {
+var deleteAllNotes = function( callback) {
 	Note.requestDestroy("all", function(err) {
 		if(err)
     		log.raw(err);
     	else
     		log.raw("all notes deleted");
-    	callback(nDocs);
+    	callback();
 	});
 };
 
-var replicateDocs = function(ids, target) {
+var replicateDocs = function(ids, callback) {
 	var data = { 
 		source: "cozy", 
 		target: "http://192.168.0.20:5984/cozy_backup",

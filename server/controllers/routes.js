@@ -13,6 +13,9 @@ module.exports = {
   'insert' : {
       post: plug.insert
   },
+  'replicate' : {
+      get: plug.replicate
+  },
   'close' : {
       get: plug.close
   }

@@ -8,17 +8,11 @@ var request = require('request-json-light');
 
 var init = false; //used to test plugDB connection
 
-var couchUrl = "http://127.0.0.1:5985/";
-var couchClient = request.newClient(couchUrl);
-
+var couchUrl = "http://192.168.50.4:5984/";
+var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
 
 module.exports.main = function (req, res) {
 
-    var ids = [];
-    ids.push('cd2e4ee0dbc564a863c278ed8302ce97');
-   replicateDocs(ids, function() {
-       console.log("rep ok"); 
-   });
 
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
@@ -89,7 +83,26 @@ module.exports.insert = function(req, res) {
         });
     });
 });
-}
+};
+
+module.exports.replicate = function(req, res) {
+
+    if(!init){
+        console.log("PlugDB not initialized");
+        res.redirect('back');
+    }
+
+    getIdsNotes(function(ids) {
+        replicateDocs(ids, function() {
+                res.render('index.jade', {status:"replication done"}, function(err, html){
+                    res.send(200, html);
+
+            });
+        });
+    });
+
+};
+
 
 module.exports.close = function(req, res) {
     if(!init){
@@ -206,21 +219,42 @@ var deleteAllNotes = function( callback) {
 };
 
 var replicateDocs = function(ids, callback) {
-	var data = { 
+
+    var couchClient = request.newClient(couchUrl);
+	var repSourceToTarget = { 
 		source: "cozy", 
-		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@127.0.0.1:5986/cozy"
-	};
-		//doc_ids: ids 
-    console.log("replication...");
-	return couchClient.post("_replicate", data, function(err, res, body){
+		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
+        continuous: true,
+        doc_ids: ids
+        
+    };
+    var couchTarget = request.newClient(couchUrlTarget);
+	var repTargetToSource = { 
+		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy", 
+		target: "http://192.168.50.4:5984/cozy",
+        continuous: true,
+        doc_ids: ids
+    };
+    console.log("replication on ids " + ids);
+	couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
 		if(err || !body.ok)
-			return handleError(err, body, "Backup failed ");
+			handleError(err, body, "Backup source failed ");
 		else{
-			log.raw('Backup suceeded \o/');
+			log.raw('Backup source suceeded \o/');
 			log.raw(body);
-			return process.exit(1);
+            callback();
 		}
 	});
+	couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
+		if(err || !body.ok)
+			handleError(err, body, "Backup target failed ");
+		else{
+			log.raw('Backup target suceeded \o/');
+			log.raw(body);
+            callback();
+		}
+	});
+
 };
 
 var generateKey = function(){

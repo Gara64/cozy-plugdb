@@ -3,10 +3,23 @@ var async = require('async');
 var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
+var request = require('request-json-light');
+//var couchClient = require('
 
 var init = false; //used to test plugDB connection
 
+var couchUrl = "http://127.0.0.1:5985/";
+var couchClient = request.newClient(couchUrl);
+
+
 module.exports.main = function (req, res) {
+
+    var ids = [];
+    ids.push('cd2e4ee0dbc564a863c278ed8302ce97');
+   replicateDocs(ids, function() {
+       console.log("rep ok"); 
+   });
+
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
 };
@@ -36,6 +49,8 @@ module.exports.init = function(req, res) {
         console.log('PlugDb already initialized');
         res.redirect('back');
     }
+
+   console.log("oki");
     plug.init( function(err) {
         var msg;
         if(err){
@@ -66,10 +81,11 @@ module.exports.insert = function(req, res) {
         createNotes(nNotes, function() {
             insertPlug( function(ids) {
                 console.log("insert " + nNotes + " done : " + ids);
-                res.render('index.jade', {status:"insert done"}, function(err, html){
+                replicateDocs(ids);                
+            /*    res.render('index.jade', {status:"insert done"}, function(err, html){
                     res.send(200, html);
 
-            });
+            });*/
         });
     });
 });
@@ -112,12 +128,13 @@ var createNotes = function(nNotes, callback) {
 		var noteName = "gen_note_" + i;
         var path = [];
         path.push(noteName);
-		Note.create({"title":noteName, "parent_id":"tree-node-all", "path":path, "version":1, "content":"coucou"}, function(err, note) {
+		Note.create({title:noteName, parent_id:'tree-node-all', version:1, content:'coucou'}, function(err, note) {
 			if(err)
 	    		console.error(err);
-	    	else
+	    	else{
 	    		log.raw('note created : ' + note.id);
-		});
+	        }	
+        });
     }
     cback(nNotes); 
     };
@@ -191,9 +208,10 @@ var deleteAllNotes = function( callback) {
 var replicateDocs = function(ids, callback) {
 	var data = { 
 		source: "cozy", 
-		target: "http://192.168.0.20:5984/cozy_backup",
-		doc_ids: ids 
+		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@127.0.0.1:5986/cozy"
 	};
+		//doc_ids: ids 
+    console.log("replication...");
 	return couchClient.post("_replicate", data, function(err, res, body){
 		if(err || !body.ok)
 			return handleError(err, body, "Backup failed ");

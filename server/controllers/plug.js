@@ -13,7 +13,7 @@ var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9
 
 module.exports.main = function (req, res) {
 
-
+    
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
 };
@@ -64,10 +64,12 @@ module.exports.init = function(req, res) {
 };
 
 module.exports.insert = function(req, res) {
+    var msg;
     if(!init){
         console.log("PlugDB not initialized");
-        res.redirect('back');
+        msg = "PlugDB not initialized :/";
     }
+    else {
 
     var nNotes = req.body.nDocs;
     console.log("n notes : " + nNotes);
@@ -75,26 +77,38 @@ module.exports.insert = function(req, res) {
         createNotes(nNotes, function() {
             insertPlug( function(ids) {
                 console.log("insert " + nNotes + " done : " + ids);
-                replicateDocs(ids);                
-            /*    res.render('index.jade', {status:"insert done"}, function(err, html){
-                    res.send(200, html);
-
-            });*/
+                msg = "insert done";
+            });
         });
     });
-});
+    }
+    res.render('index.jade', {status:msg}, function(err, html){
+                    res.send(200, html);
+    });
+
 };
+
 
 module.exports.replicate = function(req, res) {
 
+    var msg;
     if(!init){
         console.log("PlugDB not initialized");
-        res.redirect('back');
+        msg = "PlugDB not initialized :/";
+        //res.redirect('back');
     }
 
-    getIdsNotes(function(ids) {
+    var repMode = req.body.repMode;
+    
+    var getIdsMode;
+    if (repMode != "noplug") 
+        getIdsMode = selectPlug;
+    else
+        getIdsMode = getIdsNotes; 
+
+    getIdsMode(function(ids) {
         replicateDocs(ids, function() {
-                res.render('index.jade', {status:"replication done"}, function(err, html){
+                res.render('index.jade', {status:"Replication done !"}, function(err, html){
                     res.send(200, html);
 
             });
@@ -139,9 +153,10 @@ var createNotes = function(nNotes, callback) {
 	var create = function(nNotes,cback) {
     for(var i=0;i<nNotes;i++){
 		var noteName = "gen_note_" + i;
+        var contentText = "coucou " + i;
         var path = [];
         path.push(noteName);
-		Note.create({title:noteName, parent_id:'tree-node-all', version:1, content:'coucou'}, function(err, note) {
+		Note.create({title:noteName, parent_id:'tree-node-all', version:1, content:contentText}, function(err, note) {
 			if(err)
 	    		console.error(err);
 	    	else{
@@ -198,6 +213,12 @@ var insertPlug = function(callback) {
     });
 };
 
+var selectPlug = function( callback) {
+	    plug.select( function(ids){
+		    console.log(ids);
+    });
+};
+
 var deleteAllFiles = function(callback, nDocs) {
 	File.requestDestroy("all", function(err) {
 		if(err)
@@ -225,6 +246,7 @@ var replicateDocs = function(ids, callback) {
 		source: "cozy", 
 		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
         continuous: true,
+        cancel: true,
         doc_ids: ids
         
     };
@@ -233,6 +255,7 @@ var replicateDocs = function(ids, callback) {
 		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy", 
 		target: "http://192.168.50.4:5984/cozy",
         continuous: true,
+        cancel: true,
         doc_ids: ids
     };
     console.log("replication on ids " + ids);
@@ -251,7 +274,6 @@ var replicateDocs = function(ids, callback) {
 		else{
 			log.raw('Backup target suceeded \o/');
 			log.raw(body);
-            callback();
 		}
 	});
 

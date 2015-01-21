@@ -13,13 +13,13 @@ var close = function(callback){
     });
 };
 
-var select = function(){
+var select = function(callback){
 	plug.plugSelect( function(err, result) {
 		if(err) { console.error(err); return; }
 		else{
-			//close();
 			console.log("read ok");
-		}
+		    callback(result);
+        }
 	});
 };
 

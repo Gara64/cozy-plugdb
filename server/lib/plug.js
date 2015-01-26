@@ -17,7 +17,7 @@ var select = function(callback){
 	plug.plugSelect( function(err, result) {
 		if(err) { console.error(err); return; }
 		else{
-			console.log("read ok");
+			console.log("read ok : " + result);
 		    callback(result);
         }
 	});
@@ -30,14 +30,13 @@ function insertPlug(ids, callback){
 		if(err) { console.error(err); return; }
 		else{
 			callback();
-			console.log("insert ok");
+		//	console.log("insert ok");
 		}
 	});
 };
 
 
 var convert = function(ids, insertPlug, callback){
-console.log("go convert");
 	var ArrayList = java.import('java.util.ArrayList');
 	var list = new ArrayList();
 	for(var i=0;i<ids.length;i++)

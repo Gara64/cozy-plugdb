@@ -3,24 +3,42 @@ var async = require('async');
 var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
+Contact = require('../models/contacts.js');
 var request = require('request-json-light');
-//var couchClient = require('
+var basic = require('../lib/basic.js');
 
 var init = false; //used to test plugDB connection
 
+var remoteConfig = {
+    cozyURL: "192.168.50.5",
+    password: "cozycloud"
+};
+
 var couchUrl = "http://192.168.50.4:5984/";
+var couchClient = request.newClient(couchUrl);
 var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
+
+var remoteProxyClient = request.newClient("https://" + remoteConfig.cozyURL);
 
 module.exports.main = function (req, res) {
 
-    
+    checkCredentials(remoteConfig, function(err) {
+        if(err)
+             console.log(err);
+        else{
+            console.log("check ok, now register");
+            registerRemote(remoteConfig, function(err) {
+                if(err)
+                    console.log(err);
+                else
+                    console.log("auth ok");
+            });
+        }
+    });
+
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
 };
-    /*plug.init(function(){
-		deleteAllFiles(createNotes, 2);
-		getNotes(insertPlug, target);
-	});*/
     
     
     /* This is the whole demo flow :
@@ -55,7 +73,6 @@ module.exports.init = function(req, res) {
             init = true;
             msg = "Init succeeded";
         }
-        //res.send(200, msg);
         console.log(msg);    
         res.render('index.jade', {status: msg}, function(err, html){
             res.send(200, html);
@@ -69,22 +86,22 @@ module.exports.insert = function(req, res) {
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
     }
-    else {
+    //else {
 
-    var nNotes = req.body.nDocs;
-    console.log("n notes : " + nNotes);
-    deleteAllNotes(function() {
-        createNotes(nNotes, function() {
-            insertPlug( function(ids) {
-                console.log("insert " + nNotes + " done : " + ids);
-                msg = "insert done";
+        var nDocs = req.body.nDocs;
+        console.log("n contacts : " + nDocs);
+        deleteAllContacts(function() {
+            createContacts(nDocs, function() {
+               /* insertPlug( function(ids) {
+                    console.log(nDocs + " insert in plug done");
+                    msg = "insert done";*/
+                    res.render('index.jade', {status:msg}, function(err, html){
+                        res.send(200, html);
+                    });
+                //});
             });
         });
-    });
-    }
-    res.render('index.jade', {status:msg}, function(err, html){
-                    res.send(200, html);
-    });
+   // }
 
 };
 
@@ -101,10 +118,10 @@ module.exports.replicate = function(req, res) {
     var repMode = req.body.repMode;
     
     var getIdsMode;
-    if (repMode != "noplug") 
+    if (repMode == "plug") 
         getIdsMode = selectPlug;
     else
-        getIdsMode = getIdsNotes; 
+        getIdsMode = getIdsContacts; 
 
     getIdsMode(function(ids) {
         replicateDocs(ids, function() {
@@ -172,6 +189,23 @@ var createNotes = function(nNotes, callback) {
     });
 };
 
+var createContacts = function(nContacts, callback) {
+    for(var i=0;i<nContacts;i++) {
+        var contactName = "contact " + i;
+        var datapoint = new Array();
+
+        Contact.create({fn: contactName, datapoints: datapoint }, function(err, contact) {
+            if(err)
+                console.error(err);
+            else{
+                log.raw('contact created : ' + contact.id);
+            }
+        });
+    }
+    callback();
+};
+
+
 var getFiles = function(callback, target) {
 	// Getting request results
 	File.request("all", function (err, files) {
@@ -204,6 +238,23 @@ var getIdsNotes = function(callback) {
 	});
 };
 
+var getIdsContacts = function(callback) {
+    // Getting request results
+    Contact.request("all", function (err, contacts) {
+        if(err){
+            console.error(err);
+            return;
+        }
+        else{
+            var ids = [];
+            for(var i=0;i<contacts.length;i++){
+                ids.push(contacts[i].id);
+            }
+            callback(ids);
+        }
+    });
+};
+
 var insertPlug = function(callback) {
     getIdsNotes(function(ids) {
         console.log("insert in plug: " + ids);
@@ -213,9 +264,10 @@ var insertPlug = function(callback) {
     });
 };
 
-var selectPlug = function( callback) {
-	    plug.select( function(ids){
-		    console.log(ids);
+var selectPlug = function(callback) {
+	    plug.select(function(result){
+		    console.log("ids : " + result);
+            callback(result);
     });
 };
 
@@ -239,23 +291,32 @@ var deleteAllNotes = function( callback) {
 	});
 };
 
+var deleteAllContacts = function(callback) {
+    Contact.requestDestroy("all", function(err) {
+        if(err)
+            log.raw(err);
+        else
+            log.raw("all notes deleted");
+        callback();
+    });
+};
+
 var replicateDocs = function(ids, callback) {
 
-    var couchClient = request.newClient(couchUrl);
+    
 	var repSourceToTarget = { 
 		source: "cozy", 
 		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
         continuous: true,
-        cancel: true,
+        //cancel: true,
         doc_ids: ids
-        
     };
     var couchTarget = request.newClient(couchUrlTarget);
 	var repTargetToSource = { 
 		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy", 
 		target: "http://192.168.50.4:5984/cozy",
         continuous: true,
-        cancel: true,
+        //cancel: true,
         doc_ids: ids
     };
     console.log("replication on ids " + ids);
@@ -279,11 +340,36 @@ var replicateDocs = function(ids, callback) {
 
 };
 
-var generateKey = function(){
-	return crypto.randomBytes(256, function(ex, buf) {
-  		if (ex) throw ex;
-  		return buf;
-	});
+var cancelReplication = function() {
+ 
+    var activeTasks = function(callback) {
+        couchClient.get("_active_tasks", function(err, res, body){
+            if(err)
+                console.error('Cannot get active tasks');
+            else {
+                var repIds = [];
+                for (var i=0;i<body.length; i++) {
+                    var rep = body[i];
+                    repIds.push(rep.replication_id);
+                }
+            }
+            callback(repIds);
+        });
+    };
+
+    activeTasks(function(repIds) {
+        for(var i=0;i<repIds.length;i++) {
+
+            couchClient.post("_replicate", {replication_id: repIds[i], cancel:true}, function(err, res, body){
+                if(err || !body.ok)
+                    handleError(err, body, "Cancel replication failed");
+                else{
+                    log.raw('Cancel replication ok');
+                    log.raw(body);
+                }
+            });
+        }
+    });
 };
 
 
@@ -326,4 +412,41 @@ var handleError = function(err, body, msg) {
   };
 
 
+var registerRemote = function(config, callback) {
 
+    remoteProxyClient.setBasicAuth('owner', config.password);
+    return remoteProxyClient.post("device/", {login: 'toto'}
+    
+    , (function(_this) {
+      return function(err, response, body) {
+        if (err) {
+          return callback(err);
+        } else if (response.statusCode === 401 && response.reason) {
+          return callback(new Error('cozy need patch'));
+        } else if (response.statusCode === 401) {
+          return callback(new Error('wrong password'));
+        } else if (response.statusCode === 400) {
+          return callback(new Error('device name already exist'));
+        } else {
+            console.log(body.id + " - " + body.password);
+          //return _this.config.save(config, callback);
+        }
+      };
+    })(this));
+  };
+
+var checkCredentials = function(config, callback) {
+    return remoteProxyClient.post("login", {
+        username: 'owner',
+        password: config.password
+      }
+    , function(err, response, body) {
+      var error;
+      if ((response != null ? response.statusCode : void 0) !== 200) {
+        error = (err != null ? err.message : void 0) || body.error || body.message;
+      } else {
+        error = null;
+      }
+      return callback(error);
+    });
+};

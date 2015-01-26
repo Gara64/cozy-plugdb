@@ -20,21 +20,20 @@ var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9
 
 var remoteProxyClient = request.newClient("https://" + remoteConfig.cozyURL);
 
+var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
+
+
 module.exports.main = function (req, res) {
 
-    checkCredentials(remoteConfig, function(err) {
-        if(err)
-             console.log(err);
-        else{
-            console.log("check ok, now register");
-            registerRemote(remoteConfig, function(err) {
-                if(err)
-                    console.log(err);
-                else
-                    console.log("auth ok");
-            });
-        }
+    getIdsContacts(function(ids) {
+        replicateRemote(ids, remoteConfig, function(err) {
+            if(err)
+                console.log("fail");
+            else
+                console.log("success, gg");
+        });
     });
+    
 
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
@@ -435,6 +434,29 @@ var registerRemote = function(config, callback) {
     })(this));
   };
 
+var replicateRemote = function(ids, config, callback) {
+
+
+    //deviceRemoteClient.setBasicAuth('owner', config.password);
+    var data = { 
+        source: "cozy",
+        target: replicateRemoteURL,
+        doc_ids: ids
+    };
+    
+    console.log("replication on ids " + ids);
+    couchClient.post("_replicate", data, function(err, res, body){
+        if(err || !body.ok)
+            handleError(err, body, "Backup source failed ");
+        else{
+            log.raw('Backup source suceeded \o/');
+            log.raw(body);
+        }
+        callback(err);
+
+    });
+  };
+
 var checkCredentials = function(config, callback) {
     return remoteProxyClient.post("login", {
         username: 'owner',
@@ -449,4 +471,9 @@ var checkCredentials = function(config, callback) {
       }
       return callback(error);
     });
+};
+
+var unregisterDevice = function (options, callback) {
+    remoteProxyClient.setBasicAuth('owner', config.password);
+    remoteProxyClient.del("device/#{options.deviceId}/", callback());
 };

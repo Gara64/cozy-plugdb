@@ -25,14 +25,15 @@ var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remo
 
 module.exports.main = function (req, res) {
 
-    getIdsContacts(function(ids) {
+    cancelReplication();
+   /* getIdsContacts(function(ids) {
         replicateRemote(ids, remoteConfig, function(err) {
             if(err)
                 console.log("fail");
             else
                 console.log("success, gg");
         });
-    });
+    });*/
     
 
     res.render('index.jade'), function(err, html) {
@@ -87,13 +88,15 @@ module.exports.insert = function(req, res) {
     }
     //else {
 
-        var nDocs = req.body.nDocs;
+       // var nDocs = req.body.nDocs;
+        var nDocs = req.params.ndocs;
         console.log("n contacts : " + nDocs);
         deleteAllContacts(function() {
             createContacts(nDocs, function() {
                /* insertPlug( function(ids) {
                     console.log(nDocs + " insert in plug done");
-                    msg = "insert done";*/
+                   */
+                    msg = "insert done";
                     res.render('index.jade', {status:msg}, function(err, html){
                         res.send(200, html);
                     });

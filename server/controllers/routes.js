@@ -10,7 +10,7 @@ module.exports = {
   'init' : {
       get: plug.init
   },
-  'insert' : {
+  'insert/:ndocs' : {
       post: plug.insert
   },
   'replicate' : {

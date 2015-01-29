@@ -1,18 +1,23 @@
 var AppView = require('views/app_view');
-var BookmarkCollection = require('collections/bookmarks');
+var PlugCollection = require('collections/plugs');
 
-var bookmarks = new BookmarkCollection();
+var plugs = new PlugCollection();
 
 module.exports = Router = Backbone.Router.extend({
 
     routes: {
-        '': 'main'
+        '': 'main',
+        'insert': 'insertPlug'
     },
 
     main: function() {
         var mainView = new AppView({
-            collection: bookmarks
+            collection: plugs,
         });
         mainView.render();
+    },
+
+    insertPlug: function() {
+    	//alert('toto');
     }
 });

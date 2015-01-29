@@ -101,10 +101,11 @@ module.exports = {
 };
 });
 
-require.register("collections/bookmarks", function(exports, require, module) {
-Bookmark = require('../models/bookmark');
-module.exports = Bookmarks = Backbone.Collection.extend({
-    model: Bookmark
+require.register("collections/plugs", function(exports, require, module) {
+Plug = require('../models/plug');
+module.exports = Plugs = Backbone.Collection.extend({
+    model: Plug,
+    url: 'insert'
 });
 });
 
@@ -117,29 +118,41 @@ $(document).ready(function() {
 
 });
 
-require.register("models/bookmark", function(exports, require, module) {
-module.exports = Bookmark = Backbone.Model.extend({
+require.register("models/plug", function(exports, require, module) {
+module.exports = Plug = Backbone.Model.extend({
+	defaults: {
+		nDocs: null
+	}, 
+	url: function() {
+		return '/insert';
+	}
 
 });
+
 });
 
 require.register("router", function(exports, require, module) {
 var AppView = require('views/app_view');
-var BookmarkCollection = require('collections/bookmarks');
+var PlugCollection = require('collections/plugs');
 
-var bookmarks = new BookmarkCollection();
+var plugs = new PlugCollection();
 
 module.exports = Router = Backbone.Router.extend({
 
     routes: {
-        '': 'main'
+        '': 'main',
+        'insert': 'insertPlug'
     },
 
     main: function() {
         var mainView = new AppView({
-            collection: bookmarks
+            collection: plugs,
         });
         mainView.render();
+    },
+
+    insertPlug: function() {
+    	//alert('toto');
     }
 });
 
@@ -151,25 +164,65 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button><br/><br/><!--form(action="insert",method="post",name="insert")--><p>Generate n Contacts and insert the ids in PlugDB :</p><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/><p>Share all my contacts ! <a href="replicate"><img src="./images/share.jpg" height="60" width="60"/></a></p><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/></form><p>Share all my contacts ! <a href="replicate"><img src="./images/share.jpg" height="60" width="60"/></a></p><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
 });
 
 require.register("views/app_view", function(exports, require, module) {
+var Plug = require('../models/plug');
+
 module.exports = AppView = Backbone.View.extend({
 
     el: 'body',
     template: require('../templates/home'),
+    events: {
+    	"click #insertDocs": "createDocs"
+	},
 
     render: function() {
         this.$el.html(this.template({
-            bookmarks: this.collection.toJSON()
+            plugs: this.collection.toJSON()
         }));
 
         return this;
+    }, 
+
+    createDocs: function(event) {
+	    // submit button reload the page, we don't want that
+	   event.preventDefault();	
+
+	    // create a new model
+	    var plug = new Plug({
+	        nDocs: this.$el.find('input[name="nDocs"]').val()
+	    });
+
+	    // add it to the collection
+	   //his.collection.add(plug);
+
+	    plug.save({}, {
+    success: function(model, response) {
+        console.log('SUCCESS:');
+        console.log(response);
+    },
+    error: function(model, response) {
+        console.log('FAIL:');
+        console.log(response);
     }
+	});
+
+
+	}, 
+
+	// initialize is automatically called once after the view is constructed
+	initialize: function() {
+	    this.listenTo(this.collection, "insert", this.onInsertPlug);
+	},
+	onInsertPlug: function(model) {
+	    // re-render the view
+	    this.render();
+	}
 });
 });
 

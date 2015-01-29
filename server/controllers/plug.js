@@ -88,8 +88,8 @@ module.exports.insert = function(req, res) {
     }
     //else {
 
-       // var nDocs = req.body.nDocs;
-        var nDocs = req.params.ndocs;
+        var nDocs = req.body.nDocs;
+       // var nDocs = req.params.ndocs;
         console.log("n contacts : " + nDocs);
         deleteAllContacts(function() {
             createContacts(nDocs, function() {
@@ -97,9 +97,7 @@ module.exports.insert = function(req, res) {
                     console.log(nDocs + " insert in plug done");
                    */
                     msg = "insert done";
-                    res.render('index.jade', {status:msg}, function(err, html){
-                        res.send(200, html);
-                    });
+                    res.send(200);
                 //});
             });
         });

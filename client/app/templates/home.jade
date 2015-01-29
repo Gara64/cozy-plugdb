@@ -1,4 +1,5 @@
 h1 Plug app
+
 p
 	| Status PlugDB :
 	strong(id="status") #{status}
@@ -10,10 +11,11 @@ button(id="closePlug") Close PlugDB
 br
 br
 
-//form(action="insert",method="post",name="insert")
-p Generate n Contacts and insert the ids in PlugDB :
-input(type="text",name="nDocs",size="5")
-input(id="insertDocs",type="submit",value="Generate")
+form
+	label Generate n Contacts and insert the ids in PlugDB :
+	input(type="text",name="nDocs",size=5)
+	input(id="insertDocs", type="submit", value="Generate")
+
 
 p Share all my contacts ! 
 	a(href="replicate")

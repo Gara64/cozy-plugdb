@@ -1,34 +1,18 @@
-var application = require('application');
+var AppView = require('views/app_view');
+var BookmarkCollection = require('collections/bookmarks');
 
-module.exports = Backbone.Router.extend({
+var bookmarks = new BookmarkCollection();
+
+module.exports = Router = Backbone.Router.extend({
+
     routes: {
-      "": "main",
-      "init": "init",
-      "close": "close",
-      "insert/:ndocs": "insert",
-      "select": "select",
-      "replicate": "replicate"    
+        '': 'main'
     },
 
     main: function() {
-        $('body').html(application.homeView.render().el);
-    },
-
-    init: function () {
-        //$('body').html(application.homeView.render().el);
-    }, 
-
-    close: function () {
-    },
-
-    insert: function () {
-    },
-
-    select: function () {
-    },
-
-    replicate: function () {
+        var mainView = new AppView({
+            collection: bookmarks
+        });
+        mainView.render();
     }
-
 });
-

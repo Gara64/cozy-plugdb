@@ -11,6 +11,8 @@ module.exports = AppView = Backbone.View.extend({
     	"click #registerDevice" : "registerDevice",
     	"click #unregisterDevice" : "unregisterDevice",
     	"click #insertDocs": "createDocs",
+    	"click #replicate" :"replicate",
+    	"click #cancel": "cancel"
 	},
 
     render: function() {
@@ -36,6 +38,20 @@ module.exports = AppView = Backbone.View.extend({
     	var plug = new Plug({});
 	    plug.urlRoot = '/close';
 	    plug.save();
+    },
+
+    replicate: function(event) {
+    	event.preventDefault();
+    	var model = this.model;
+    	model.url = '/replicate/true';
+    	model.save();
+    },
+
+    cancel: function(event) {
+    	event.preventDefault();
+    	var model = this.model;
+    	model.url = '/replicate/false';
+    	model.save();
     },
 
 	registerDevice: function(event) {

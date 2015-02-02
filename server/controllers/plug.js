@@ -3,6 +3,7 @@ var async = require('async');
 var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
+Device = require('../models/device.js');
 Contact = require('../models/contacts.js');
 var request = require('request-json-light');
 var basic = require('../lib/basic.js');
@@ -17,25 +18,15 @@ var remoteConfig = {
 
 var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
-var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
+//var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
 
+//var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
 
-
-var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
 
 
 module.exports.main = function (req, res) {
 
-    cancelReplication();
-   /* getIdsContacts(function(ids) {
-        replicateRemote(ids, remoteConfig, function(err) {
-            if(err)
-                console.log("fail");
-            else
-                console.log("success, gg");
-        });
-    });*/
-    
+
 
     res.render('index.jade'), function(err, html) {
         res.send(200, html);
@@ -116,19 +107,37 @@ module.exports.replicate = function(req, res) {
         //res.redirect('back');
     }
 
-    var repMode = req.body.repMode;
+    console.log(req.params.bool);
+    if(req.params.bool === 'true'){
+        var repMode = req.body.repMode;
     
-    var getIdsMode;
-    if (repMode == "plug") 
-        getIdsMode = selectPlug;
-    else
-        getIdsMode = getIdsContacts; 
+        var getIdsMode;
+        if (repMode == "plug") 
+            getIdsMode = selectPlug;
+        else
+            getIdsMode = getIdsContacts; 
 
-    getIdsMode(function(ids) {
-        replicateDocs(ids, function() {
-            res.send(200, {});
+        getIdsMode(function(ids) {
+            replicateRemote(ids, function(err) {
+                if(err)
+                    res.send(500, err);
+                else
+                    res.send(200);
+            });
         });
-    });
+    }
+    else if(req.params.bool === 'false') {
+        cancelReplication(function(err) {
+            if(err)
+                res.send(500, err);
+            else
+                res.send(200);
+        });
+    }
+    else
+        res.redirect('back');
+
+    
 
 };
 
@@ -138,7 +147,6 @@ module.exports.register = function(req, res) {
         //res.redirect('back');
     }
 
-    console.log(req.params.bool);
     
     var deviceName = req.body.devicename;
     var target = req.body.target;
@@ -154,20 +162,24 @@ module.exports.register = function(req, res) {
     console.log('password : ' + config.password);
     console.log('cozyUrl : ' + config.cozyURL);
 
-    if(req.params.bool == true) {
+    console.log(req.params.bool)
+
+    if(req.params.bool === 'true') {
+        console.log('go register');
         registerRemote(config, function(err) {
             if(err){
                 console.log(err);
                 res.send(500, err);
             }
             else{
+
                 console.log('registration ok !');
-                res.send(200, {});
+                res.send(200);
             }
         });
     }
     //unregister device
-    else {
+    else if(req.params.bool === 'false'){
         unregisterDevice(config, function(err) {
             if(err){
                 console.log(err);
@@ -175,10 +187,12 @@ module.exports.register = function(req, res) {
             }
             else{
                 console.log('uregistration ok !');
-                res.send(200, {});
+                res.send(200);
             }
-        })
+        });
     }
+    else
+        res.redirect('back');
 
 }
 
@@ -349,6 +363,8 @@ var deleteAllContacts = function(callback) {
     });
 };
 
+/* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!! 
+See replicateRemote instead */
 var replicateDocs = function(ids, callback) {
 
     
@@ -388,35 +404,46 @@ var replicateDocs = function(ids, callback) {
 
 };
 
-var cancelReplication = function() {
+var cancelReplication = function(callback) {
  
-    var activeTasks = function(callback) {
+    var activeTasks = function(_callback) {
         couchClient.get("_active_tasks", function(err, res, body){
-            if(err)
+            var repIds;
+            if(err){
                 console.error('Cannot get active tasks');
-            else {
-                var repIds = [];
+            }
+            else if(body.length) {
+                repIds = [];
                 for (var i=0;i<body.length; i++) {
                     var rep = body[i];
                     repIds.push(rep.replication_id);
                 }
             }
-            callback(repIds);
+            _callback(err, repIds);
+            
         });
     };
 
-    activeTasks(function(repIds) {
-        for(var i=0;i<repIds.length;i++) {
+    activeTasks(function(err,repIds) {
+        if(err)
+            callback(err);
+        else if(repIds) {
+            for(var i=0;i<repIds.length;i++) {
 
-            couchClient.post("_replicate", {replication_id: repIds[i], cancel:true}, function(err, res, body){
-                if(err || !body.ok)
-                    handleError(err, body, "Cancel replication failed");
-                else{
-                    log.raw('Cancel replication ok');
-                    log.raw(body);
-                }
-            });
+                couchClient.post("_replicate", {replication_id: repIds[i], cancel:true}, function(err, res, body){
+                    if(err || !body.ok){
+                        console.log("Cancel replication failed");
+                        callback(err);
+                    }
+                    else{
+                        log.raw('Cancel replication ok');
+                        callback();
+                    }
+                });
+            }
         }
+        else 
+            callback();
     });
 };
 
@@ -478,31 +505,37 @@ var registerRemote = function(config, callback) {
           callback('device name already exist');
         } else {
             console.log(body.id + " - " + body.password);
-            callback(null, body.id + " - " + body.password);
+            //var fullURL = "https://" + config.cozyURL;
+            Device = new Device({id:body.id, password: body.password, login: config.deviceName, url: config.cozyURL});
+            callback();
             
         }
       });
   };
 
-var replicateRemote = function(ids, config, callback) {
+var replicateRemote = function(ids, callback) {
 
-
-    //deviceRemoteClient.setBasicAuth('owner', config.password);
+    console.log('url : ' + Device.url + ' - id : ' + Device.id);
+    //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
+    var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
+    console.log(remoteURL);
     var data = { 
         source: "cozy",
-        target: replicateRemoteURL, //contains credentials for a registered device.
-        doc_ids: ids
+        target:  remoteURL, // replicateRemoteURL, //contains credentials for a registered device.
+        continuous: true,
+        doc_ids: ids,
     };
     
     console.log("replication on ids " + ids);
     couchClient.post("_replicate", data, function(err, res, body){
-        if(err || !body.ok)
+        if(err || !body.ok){
             handleError(err, body, "Backup source failed ");
+            callback(err);
+        }
         else{
             log.raw('Backup source suceeded \o/');
-            log.raw(body);
+            callback();
         }
-        callback(err);
 
     });
 };
@@ -526,11 +559,11 @@ var checkCredentials = function(config, callback) {
 var unregisterDevice = function (config, callback) {
     var remoteProxyClient = request.newClient("https://" + config.cozyURL);
     remoteProxyClient.setBasicAuth('owner', config.password);
-    remoteProxyClient.del("device/#{config.deviceName}/", function(err, res) {
+    remoteProxyClient.del("device/#{Device.id}", function(err, res) {
         if(err) {
             callback(err)
         }
-        else if(response.statusCode != 200)
+        else if(res.statusCode != 200)
             callback('Impossible to unregister the device');
         else
             callback();

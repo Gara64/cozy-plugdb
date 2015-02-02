@@ -179,7 +179,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><form><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button></form><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><label>Device name : </label><input type="text" name="devicename" size="10"/><label>Password : </label><input type="password" name="pwd" size="10"/><input id="registerDevice" type="submit" value="Register"/><input id="unregisterDevice" type="submit" value="Unregister"/></form><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/></form><p>Share all my contacts ! <a href="replicate"><img src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><p>Extra : </p><form><label>Target URL : </label><input type="text" name="targetURL" size="10"/><input id="registerDevice" type="submit" value="Unregister device"/></form><form><input id="cancelReplication" type="submit" value="Cancel all replications"/></form><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><form><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button></form><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><label>Device name : </label><input type="text" name="devicename" size="10"/><label>Password : </label><input type="password" name="pwd" size="10"/><input id="registerDevice" type="submit" value="Register"/><input id="unregisterDevice" type="submit" value="Unregister"/></form><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/></form><p>Share all my contacts ! <a href=""><img id="replicate" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><!--form--><!--	input(id="cancelReplication", type="submit", value="Cancel all replications")--><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
@@ -199,6 +199,8 @@ module.exports = AppView = Backbone.View.extend({
     	"click #registerDevice" : "registerDevice",
     	"click #unregisterDevice" : "unregisterDevice",
     	"click #insertDocs": "createDocs",
+    	"click #replicate" :"replicate",
+    	"click #cancel": "cancel"
 	},
 
     render: function() {
@@ -224,6 +226,20 @@ module.exports = AppView = Backbone.View.extend({
     	var plug = new Plug({});
 	    plug.urlRoot = '/close';
 	    plug.save();
+    },
+
+    replicate: function(event) {
+    	event.preventDefault();
+    	var model = this.model;
+    	model.url = '/replicate/true';
+    	model.save();
+    },
+
+    cancel: function(event) {
+    	event.preventDefault();
+    	var model = this.model;
+    	model.url = '/replicate/false';
+    	model.save();
     },
 
 	registerDevice: function(event) {

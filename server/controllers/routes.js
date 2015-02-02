@@ -14,8 +14,8 @@ module.exports = {
       post: plug.insert,
       get: plug.insert
   },
-  'replicate' : {
-      get: plug.replicate
+  'replicate/:bool' : {
+      post: plug.replicate
   },
   'register/:bool' : {
     post: plug.register

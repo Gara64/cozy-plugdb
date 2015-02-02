@@ -5,8 +5,21 @@ p
 	strong(id="status") #{status}
 hr
 
-button(id="initPlug") Start PlugDB
-button(id="closePlug") Close PlugDB
+form
+	button(id="initPlug") Start PlugDB
+	button(id="closePlug") Close PlugDB
+
+br
+
+form
+	label Target URL : 
+	input(type="text", name="targetURL")
+	label Device name : 
+	input(type="text", name="devicename", size=10)
+	label Password : 
+	input(type="password", name="pwd", size=10)
+	input(id="registerDevice", type="submit", value="Register")
+	input(id="unregisterDevice", type="submit", value="Unregister")
 
 br
 br
@@ -20,6 +33,20 @@ form
 p Share all my contacts ! 
 	a(href="replicate")
 		img(src="./images/share.jpg", height="60", width="60")
+
+
+br
+br
+
+p Extra : 
+form
+	label Target URL : 
+	input(type="text", name="targetURL", size=10)
+	input(id="registerDevice", type="submit", value="Unregister device")
+
+form
+	input(id="cancelReplication", type="submit", value="Cancel all replications")
+
 
 ul
 li 

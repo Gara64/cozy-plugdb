@@ -11,14 +11,15 @@ var init = false; //used to test plugDB connection
 
 var remoteConfig = {
     cozyURL: "192.168.50.5",
-    password: "cozycloud"
+    password: "cozycloud",
+    login: "toto"
 };
 
 var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
 var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
 
-var remoteProxyClient = request.newClient("https://" + remoteConfig.cozyURL);
+
 
 var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
 
@@ -125,14 +126,61 @@ module.exports.replicate = function(req, res) {
 
     getIdsMode(function(ids) {
         replicateDocs(ids, function() {
-                res.render('index.jade', {status:"Replication done !"}, function(err, html){
-                    res.send(200, html);
-
-            });
+            res.send(200, {});
         });
     });
 
 };
+
+module.exports.register = function(req, res) {
+    if(!init){
+        console.log("PlugDB is not initialized");
+        //res.redirect('back');
+    }
+
+    console.log(req.params.bool);
+    
+    var deviceName = req.body.devicename;
+    var target = req.body.target;
+    var pwd = req.body.password;
+
+    var config = {
+        cozyURL: target,
+        password: pwd,
+        deviceName: deviceName
+    }
+
+    console.log('login : ' + config.deviceName);
+    console.log('password : ' + config.password);
+    console.log('cozyUrl : ' + config.cozyURL);
+
+    if(req.params.bool == true) {
+        registerRemote(config, function(err) {
+            if(err){
+                console.log(err);
+                res.send(500, err);
+            }
+            else{
+                console.log('registration ok !');
+                res.send(200, {});
+            }
+        });
+    }
+    //unregister device
+    else {
+        unregisterDevice(config, function(err) {
+            if(err){
+                console.log(err);
+                res.send(500, err);
+            }
+            else{
+                console.log('uregistration ok !');
+                res.send(200, {});
+            }
+        })
+    }
+
+}
 
 
 module.exports.close = function(req, res) {
@@ -414,25 +462,26 @@ var handleError = function(err, body, msg) {
 
 var registerRemote = function(config, callback) {
 
+    var remoteProxyClient = request.newClient("https://" + config.cozyURL);
     remoteProxyClient.setBasicAuth('owner', config.password);
-    return remoteProxyClient.post("device/", {login: 'toto'}
-    
-    , (function(_this) {
-      return function(err, response, body) {
+
+    console.log('register ' + config.deviceName);
+    console.log('mdp : ' + config.password)
+    remoteProxyClient.post("device/", {login: config.deviceName}, function(err, response, body) {
         if (err) {
-          return callback(err);
+          callback(err);
         } else if (response.statusCode === 401 && response.reason) {
-          return callback(new Error('cozy need patch'));
+          callback('cozy need patch');
         } else if (response.statusCode === 401) {
-          return callback(new Error('wrong password'));
+          callback('wrong password');
         } else if (response.statusCode === 400) {
-          return callback(new Error('device name already exist'));
+          callback('device name already exist');
         } else {
             console.log(body.id + " - " + body.password);
-          //return _this.config.save(config, callback);
+            callback(null, body.id + " - " + body.password);
+            
         }
-      };
-    })(this));
+      });
   };
 
 var replicateRemote = function(ids, config, callback) {
@@ -441,7 +490,7 @@ var replicateRemote = function(ids, config, callback) {
     //deviceRemoteClient.setBasicAuth('owner', config.password);
     var data = { 
         source: "cozy",
-        target: replicateRemoteURL,
+        target: replicateRemoteURL, //contains credentials for a registered device.
         doc_ids: ids
     };
     
@@ -456,7 +505,7 @@ var replicateRemote = function(ids, config, callback) {
         callback(err);
 
     });
-  };
+};
 
 var checkCredentials = function(config, callback) {
     return remoteProxyClient.post("login", {
@@ -474,7 +523,16 @@ var checkCredentials = function(config, callback) {
     });
 };
 
-var unregisterDevice = function (options, callback) {
+var unregisterDevice = function (config, callback) {
+    var remoteProxyClient = request.newClient("https://" + config.cozyURL);
     remoteProxyClient.setBasicAuth('owner', config.password);
-    remoteProxyClient.del("device/#{options.deviceId}/", callback());
+    remoteProxyClient.del("device/#{config.deviceName}/", function(err, res) {
+        if(err) {
+            callback(err)
+        }
+        else if(response.statusCode != 200)
+            callback('Impossible to unregister the device');
+        else
+            callback();
+    });
 };

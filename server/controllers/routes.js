@@ -8,7 +8,7 @@ module.exports = {
   },
 
   'init' : {
-      get: plug.init
+      post: plug.init
   },
   'insert' : {
       post: plug.insert,
@@ -17,8 +17,11 @@ module.exports = {
   'replicate' : {
       get: plug.replicate
   },
+  'register/:bool' : {
+    post: plug.register
+  },
   'close' : {
-      get: plug.close
+      post: plug.close
   }
 };
 

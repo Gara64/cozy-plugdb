@@ -118,13 +118,25 @@ $(document).ready(function() {
 
 });
 
+require.register("models/device", function(exports, require, module) {
+module.exports = Device = Backbone.Model.extend({
+	url: '',
+	defaults: {
+		password: null,
+		target: null,
+		devicename: null, 
+		status: null
+	}
+
+});
+});
+
 require.register("models/plug", function(exports, require, module) {
 module.exports = Plug = Backbone.Model.extend({
+	urlRoot: '',
 	defaults: {
-		nDocs: null
-	}, 
-	url: function() {
-		return '/insert';
+		nDocs: null,
+		status: null
 	}
 
 });
@@ -134,8 +146,10 @@ module.exports = Plug = Backbone.Model.extend({
 require.register("router", function(exports, require, module) {
 var AppView = require('views/app_view');
 var PlugCollection = require('collections/plugs');
+var DeviceModel = require('models/device');
 
 var plugs = new PlugCollection();
+var device = new DeviceModel();
 
 module.exports = Router = Backbone.Router.extend({
 
@@ -147,6 +161,7 @@ module.exports = Router = Backbone.Router.extend({
     main: function() {
         var mainView = new AppView({
             collection: plugs,
+            model: device
         });
         mainView.render();
     },
@@ -164,7 +179,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/></form><p>Share all my contacts ! <a href="replicate"><img src="./images/share.jpg" height="60" width="60"/></a></p><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><form><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button></form><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><label>Device name : </label><input type="text" name="devicename" size="10"/><label>Password : </label><input type="password" name="pwd" size="10"/><input id="registerDevice" type="submit" value="Register"/><input id="unregisterDevice" type="submit" value="Unregister"/></form><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="5"/><input id="insertDocs" type="submit" value="Generate"/></form><p>Share all my contacts ! <a href="replicate"><img src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><p>Extra : </p><form><label>Target URL : </label><input type="text" name="targetURL" size="10"/><input id="registerDevice" type="submit" value="Unregister device"/></form><form><input id="cancelReplication" type="submit" value="Cancel all replications"/></form><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
@@ -172,22 +187,97 @@ return buf.join("");
 
 require.register("views/app_view", function(exports, require, module) {
 var Plug = require('../models/plug');
+var Device = require('../models/device');
 
 module.exports = AppView = Backbone.View.extend({
 
     el: 'body',
     template: require('../templates/home'),
     events: {
-    	"click #insertDocs": "createDocs"
+    	"click #initPlug" : "initPlug",
+    	"click #closePlug" : "closePlug",
+    	"click #registerDevice" : "registerDevice",
+    	"click #unregisterDevice" : "unregisterDevice",
+    	"click #insertDocs": "createDocs",
 	},
 
     render: function() {
-        this.$el.html(this.template({
-            plugs: this.collection.toJSON()
-        }));
-
-        return this;
+    	var model = this.model;
+        this.$el.html(this.template({status:model.get('status')}));
+    	return this;
     }, 
+
+    updateStatus: function() {
+    	//this.$el.find('')
+    },
+
+    initPlug: function(event) {
+    	event.preventDefault();
+    	var plug = new Plug({});
+	    plug.urlRoot = '/init';
+	    plug.save();
+
+    },
+
+    closePlug: function(event) {
+    	event.preventDefault();
+    	var plug = new Plug({});
+	    plug.urlRoot = '/close';
+	    plug.save();
+    },
+
+	registerDevice: function(event) {
+		event.preventDefault();
+		_this = this;
+		var device = new Device({
+			target: this.$el.find('input[name="targetURL"]').val(),
+			password: this.$el.find('input[name="pwd"]').val(),
+			devicename: this.$el.find('input[name="devicename"]').val()
+		});
+		console.log('name ' + device.get('devicename'));
+		console.log('url ' + device.get('target'));
+	    device.url = '/register/true';
+	    device.save({}, {
+	    	success: function(model, response) {
+		        console.log('SUCCESS:');
+		        _this.model.set({status: response.responseText});
+		        _this.render();
+		    },
+		    error: function(model, response) {
+		        console.log('FAIL:');
+		        console.log(response);
+		        console.log('responseText : ' + response.responseText);
+		        _this.model.set({status: response.responseText});
+		        _this.render();
+		    }
+		});
+
+	}, 
+
+	unregisterDevice: function(event) {
+		event.preventDefault();
+		_this = this;
+		var device = new Device({
+			target: this.$el.find('input[name="targetURL"]').val(),
+			password: this.$el.find('input[name="pwd"]').val(),
+			devicename: this.$el.find('input[name="devicename"]').val()
+		});
+		device.url = '/register/false';
+	    device.save({}, {
+	    	success: function(model, response) {
+		        console.log('SUCCESS:');
+		        _this.model.set({status: response.responseText});
+		        _this.render();
+		    },
+		    error: function(model, response) {
+		        console.log('FAIL:');
+		        console.log(response);
+		        console.log('responseText : ' + response.responseText);
+		        _this.model.set({status: response.responseText});
+		        _this.render();
+		    }
+		});
+	},
 
     createDocs: function(event) {
 	    // submit button reload the page, we don't want that
@@ -197,22 +287,21 @@ module.exports = AppView = Backbone.View.extend({
 	    var plug = new Plug({
 	        nDocs: this.$el.find('input[name="nDocs"]').val()
 	    });
+	    plug.urlRoot = '/insert'; 
 
 	    // add it to the collection
 	   //his.collection.add(plug);
 
 	    plug.save({}, {
-    success: function(model, response) {
-        console.log('SUCCESS:');
-        console.log(response);
-    },
-    error: function(model, response) {
-        console.log('FAIL:');
-        console.log(response);
-    }
-	});
-
-
+		    success: function(model, response) {
+		        console.log('SUCCESS:');
+		        console.log(response);
+		    },
+		    error: function(model, response) {
+		        console.log('FAIL:');
+		        console.log(response);
+		    }
+		});
 	}, 
 
 	// initialize is automatically called once after the view is constructed

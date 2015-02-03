@@ -49,26 +49,50 @@ module.exports.main = function (req, res) {
 };
 
 module.exports.init = function(req, res) {
+    var msg;
     if(init) {
-        console.log('PlugDb already initialized');
-        res.redirect('back');
+        msg = 'PlugDb already initialized';
+        console.log(msg);
+        res.send(500, {error: msg});
     }
+    else {
+        plug.init( function(err) {
+            
+            if(err){
+                console.log(err);
+                msg = "Init failed";
+                res.send(500, {error: msg});
+            }
+            else{
+                init = true;
+                msg = "Init succeeded";
+                console.log(msg);    
+                res.send(200, req.body);
+            }
+            
+        });
+    }
+};
 
-   console.log("oki");
-    plug.init( function(err) {
-        var msg;
+module.exports.close = function(req, res) {
+    var msg; 
+    if(!init){
+        msg = "PlugDB is not initialized";
+        console.log(msg);
+        res.send(500, {error: msg});
+    }
+    plug.close( function(err) {
         if(err){
-            console.log(err);
-            msg = "Init failed";
+            msg = "Closing failed";
+            res.send(500, {error: msg});
         }
         else{
-            init = true;
-            msg = "Init succeeded";
+            init = false;
+            msg = "Closed";
+            res.send(200, req.body);
         }
-        console.log(msg);    
-        res.render('index.jade', {status: msg}, function(err, html){
-            res.send(200, html);
-        });
+        console.log(msg);
+            
     });
 };
 
@@ -85,12 +109,16 @@ module.exports.insert = function(req, res) {
         console.log("n contacts : " + nDocs);
         deleteAllContacts(function() {
             createContacts(nDocs, function() {
-               /* insertPlug( function(ids) {
-                    console.log(nDocs + " insert in plug done");
-                   */
-                    msg = "insert done";
-                    res.send(200);
-                //});
+                if(init) {
+                    insertPlug( function(ids) {
+                        console.log(nDocs + " insert in plug done");
+                        msg = "generation done";
+                        res.send(200, req.body);
+                    });
+                }
+                msg = "generation done";
+                res.send(200, req.body);
+
             });
         });
    // }
@@ -120,18 +148,18 @@ module.exports.replicate = function(req, res) {
         getIdsMode(function(ids) {
             replicateRemote(ids, function(err) {
                 if(err)
-                    res.send(500, err);
+                    res.send(500, {error: err});
                 else
-                    res.send(200);
+                    res.send(200, req.body);
             });
         });
     }
     else if(req.params.bool === 'false') {
         cancelReplication(function(err) {
             if(err)
-                res.send(500, err);
+                res.send(500, {error: err});
             else
-                res.send(200);
+                res.send(200, req.body);
         });
     }
     else
@@ -169,12 +197,12 @@ module.exports.register = function(req, res) {
         registerRemote(config, function(err) {
             if(err){
                 console.log(err);
-                res.send(500, err);
+                res.send(500, {error: err});
             }
             else{
 
                 console.log('registration ok !');
-                res.send(200);
+                res.send(200, req.body);
             }
         });
     }
@@ -183,11 +211,11 @@ module.exports.register = function(req, res) {
         unregisterDevice(config, function(err) {
             if(err){
                 console.log(err);
-                res.send(500, err);
+                res.send(500, {error: err});
             }
             else{
                 console.log('uregistration ok !');
-                res.send(200);
+                res.send(200, req.body);
             }
         });
     }
@@ -197,24 +225,7 @@ module.exports.register = function(req, res) {
 }
 
 
-module.exports.close = function(req, res) {
-    if(!init){
-        console.log("PlugDB is not initialized");
-        res.redirect('back');
-    }
-    plug.close( function(err) {
-        if(err){
-            msg = "Closing failed";
-        }
-        else{
-            msg = "Closed"
-        }
-        console.log(msg);
-        res.render('index.jade', {status: msg}, function(err, html){
-            res.send(200, html);
-        });
-    });
-};
+
 
 var createFiles = function(nDocs) {
 	for(var i=0;i<nDocs;i++){

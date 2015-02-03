@@ -215,31 +215,75 @@ module.exports = AppView = Backbone.View.extend({
 
     initPlug: function(event) {
     	event.preventDefault();
+    	_this = this;
     	var plug = new Plug({});
 	    plug.urlRoot = '/init';
-	    plug.save();
-
+	    plug.save({}, {
+	    	success: function(model, response) {
+	    		console.log('ok');
+	    		_this.model.set({status: "Init succeeded"});
+		        _this.render();
+	    	}, 
+	    	error: function(model, response) {
+	    		console.log('nok');
+	    		var rep = JSON.parse(response.responseText);
+	    		
+	    		_this.model.set({status: rep.error});
+		        _this.render();
+	    	}
+	    });
     },
 
     closePlug: function(event) {
     	event.preventDefault();
+    	_this = this;
     	var plug = new Plug({});
 	    plug.urlRoot = '/close';
-	    plug.save();
+	    plug.save({}, {
+	    	success: function(model, response) {
+	    		_this.model.set({status: "Close ok"});
+		        _this.render();
+	    	}, 
+	    	error: function(model, response) {
+	    		var rep = JSON.parse(response.responseText);
+	    		_this.model.set({status: rep.error});
+		        _this.render();
+	    	}
+	    });
     },
 
     replicate: function(event) {
     	event.preventDefault();
     	var model = this.model;
     	model.url = '/replicate/true';
-    	model.save();
+    	model.save({}, {
+	    	success: function(model, response) {
+	    		_this.model.set({status: "Sharing ok !"});
+		        _this.render();
+	    	}, 
+	    	error: function(model, response) {
+	    		var rep = JSON.parse(response.responseText);
+	    		_this.model.set({status: rep.error});
+		        _this.render();
+	    	}
+	    });
     },
 
     cancel: function(event) {
     	event.preventDefault();
     	var model = this.model;
     	model.url = '/replicate/false';
-    	model.save();
+    	model.save({}, {
+	    	success: function(model, response) {
+	    		_this.model.set({status: "Cancel replications ok"});
+		        _this.render();
+	    	}, 
+	    	error: function(model, response) {
+	    		var rep = JSON.parse(response.responseText);
+	    		_this.model.set({status: rep.error});
+		        _this.render();
+	    	}
+	    });
     },
 
 	registerDevice: function(event) {
@@ -255,15 +299,12 @@ module.exports = AppView = Backbone.View.extend({
 	    device.url = '/register/true';
 	    device.save({}, {
 	    	success: function(model, response) {
-		        console.log('SUCCESS:');
-		        _this.model.set({status: response.responseText});
+		        _this.model.set({status: "Device correctly registered"});
 		        _this.render();
 		    },
 		    error: function(model, response) {
-		        console.log('FAIL:');
-		        console.log(response);
-		        console.log('responseText : ' + response.responseText);
-		        _this.model.set({status: response.responseText});
+		    	var rep = JSON.parse(response.responseText);
+		        _this.model.set({status: rep.error});
 		        _this.render();
 		    }
 		});
@@ -281,15 +322,12 @@ module.exports = AppView = Backbone.View.extend({
 		device.url = '/register/false';
 	    device.save({}, {
 	    	success: function(model, response) {
-		        console.log('SUCCESS:');
-		        _this.model.set({status: response.responseText});
+		        _this.model.set({status: "Device correctly unregistered"});
 		        _this.render();
 		    },
 		    error: function(model, response) {
-		        console.log('FAIL:');
-		        console.log(response);
-		        console.log('responseText : ' + response.responseText);
-		        _this.model.set({status: response.responseText});
+		        var rep = JSON.parse(response.responseText);
+		        _this.model.set({status: rep.error});
 		        _this.render();
 		    }
 		});
@@ -298,7 +336,7 @@ module.exports = AppView = Backbone.View.extend({
     createDocs: function(event) {
 	    // submit button reload the page, we don't want that
 	   event.preventDefault();	
-
+	   _this = this;
 	    // create a new model
 	    var plug = new Plug({
 	        nDocs: this.$el.find('input[name="nDocs"]').val()
@@ -310,12 +348,13 @@ module.exports = AppView = Backbone.View.extend({
 
 	    plug.save({}, {
 		    success: function(model, response) {
-		        console.log('SUCCESS:');
-		        console.log(response);
+		        _this.model.set({status: "Insert " + plug.get('nDocs') + ' docs ok !'});
+		        _this.render();
 		    },
 		    error: function(model, response) {
-		        console.log('FAIL:');
-		        console.log(response);
+		        var rep = JSON.parse(response.responseText);
+		        _this.model.set({status: rep.error});
+		        _this.render();
 		    }
 		});
 	}, 

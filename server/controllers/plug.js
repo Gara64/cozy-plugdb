@@ -5,7 +5,9 @@ File = require('../models/files.js');
 Note = require('../models/notes.js');
 Device = require('../models/device.js');
 Contact = require('../models/contacts.js');
-var request = require('request-json-light');
+//var request = require('request-json-light');
+var request = require('request-json');
+var request_new = require('request');
 var basic = require('../lib/basic.js');
 
 var init = false; //used to test plugDB connection
@@ -26,12 +28,7 @@ var couchClient = request.newClient(couchUrl);
 
 module.exports.main = function (req, res) {
 
-
-
-    res.render('index.jade'), function(err, html) {
-        res.send(200, html);
-};
-    
+    res.send(200);
     
     /* This is the whole demo flow :
     plug.init(function() {
@@ -49,6 +46,7 @@ module.exports.main = function (req, res) {
 };
 
 module.exports.init = function(req, res) {
+   
     var msg;
     if(init) {
         msg = 'PlugDb already initialized';
@@ -57,7 +55,6 @@ module.exports.init = function(req, res) {
     }
     else {
         plug.init( function(err) {
-            
             if(err){
                 console.log(err);
                 msg = "Init failed";
@@ -552,6 +549,7 @@ var replicateRemote = function(ids, callback) {
 };
 
 var checkCredentials = function(config, callback) {
+    var remoteProxyClient = request.newClient("https://" + config.cozyURL);
     return remoteProxyClient.post("login", {
         username: 'owner',
         password: config.password
@@ -580,3 +578,54 @@ var unregisterDevice = function (config, callback) {
             callback();
     });
 };
+
+var testRemotePlug = function(callback) {
+  
+    var req = request_new.defaults({jar: true});
+    var remoteClient = req.post({url: "https://paulsharing1.cozycloud.cc/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
+        if(err) {
+            return console.error(err);
+        }
+        else{
+            req.post({url: "https://paulsharing1.cozycloud.cc/apps/plug/init"}, function(err, res, body) {
+            if(err) 
+                return console.error(err);
+            else{
+                console.log("code : " + res.statusCode);
+                console.log("body : " + JSON.stringify(body));
+            }
+        });
+
+        }
+    });
+
+    //remoteProxyClient.setBasicAuth('plug', 'kjc7mvznum8nz5mi85okwoo4de4gqfrp');
+
+ /* var remoteProxyClient = request.newClient("https://paulsharing1.cozycloud.cc");
+
+    remoteProxyClient.post('login', {username:'owner', password: 'sharing1'}, function(err, res, body) {
+        if(err)
+            console.log('error login: ' + err);
+        else{
+            console.log('ok login ' + res.statusCode);
+            console.log('body : ' + JSON.stringify(body));
+            var headers = res.headers;
+            var cookie = headers["set-cookie"];
+
+            remoteProxyClient.get('authenticated', {'Cookie' : cookie}, function(err, res, body) {
+                if(err)
+                    console.log('fail');
+                else{
+                    console.log('ok login ' + res.statusCode + ' body : ' + JSON.stringify(body) + ' - headers : ' + JSON.stringify(res.headers));
+                    
+                   // "_pk_id.1.b53c=bc95dad5da777bf5.1420724455.3.1422623068.1422018804.; express:sess=eyJwYXNzcG9ydCI6eyJ1c2VyIjoiYWRhYWY3Mjk1NmY0YTRkODkxZmVjODBlN2EwMDY1ZTQifX0=; express:sess.sig=viNPjxd06K-pH4x2rfax8tMTzTU"
+                    //express:sess=eyJwYXNzcG9ydCI6e319; path=/; expires=Wed, 11 Feb 2015 11:16:05 GMT; secure; httponly,express:sess.sig=hDmS2dUGD1OKq22qiiaZz34qiGk; path=/; expires=Wed, 11 Feb 2015 11:16:05 GMT; secure; httponly
+                }
+
+            });
+            
+        }
+    });*/
+
+
+}

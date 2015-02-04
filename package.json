@@ -4,7 +4,7 @@
   "description": "Cozy app to communicate with plugdb",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gara64/cozy-plugdb.git@americano-branch"
+    "url": "https://github.com/Gara64/cozy-plugdb.git"
   },
   "main": "server.js",
   "dependencies": {

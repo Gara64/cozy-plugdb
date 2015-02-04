@@ -32,6 +32,15 @@
   "cozy-permissions": {
       "Contact": {
           "description": "Generates contacts"
+      },
+      "File": {
+          "description": "Could generate files"
+      },
+      "Note": {
+          "description": "Used to generate notes"
+      },
+      "Device": {
+          "description": "share as a device"
       }
   },
   "cozy-displayname": "PlugDB"

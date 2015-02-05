@@ -1,9 +1,11 @@
 var AppView = require('views/app_view');
 var PlugCollection = require('collections/plugs');
 var DeviceModel = require('models/device');
+var PlugModel = require('models/plug');
 
 var plugs = new PlugCollection();
 var device = new DeviceModel();
+var plug = new PlugModel();
 
 module.exports = Router = Backbone.Router.extend({
 
@@ -14,8 +16,8 @@ module.exports = Router = Backbone.Router.extend({
 
     main: function() {
         var mainView = new AppView({
-            collection: plugs,
-            model: device
+            //collection: plugs,
+            model: plug
         });
         mainView.render();
     },

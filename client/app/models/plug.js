@@ -1,8 +1,11 @@
 module.exports = Plug = Backbone.Model.extend({
-	urlRoot: '',
+	urlRoot: 'plug',
 	defaults: {
 		nDocs: null,
-		status: null
+		status: null,
+        devicename: null,
+        target: null,
+        password: null
 	}
 
 });

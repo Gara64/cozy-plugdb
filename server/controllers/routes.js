@@ -7,20 +7,20 @@ module.exports = {
       get: plug.main
   },
 
-  'init' : {
+  'plug/init' : {
       post: plug.init
   },
-  'insert' : {
+  'plug/insert' : {
       post: plug.insert,
       get: plug.insert
   },
-  'replicate/:bool' : {
+  'plug/replicate/:bool' : {
       post: plug.replicate
   },
-  'register/:bool' : {
+  'plug/register/:bool' : {
     post: plug.register
   },
-  'close' : {
+  'plug/close' : {
       post: plug.close
   }
 };

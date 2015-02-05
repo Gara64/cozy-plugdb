@@ -1,5 +1,5 @@
 var Plug = require('../models/plug');
-var Device = require('../models/device');
+//var Device = require('../models/device');
 
 module.exports = AppView = Backbone.View.extend({
 
@@ -28,8 +28,8 @@ module.exports = AppView = Backbone.View.extend({
     initPlug: function(event) {
     	event.preventDefault();
     	_this = this;
-    	var plug = new Plug({});
-	    plug.urlRoot = '/init';
+    	var plug = this.model;
+	    plug.urlRoot = 'plug/init';
 	    plug.save({}, {
 	    	success: function(model, response) {
 	    		console.log('ok');
@@ -56,8 +56,8 @@ module.exports = AppView = Backbone.View.extend({
     closePlug: function(event) {
     	event.preventDefault();
     	_this = this;
-    	var plug = new Plug({});
-	    plug.urlRoot = '/close';
+    	var plug = this.model;
+	    plug.urlRoot = 'plug/close';
 	    plug.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Close ok"});
@@ -74,7 +74,7 @@ module.exports = AppView = Backbone.View.extend({
     replicate: function(event) {
     	event.preventDefault();
     	var model = this.model;
-    	model.url = '/replicate/true';
+    	model.urlRoot = 'plug/replicate/true';
     	model.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Sharing ok !"});
@@ -91,7 +91,7 @@ module.exports = AppView = Backbone.View.extend({
     cancel: function(event) {
     	event.preventDefault();
     	var model = this.model;
-    	model.url = '/replicate/false';
+    	model.url = 'plug/replicate/false';
     	model.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Cancel replications ok"});
@@ -108,15 +108,12 @@ module.exports = AppView = Backbone.View.extend({
 	registerDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-		var device = new Device({
-			target: this.$el.find('input[name="targetURL"]').val(),
-			password: this.$el.find('input[name="pwd"]').val(),
-			devicename: this.$el.find('input[name="devicename"]').val()
-		});
-		console.log('name ' + device.get('devicename'));
-		console.log('url ' + device.get('target'));
-	    device.url = '/register/true';
-	    device.save({}, {
+        var plug = this.model;
+		plug.target =  this.$el.find('input[name="targetURL"]').val();
+	    plug.password =  this.$el.find('input[name="pwd"]').val();
+	    plug.devicename = this.$el.find('input[name="devicename"]').val();
+	    plug.url = 'plug/register/true';
+	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly registered"});
 		        _this.render();
@@ -133,13 +130,12 @@ module.exports = AppView = Backbone.View.extend({
 	unregisterDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-		var device = new Device({
-			target: this.$el.find('input[name="targetURL"]').val(),
-			password: this.$el.find('input[name="pwd"]').val(),
-			devicename: this.$el.find('input[name="devicename"]').val()
-		});
-		device.url = '/register/false';
-	    device.save({}, {
+        var plug = this.model;
+		plug.target =  this.$el.find('input[name="targetURL"]').val();
+	    plug.password =  this.$el.find('input[name="pwd"]').val();
+	    plug.devicename =  this.$el.find('input[name="devicename"]').val();
+	    plug.url = 'plug/register/false';
+	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly unregistered"});
 		        _this.render();
@@ -157,10 +153,9 @@ module.exports = AppView = Backbone.View.extend({
 	   event.preventDefault();	
 	   _this = this;
 	    // create a new model
-	    var plug = new Plug({
-	        nDocs: this.$el.find('input[name="nDocs"]').val()
-	    });
-	    plug.urlRoot = '/insert'; 
+	    var plug = this.model;
+        plug.nDocs = this.$el.find('input[name="nDocs"]').val()
+	    plug.urlRoot = 'plug/insert'; 
 
 	    // add it to the collection
 	   //his.collection.add(plug);
@@ -180,7 +175,7 @@ module.exports = AppView = Backbone.View.extend({
 
 	// initialize is automatically called once after the view is constructed
 	initialize: function() {
-	    this.listenTo(this.collection, "insert", this.onInsertPlug);
+	    //this.listenTo(this.collection, "insert", this.onInsertPlug);
 	},
 	onInsertPlug: function(model) {
 	    // re-render the view

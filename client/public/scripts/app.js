@@ -226,7 +226,8 @@ module.exports = AppView = Backbone.View.extend({
 	    	}, 
 	    	error: function(model, response) {
 	    		console.log('nok');
-	    		if(response.responseText) {
+	    		console.log(response.responseText);
+                if(response.responseText) {
 	    			var rep = JSON.parse(response.responseText);
 	    			_this.model.set({status: rep.error});
 		        	_this.render();
@@ -374,6 +375,7 @@ module.exports = AppView = Backbone.View.extend({
 	    this.render();
 	}
 });
+
 });
 
 

@@ -38,10 +38,16 @@ module.exports = AppView = Backbone.View.extend({
 	    	}, 
 	    	error: function(model, response) {
 	    		console.log('nok');
-	    		var rep = JSON.parse(response.responseText);
+	    		if(response.responseText) {
+	    			var rep = JSON.parse(response.responseText);
+	    			_this.model.set({status: rep.error});
+		        	_this.render();
+	    		}
+	    		else {
+	    			_this.model.set({status: response});
+	    		}
+	    		_this.render();
 	    		
-	    		_this.model.set({status: rep.error});
-		        _this.render();
 	    	}
 	    });
     },

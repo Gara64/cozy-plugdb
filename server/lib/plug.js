@@ -30,7 +30,6 @@ function insertPlug(ids, callback){
 		if(err) { console.error(err); return; }
 		else{
 			callback();
-		//	console.log("insert ok");
 		}
 	});
 };

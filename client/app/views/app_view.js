@@ -12,7 +12,7 @@ module.exports = AppView = Backbone.View.extend({
     	"click #unregisterDevice" : "unregisterDevice",
     	"click #insertDocs": "createDocs",
     	"click #replicate" :"replicate",
-    	"click #cancel": "cancel"
+    	"click #cancel": "cancelReplications"
 	},
 
     render: function() {
@@ -27,51 +27,75 @@ module.exports = AppView = Backbone.View.extend({
 
     initPlug: function(event) {
     	event.preventDefault();
-    	_this = this;
     	var plug = this.model;
-	    plug.urlRoot = 'plug/init';
-	    plug.save({}, {
-	    	success: function(model, response) {
-	    		console.log('ok');
-	    		_this.model.set({status: "Init succeeded"});
-		        _this.render();
-	    	}, 
-	    	error: function(model, response) {
-	    		console.log('nok');
-	    		console.log(response.responseText);
-                if(response.responseText) {
-	    			var rep = JSON.parse(response.responseText);
-	    			_this.model.set({status: rep.error});
-		        	_this.render();
-	    		}
-	    		else {
-	    			_this.model.set({status: response});
-	    		}
-	    		_this.render();
-	    		
-	    	}
-	    });
+    	plug.set({status: "Initialization..."});
+    	plug.init(function(res) {
+    		plug.set({status: res});
+    	});
     },
 
     closePlug: function(event) {
     	event.preventDefault();
-    	_this = this;
     	var plug = this.model;
-	    plug.urlRoot = 'plug/close';
-	    plug.save({}, {
-	    	success: function(model, response) {
-	    		_this.model.set({status: "Close ok"});
-		        _this.render();
-	    	}, 
-	    	error: function(model, response) {
-	    		var rep = JSON.parse(response.responseText);
-	    		_this.model.set({status: rep.error});
-		        _this.render();
-	    	}
-	    });
+    	plug.set({status: "Shutdown..."});
+    	plug.close(function(res) {
+    		plug.set({status: res});
+    	});
     },
 
     replicate: function(event) {
+    	event.preventDefault();
+    	var plug = this.model;
+    	plug.replicate(function(res) {
+    		plug.set({status: res});
+    	});
+    },
+
+    cancelReplications: function(event) {
+    	event.preventDefault();
+    	var plug = this.model;
+    	plug.cancelReplications(function(res) {
+    		plug.set({status: res});
+    	});
+    },
+
+    registerDevice: function(event) {
+    	event.preventDefault();
+    	var plug = this.model;
+    	plug.set({
+    		target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+    	});
+
+    	plug.register(function(res) {
+    		plug.set({status: res});
+    	});
+    },
+
+    unregisterDevice: function(event) {
+    	event.preventDefault();
+    	var plug = this.model;
+    	plug.set({
+    		target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+    	});
+    	plug.unregister(function(res) {
+    		plug.set({status: res});
+    	});
+    },
+
+    createDocs: function(event) {
+    	event.preventDefault();
+    	var plug = this.model;
+    	plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
+    	plug.generate(function(res) {
+    		plug.set({status: res});
+    	});
+    },
+
+/*
     	event.preventDefault();
     	var model = this.model;
     	model.urlRoot = 'plug/replicate/true';
@@ -88,7 +112,7 @@ module.exports = AppView = Backbone.View.extend({
 	    });
     },
 
-    cancel: function(event) {
+    cancelReplications: function(event) {
     	event.preventDefault();
     	var model = this.model;
     	model.urlRoot = 'plug/replicate/false';
@@ -174,11 +198,13 @@ module.exports = AppView = Backbone.View.extend({
 		    }
 		});
 	}, 
-
+*/
 	// initialize is automatically called once after the view is constructed
 	initialize: function() {
 	    //this.listenTo(this.collection, "insert", this.onInsertPlug);
+	    this.model.on('change:status', this.render, this);
 	},
+
 	onInsertPlug: function(model) {
 	    // re-render the view
 	    this.render();

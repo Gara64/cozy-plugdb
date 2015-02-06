@@ -78,19 +78,21 @@ module.exports.close = function(req, res) {
         console.log(msg);
         res.send(500, {error: msg});
     }
-    plug.close( function(err) {
-        if(err){
-            msg = "Closing failed";
-            res.send(500, {error: msg});
-        }
-        else{
-            init = false;
-            msg = "Closed";
-            res.send(200, req.body);
-        }
-        console.log(msg);
-            
-    });
+    else {
+        plug.close( function(err) {
+            if(err){
+                msg = "Closing failed";
+                res.send(500, {error: msg});
+            }
+            else{
+                init = false;
+                msg = "Closed";
+                res.send(200, req.body);
+            }
+            console.log(msg);
+                
+        });
+    }
 };
 
 module.exports.insert = function(req, res) {
@@ -173,7 +175,8 @@ module.exports.register = function(req, res) {
         //res.redirect('back');
     }
 
-    
+    console.log("body : " + JSON.stringify(req.body));
+    console.log("body2 : " + req.body);
     var deviceName = req.body.devicename;
     var target = req.body.target;
     var pwd = req.body.password;

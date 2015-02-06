@@ -6,5 +6,4 @@ module.exports = Device = Backbone.Model.extend({
 		devicename: null, 
 		status: null
 	}
-
 });

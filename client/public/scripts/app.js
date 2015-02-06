@@ -143,7 +143,7 @@ module.exports = Plug = Backbone.Model.extend({
 
     init: function(callback) {
 		$.ajax({
-	        url: '/plug/init',
+	        url: 'plug/init',
 	        type: 'POST',
 	        success:function(result){
 	        	callback("Initialization successful !");
@@ -158,7 +158,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	close: function(callback) {
 		$.ajax({
-	        url: '/plug/close',
+	        url: 'plug/close',
 	        type: 'POST',
 	        success:function(result){
 	        	callback("Shutdown successful !");
@@ -171,7 +171,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	replicate: function(callback) {
 		$.ajax({
-	        url: '/plug/replicate/true',
+	        url: 'plug/replicate/true',
 	        type: 'POST',
 	        success:function(result){
 	        	callback("Sharing ok !");
@@ -184,7 +184,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	cancelReplications: function(callback) {
 		$.ajax({
-	        url: '/plug/replicate/false',
+	        url: 'plug/replicate/false',
 	        type: 'POST',
 	        success:function(result){
 	        	callback("Cancel replication successful !");
@@ -197,7 +197,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	register: function(callback) {
 		$.ajax({
-	        url: '/plug/register/true',
+	        url: 'plug/register/true',
 	        type: 'POST',
 	        data: {
 	        	target: this.get('target'), 
@@ -215,7 +215,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	unregister: function(callback) {
 		$.ajax({
-	        url: '/plug/register/false',
+	        url: 'plug/register/false',
 	        type: 'POST',
 	        data: {
 	        	target: this.get('target'), 
@@ -233,7 +233,7 @@ module.exports = Plug = Backbone.Model.extend({
 
 	generate: function(callback) {
 		$.ajax({
-	        url: '/plug/insert',
+	        url: 'plug/insert',
 	        type: 'POST',
 	        data: {
 	        	nDocs: this.get('nDocs')

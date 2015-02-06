@@ -29,7 +29,7 @@ module.exports = AppView = Backbone.View.extend({
     	event.preventDefault();
     	_this = this;
     	var plug = this.model;
-	    plug.urlRoot = '/init';
+	    plug.urlRoot = 'plug/init';
 	    plug.save({}, {
 	    	success: function(model, response) {
 	    		console.log('ok');
@@ -57,7 +57,7 @@ module.exports = AppView = Backbone.View.extend({
     	event.preventDefault();
     	_this = this;
     	var plug = this.model;
-	    plug.urlRoot = '/close';
+	    plug.urlRoot = 'plug/close';
 	    plug.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Close ok"});
@@ -74,7 +74,7 @@ module.exports = AppView = Backbone.View.extend({
     replicate: function(event) {
     	event.preventDefault();
     	var model = this.model;
-    	model.urlRoot = '/replicate/true';
+    	model.urlRoot = 'plug/replicate/true';
     	model.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Sharing ok !"});
@@ -91,7 +91,7 @@ module.exports = AppView = Backbone.View.extend({
     cancel: function(event) {
     	event.preventDefault();
     	var model = this.model;
-    	model.url = '/replicate/false';
+    	model.urlRoot = 'plug/replicate/false';
     	model.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Cancel replications ok"});
@@ -108,11 +108,12 @@ module.exports = AppView = Backbone.View.extend({
 	registerDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-        var plug = this.model;
-		plug.target =  this.$el.find('input[name="targetURL"]').val();
-	    plug.password =  this.$el.find('input[name="pwd"]').val();
-	    plug.devicename = this.$el.find('input[name="devicename"]').val();
-	    plug.url = '/register/true';
+        var plug = new Plug({
+        	target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+        })
+	    plug.urlRoot = 'plug/register/true';
 	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly registered"});
@@ -130,11 +131,12 @@ module.exports = AppView = Backbone.View.extend({
 	unregisterDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-        var plug = this.model;
-		plug.target =  this.$el.find('input[name="targetURL"]').val();
-	    plug.password =  this.$el.find('input[name="pwd"]').val();
-	    plug.devicename =  this.$el.find('input[name="devicename"]').val();
-	    plug.url = '/register/false';
+        var plug = new Plug({
+        	target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+        })
+	    plug.urlRoot = 'plug/register/false';
 	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly unregistered"});
@@ -154,8 +156,8 @@ module.exports = AppView = Backbone.View.extend({
 	   _this = this;
 	    // create a new model
 	    var plug = this.model;
-        plug.nDocs = this.$el.find('input[name="nDocs"]').val()
-	    plug.urlRoot = '/insert'; 
+        plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
+	    plug.urlRoot = 'plug/insert'; 
 
 	    // add it to the collection
 	   //his.collection.add(plug);

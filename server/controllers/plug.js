@@ -113,9 +113,10 @@ module.exports.insert = function(req, res) {
                         res.send(200, req.body);
                     });
                 }
-                msg = "generation done";
-                res.send(200, req.body);
-
+                else{
+                    msg = "generation done";
+                    res.send(200, req.body);
+                }
             });
         });
    // }

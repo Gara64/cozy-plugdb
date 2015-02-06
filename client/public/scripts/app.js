@@ -284,7 +284,7 @@ module.exports = AppView = Backbone.View.extend({
     cancel: function(event) {
     	event.preventDefault();
     	var model = this.model;
-    	model.url = 'plug/replicate/false';
+    	model.urlRoot = 'plug/replicate/false';
     	model.save({}, {
 	    	success: function(model, response) {
 	    		_this.model.set({status: "Cancel replications ok"});
@@ -301,11 +301,12 @@ module.exports = AppView = Backbone.View.extend({
 	registerDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-        var plug = this.model;
-		plug.target =  this.$el.find('input[name="targetURL"]').val();
-	    plug.password =  this.$el.find('input[name="pwd"]').val();
-	    plug.devicename = this.$el.find('input[name="devicename"]').val();
-	    plug.url = 'plug/register/true';
+        var plug = new Plug({
+        	target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+        })
+	    plug.urlRoot = 'plug/register/true';
 	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly registered"});
@@ -323,11 +324,12 @@ module.exports = AppView = Backbone.View.extend({
 	unregisterDevice: function(event) {
 		event.preventDefault();
 		_this = this;
-        var plug = this.model;
-		plug.target =  this.$el.find('input[name="targetURL"]').val();
-	    plug.password =  this.$el.find('input[name="pwd"]').val();
-	    plug.devicename =  this.$el.find('input[name="devicename"]').val();
-	    plug.url = 'plug/register/false';
+        var plug = new Plug({
+        	target: this.$el.find('input[name="targetURL"]').val(), 
+	 		password: this.$el.find('input[name="pwd"]').val(),
+	 		devicename: this.$el.find('input[name="devicename"]').val()
+        })
+	    plug.urlRoot = 'plug/register/false';
 	    plug.save({}, {
 	    	success: function(model, response) {
 		        _this.model.set({status: "Device correctly unregistered"});
@@ -347,7 +349,7 @@ module.exports = AppView = Backbone.View.extend({
 	   _this = this;
 	    // create a new model
 	    var plug = this.model;
-        plug.nDocs = this.$el.find('input[name="nDocs"]').val()
+        plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
 	    plug.urlRoot = 'plug/insert'; 
 
 	    // add it to the collection

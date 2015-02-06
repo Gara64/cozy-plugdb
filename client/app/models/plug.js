@@ -99,6 +99,7 @@ module.exports = Plug = Backbone.Model.extend({
 	},
 
 	generate: function(callback) {
+		_this = this;
 		$.ajax({
 	        url: 'plug/insert',
 	        type: 'POST',
@@ -106,7 +107,7 @@ module.exports = Plug = Backbone.Model.extend({
 	        	nDocs: this.get('nDocs')
 	        },
 	        success:function(result){
-	        	callback("Insert " + this.get('nDocs') + " docs ok !");
+	        	callback("Insert " + _this.get('nDocs') + " docs ok !");
 	        },
 	        error: function(result, response) {
 	        	callback("Insertion failed !");

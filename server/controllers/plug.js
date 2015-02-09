@@ -47,6 +47,24 @@ module.exports.main = function (req, res) {
 
 module.exports.init = function(req, res) {
    
+    /*run_cmd( "cozy-monitor", ["-l"], function(text) {
+        console.log (text)
+    });
+*/
+
+    /*var config = {
+        cozyURL : "localhost:9104",
+        password: "cozycloud",
+        deviceName: "mondevicelocal"
+    };
+
+    registerRemote(config, function(err) {
+        if(err)
+            console.log('fail');
+        else
+            console.log('ok');
+    });*/
+
     var msg;
     if(init) {
         msg = 'PlugDb already initialized';
@@ -527,17 +545,70 @@ var registerRemote = function(config, callback) {
 
 var replicateRemote = function(ids, callback) {
 
-    console.log('url : ' + Device.url + ' - id : ' + Device.id);
     //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
     console.log(remoteURL);
     var data = { 
+        
         source: "cozy",
-        target:  remoteURL, // replicateRemoteURL, //contains credentials for a registered device.
+        target:  "https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy", 
         continuous: true,
-        doc_ids: ids,
+        doc_ids: ids
     };
-    
+    //device test pwd paulsharing1 : m9nud6gctn3lerk9aisnbzwzy0gam7vi
+
+
+    ////filter: "function(doc) { if(doc.docType == 'Contact' return true }",
+        //remoteURL, // replicateRemoteURL, //contains credentials for a registered device.
+
+    //local device registered on localhost for testing purposes
+   /* var localClient = request.newClient("http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104");
+    localClient.post("cozy", data, function(err, res, body) {
+        if(err){
+            console.log("Backup source failed ");
+            callback(err);
+        }
+        else{
+            log.raw('Backup source suceeded \o/');
+            log.raw('res : ' + res);
+            callback();
+        }
+    });*/
+
+    var req = request_new.defaults({jar: true});
+    var remoteClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
+        if(err) {
+            return console.error(err);
+        }
+        else{
+/*
+           req.post({url: "http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104/cozy/", contentType: 'application/json', qs: data}, function(err, res, body) {
+                if(err) 
+                    return console.error(err);
+                else{
+                    console.log("code : " + res.statusCode);
+                    console.log("body : " + JSON.stringify(body));
+                }
+            });
+*/
+               var localClient = request.newClient("https://test:m9nud6gctn3lerk9aisnbzwzy0gam7vi@paulsharing1.cozycloud.cc/cozy");
+                localClient.post("_replicate", data, function(err, res, body) {
+                    if(err){
+                        console.log("Backup source failed ");
+                        callback(err);
+                    }
+                    else{
+                        log.raw('Backup source suceeded \o/');
+                        log.raw('res : ' + JSON.stringify(res));
+                        if(body)
+                            log.raw("body : " + JSON.stringify(body));
+                        callback();
+                    }
+
+                    
+                });
+}});
+    /*
     console.log("replication on ids " + ids);
     couchClient.post("_replicate", data, function(err, res, body){
         if(err || !body.ok){
@@ -546,10 +617,14 @@ var replicateRemote = function(ids, callback) {
         }
         else{
             log.raw('Backup source suceeded \o/');
+            log.raw('res : ' + JSON.stringify(res));
+            if(body)
+                log.raw("body : " + JSON.stringify(body));
             callback();
         }
 
     });
+}});*/
 };
 
 var checkCredentials = function(config, callback) {
@@ -602,6 +677,19 @@ var testRemotePlug = function(callback) {
 
         }
     });
+
+var run_cmd = function(cmd, args, callBack ) {
+    var spawn = require('child_process').spawn;
+    var child = spawn(cmd, args);
+    var resp = "";
+
+    child.stdout.on('data', function (buffer) { resp += buffer.toString() });
+    child.stdout.on('end', function() { callBack (resp) });
+};
+
+
+
+
 
     //remoteProxyClient.setBasicAuth('plug', 'kjc7mvznum8nz5mi85okwoo4de4gqfrp');
 

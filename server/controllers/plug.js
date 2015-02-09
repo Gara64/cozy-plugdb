@@ -576,7 +576,7 @@ var replicateRemote = function(ids, callback) {
     });*/
 
     var req = request_new.defaults({jar: true});
-    var remoteClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
+    var remoteClient = req.post({url: "http://paulsharing1.cozycloud.cc/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
         if(err) {
             return console.error(err);
         }
@@ -591,7 +591,7 @@ var replicateRemote = function(ids, callback) {
                 }
             });
 */
-               var localClient = request.newClient("https://test:m9nud6gctn3lerk9aisnbzwzy0gam7vi@paulsharing1.cozycloud.cc/cozy");
+               var localClient = request.newClient("https://test:m9nud6gctn3lerk9aisnbzwzy0gam7vi@paulsharing1.cozycloud.cc/cozy/");
                 localClient.post("_replicate", data, function(err, res, body) {
                     if(err){
                         console.log("Backup source failed ");

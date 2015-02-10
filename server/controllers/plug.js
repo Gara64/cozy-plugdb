@@ -9,7 +9,7 @@ Contact = require('../models/contacts.js');
 var request = require('request-json');
 var request_new = require('request');
 var basic = require('../lib/basic.js');
-
+var http = require('http');
 var init = false; //used to test plugDB connection
 
 var remoteConfig = {
@@ -549,9 +549,8 @@ var replicateRemote = function(ids, callback) {
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
     console.log(remoteURL);
     var data = { 
-        
         source: "cozy",
-        target:  "https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy", 
+        target:  "https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
         continuous: true,
         doc_ids: ids
     };
@@ -575,24 +574,65 @@ var replicateRemote = function(ids, callback) {
         }
     });*/
 
+
+
     var req = request_new.defaults({jar: true});
-    var remoteClient = req.post({url: "http://paulsharing1.cozycloud.cc/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
+    var remoteClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "cozycloud"}}, function(err, res, body) {
         if(err) {
             return console.error(err);
         }
         else{
-/*
-           req.post({url: "http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104/cozy/", contentType: 'application/json', qs: data}, function(err, res, body) {
-                if(err) 
-                    return console.error(err);
+
+          req.post({url: "http://localhost:9104/_replicate", json:true, body: data}, function(err, res, body) {
+                if(res.statusCode == 302)
+                    console.log("You are not authenticated"); 
+                else if(err || (res.statusCode != 202))
+                    console.log(err);
                 else{
                     console.log("code : " + res.statusCode);
                     console.log("body : " + JSON.stringify(body));
                 }
+                callback(err);
             });
-*/
-               var localClient = request.newClient("https://test:m9nud6gctn3lerk9aisnbzwzy0gam7vi@paulsharing1.cozycloud.cc/cozy/");
-                localClient.post("_replicate", data, function(err, res, body) {
+//
+              /*  var post_data = JSON.stringify(data);
+                var options = {
+                  host: 'localhost',
+                  port: '9104',
+                  path: '/cozy/_replicate',
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': post_data.length,
+                    'Authorization': 'Basic ' + new Buffer("mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9").toString('base64')
+                  }
+
+
+            };
+
+           var req = http.request(options, function(res) {
+                var str = ''
+                      res.on('data', function (chunk) {
+                        str += chunk;
+                      });
+
+
+
+                      res.on('end', function () {
+                        console.log(str);
+                      });
+            });
+
+           req.on('error', function(e) {
+              console.log('error : ' + JSON.stringify(e));
+            });
+
+            // write the request parameters
+            req.write(post_data);
+            req.end();*/
+/*
+               var localClient = request.newClient("http://localhost:9104");
+                localClient.post("/_replicate", data, function(err, res, body) {
                     if(err){
                         console.log("Backup source failed ");
                         callback(err);
@@ -606,7 +646,7 @@ var replicateRemote = function(ids, callback) {
                     }
 
                     
-                });
+                });*/
 }});
     /*
     console.log("replication on ids " + ids);

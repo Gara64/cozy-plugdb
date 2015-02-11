@@ -9,7 +9,6 @@ Contact = require('../models/contacts.js');
 var request = require('request-json');
 var request_new = require('request');
 var basic = require('../lib/basic.js');
-var http = require('http');
 var init = false; //used to test plugDB connection
 
 var remoteConfig = {
@@ -550,38 +549,17 @@ var replicateRemote = function(ids, callback) {
     console.log(remoteURL);
     var data = { 
         source: "cozy",
-        target:  "https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
+        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
         continuous: true,
         doc_ids: ids
     };
-    //device test pwd paulsharing1 : m9nud6gctn3lerk9aisnbzwzy0gam7vi
-
-
-    ////filter: "function(doc) { if(doc.docType == 'Contact' return true }",
-        //remoteURL, // replicateRemoteURL, //contains credentials for a registered device.
-
-    //local device registered on localhost for testing purposes
-   /* var localClient = request.newClient("http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104");
-    localClient.post("cozy", data, function(err, res, body) {
-        if(err){
-            console.log("Backup source failed ");
-            callback(err);
-        }
-        else{
-            log.raw('Backup source suceeded \o/');
-            log.raw('res : ' + res);
-            callback();
-        }
-    });*/
-
-
 
     var req = request_new.defaults({jar: true});
     var remoteClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "cozycloud"}}, function(err, res, body) {
         if(err) {
             return console.error(err);
         }
-        else{
+        else {
 
           req.post({url: "http://localhost:9104/_replicate", json:true, body: data}, function(err, res, body) {
                 if(res.statusCode == 302)
@@ -594,42 +572,6 @@ var replicateRemote = function(ids, callback) {
                 }
                 callback(err);
             });
-//
-              /*  var post_data = JSON.stringify(data);
-                var options = {
-                  host: 'localhost',
-                  port: '9104',
-                  path: '/cozy/_replicate',
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': post_data.length,
-                    'Authorization': 'Basic ' + new Buffer("mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9").toString('base64')
-                  }
-
-
-            };
-
-           var req = http.request(options, function(res) {
-                var str = ''
-                      res.on('data', function (chunk) {
-                        str += chunk;
-                      });
-
-
-
-                      res.on('end', function () {
-                        console.log(str);
-                      });
-            });
-
-           req.on('error', function(e) {
-              console.log('error : ' + JSON.stringify(e));
-            });
-
-            // write the request parameters
-            req.write(post_data);
-            req.end();*/
 /*
                var localClient = request.newClient("http://localhost:9104");
                 localClient.post("/_replicate", data, function(err, res, body) {

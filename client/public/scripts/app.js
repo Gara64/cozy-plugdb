@@ -141,33 +141,6 @@ module.exports = Plug = Backbone.Model.extend({
         password: null
 	}, 
 
-    init: function(callback) {
-		$.ajax({
-	        url: 'plug/init',
-	        type: 'POST',
-	        success:function(result){
-	        	callback("Initialization successful !");
-	        	//newObject.twittername = result.name; ;
-	            //that.$el.html(that.template(newObject));
-	        },
-	        error: function(result, response) {
-	        	callback("Initialization failed !");
-	        }
-	    });
-	},
-
-	close: function(callback) {
-		$.ajax({
-	        url: 'plug/close',
-	        type: 'POST',
-	        success:function(result){
-	        	callback("Shutdown successful !");
-	        },
-	        error: function(result, response) {
-	        	callback("Shutdown failed !");
-	        }
-	    });
-	},
 
 	replicate: function(callback) {
 		$.ajax({
@@ -200,36 +173,17 @@ module.exports = Plug = Backbone.Model.extend({
 	        url: 'plug/register/true',
 	        type: 'POST',
 	        data: {
-	        	target: this.get('target'), 
-	        	devicename: this.get('devicename'), 
-	        	password: this.get('password')
+	        	target: this.get('target')
 	        },
 	        success:function(result){
-	        	callback("Device correctly registered !");
+	        	callback("Ready to share !");
 	        },
 	        error: function(result, response) {
-	        	callback("Device could not be registered :/");
+	        	callback("Not ready :/");
 	        }
 	    });
 	},
 
-	unregister: function(callback) {
-		$.ajax({
-	        url: 'plug/register/false',
-	        type: 'POST',
-	        data: {
-	        	target: this.get('target'), 
-	        	devicename: this.get('devicename'), 
-	        	password: this.get('password')
-	        },
-	        success:function(result){
-	        	callback("Device correctly unregistered !");
-	        },
-	        error: function(result, response) {
-	        	callback("Device could not be unregistered :/");
-	        }
-	    });
-	},
 
 	generate: function(callback) {
 		_this = this;
@@ -291,7 +245,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Plug app</h1><p>Status PlugDB :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><form><button id="initPlug">Start PlugDB</button><button id="closePlug">Close PlugDB</button></form><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><label>Device name : </label><input type="text" name="devicename" size="10"/><label>Password : </label><input type="password" name="pwd" size="10"/><input id="registerDevice" type="submit" value="Register"/><input id="unregisterDevice" type="submit" value="Unregister"/></form><br/><br/><form><label>Generate n Contacts and insert the ids in PlugDB :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p>Share all my contacts ! <a href=""><img id="replicate" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><!--form--><!--	input(id="cancelReplication", type="submit", value="Cancel all replications")--><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><!--label Device name : --><!--input(type="text", name="devicename", size=10)--><!--label Password : --><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p>Share all my contacts ! <a href=""><img id="replicate" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><!--form--><!--	input(id="cancelReplication", type="submit", value="Cancel all replications")--><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
@@ -306,10 +260,7 @@ module.exports = AppView = Backbone.View.extend({
     el: 'body',
     template: require('../templates/home'),
     events: {
-    	"click #initPlug" : "initPlug",
-    	"click #closePlug" : "closePlug",
     	"click #registerDevice" : "registerDevice",
-    	"click #unregisterDevice" : "unregisterDevice",
     	"click #insertDocs": "createDocs",
     	"click #replicate" :"replicate",
     	"click #cancel": "cancelReplications"
@@ -325,23 +276,6 @@ module.exports = AppView = Backbone.View.extend({
     	//this.$el.find('')
     },
 
-    initPlug: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({status: "Initialization..."});
-    	plug.init(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-    closePlug: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({status: "Shutdown..."});
-    	plug.close(function(res) {
-    		plug.set({status: res});
-    	});
-    },
 
     replicate: function(event) {
     	event.preventDefault();
@@ -363,9 +297,7 @@ module.exports = AppView = Backbone.View.extend({
     	event.preventDefault();
     	var plug = this.model;
     	plug.set({
-    		target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
+    		target: this.$el.find('input[name="targetURL"]').val()
     	});
 
     	plug.register(function(res) {
@@ -373,18 +305,6 @@ module.exports = AppView = Backbone.View.extend({
     	});
     },
 
-    unregisterDevice: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({
-    		target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
-    	});
-    	plug.unregister(function(res) {
-    		plug.set({status: res});
-    	});
-    },
 
     createDocs: function(event) {
     	event.preventDefault();

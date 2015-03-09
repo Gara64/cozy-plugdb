@@ -1,10 +1,18 @@
-var plug = require('../lib/plug.js');
 var async = require('async');
 var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
 Device = require('../models/device.js');
 Contact = require('../models/contacts.js');
+cozydb = require('cozydb');
+
+Photo = cozydb.getModel('Photo', {
+  "id": String,
+  "title": String,
+  "content": { "type": String, "default": ""}
+});
+
+
 //var request = require('request-json-light');
 var request = require('request-json');
 var request_new = require('request');
@@ -19,98 +27,14 @@ var remoteConfig = {
 
 var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
-//var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/";
-
-//var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
-
-
 
 module.exports.main = function (req, res) {
 
     res.send(200);
-    
-    /* This is the whole demo flow :
-    plug.init(function() {
-        deleteAllFiles(function() {
-            createNotes(2, function() {
-                insertPlug(getIdsNotes, function(ids) {
-                    replicateDocs(ids);
-                    closePlug();
-                });
-            });
-        });
-    });
-    */
 
 };
 
-module.exports.init = function(req, res) {
-   
-    /*run_cmd( "cozy-monitor", ["-l"], function(text) {
-        console.log (text)
-    });
-*/
 
-    /*var config = {
-        cozyURL : "localhost:9104",
-        password: "cozycloud",
-        deviceName: "mondevicelocal"
-    };
-
-    registerRemote(config, function(err) {
-        if(err)
-            console.log('fail');
-        else
-            console.log('ok');
-    });*/
-
-    var msg;
-    if(init) {
-        msg = 'PlugDb already initialized';
-        console.log(msg);
-        res.send(500, {error: msg});
-    }
-    else {
-        plug.init( function(err) {
-            if(err){
-                console.log(err);
-                msg = "Init failed";
-                res.send(500, {error: msg});
-            }
-            else{
-                init = true;
-                msg = "Init succeeded";
-                console.log(msg);    
-                res.send(200, req.body);
-            }
-            
-        });
-    }
-};
-
-module.exports.close = function(req, res) {
-    var msg; 
-    if(!init){
-        msg = "PlugDB is not initialized";
-        console.log(msg);
-        res.send(500, {error: msg});
-    }
-    else {
-        plug.close( function(err) {
-            if(err){
-                msg = "Closing failed";
-                res.send(500, {error: msg});
-            }
-            else{
-                init = false;
-                msg = "Closed";
-                res.send(200, req.body);
-            }
-            console.log(msg);
-                
-        });
-    }
-};
 
 module.exports.insert = function(req, res) {
     var msg;
@@ -118,27 +42,16 @@ module.exports.insert = function(req, res) {
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
     }
-    //else {
 
         var nDocs = req.body.nDocs;
        // var nDocs = req.params.ndocs;
         console.log("n contacts : " + nDocs);
         deleteAllContacts(function() {
             createContacts(nDocs, function() {
-                if(init) {
-                    insertPlug( function(ids) {
-                        console.log(nDocs + " insert in plug done");
-                        msg = "generation done";
-                        res.send(200, req.body);
-                    });
-                }
-                else{
-                    msg = "generation done";
-                    res.send(200, req.body);
-                }
+                msg = "generation done";
+                res.send(200, req.body);
             });
         });
-   // }
 
 };
 
@@ -194,49 +107,44 @@ module.exports.register = function(req, res) {
 
     console.log("body : " + JSON.stringify(req.body));
     console.log("body2 : " + req.body);
-    var deviceName = req.body.devicename;
     var target = req.body.target;
-    var pwd = req.body.password;
 
-    var config = {
-        cozyURL: target,
-        password: pwd,
-        deviceName: deviceName
-    }
-
-    console.log('login : ' + config.deviceName);
-    console.log('password : ' + config.password);
-    console.log('cozyUrl : ' + config.cozyURL);
-
-    console.log(req.params.bool)
+    console.log('cozyUrl : ' + target);
 
     if(req.params.bool === 'true') {
         console.log('go register');
-        registerRemote(config, function(err) {
-            if(err){
-                console.log(err);
-                res.send(500, {error: err});
-            }
-            else{
 
-                console.log('registration ok !');
-                res.send(200, req.body);
-            }
-        });
+        var config;
+        //paulsharing1 device : paul - kuzqgv069xz2gldie0yobrn18vbzkt9w
+        if(target.indexOf("paulsharing1") > -1) {
+            config = {
+                cozyURL: target,
+                login: "paul",
+                password: "kuzqgv069xz2gldie0yobrn18vbzkt9w"
+            };
+        }
+        //paulsharing2 device : test - hqthj9ggjnqoxbt9pl1sgja0mv5f80k9
+        else if(target.indexOf("paulsharing2") > -1) {
+            config = {
+                cozyURL: target,
+                login: "test",
+                password: "hqthj9ggjnqoxbt9pl1sgja0mv5f80k9"
+            };
+        }
+        else{
+            var err = target + " not handled";
+            console.log(err);
+            res.send(500, {error: err});
+        }
+
+
+        console.log('replication ready !');
+        Device = new Device({url: config.cozyURL, login: config.login, password: config.password });
+        res.send(200, req.body);
+        
+    
     }
-    //unregister device
-    else if(req.params.bool === 'false'){
-        unregisterDevice(config, function(err) {
-            if(err){
-                console.log(err);
-                res.send(500, {error: err});
-            }
-            else{
-                console.log('uregistration ok !');
-                res.send(200, req.body);
-            }
-        });
-    }
+
     else
         res.redirect('back');
 
@@ -346,21 +254,6 @@ var getIdsContacts = function(callback) {
     });
 };
 
-var insertPlug = function(callback) {
-    getIdsNotes(function(ids) {
-        console.log("insert in plug: " + ids);
-	    plug.insert(ids, function(){
-		    callback(ids);
-	    });
-    });
-};
-
-var selectPlug = function(callback) {
-	    plug.select(function(result){
-		    console.log("ids : " + result);
-            callback(result);
-    });
-};
 
 var deleteAllFiles = function(callback, nDocs) {
 	File.requestDestroy("all", function(err) {
@@ -572,41 +465,9 @@ var replicateRemote = function(ids, callback) {
                 }
                 callback(err);
             });
-/*
-               var localClient = request.newClient("http://localhost:9104");
-                localClient.post("/_replicate", data, function(err, res, body) {
-                    if(err){
-                        console.log("Backup source failed ");
-                        callback(err);
-                    }
-                    else{
-                        log.raw('Backup source suceeded \o/');
-                        log.raw('res : ' + JSON.stringify(res));
-                        if(body)
-                            log.raw("body : " + JSON.stringify(body));
-                        callback();
-                    }
 
-                    
-                });*/
 }});
-    /*
-    console.log("replication on ids " + ids);
-    couchClient.post("_replicate", data, function(err, res, body){
-        if(err || !body.ok){
-            handleError(err, body, "Backup source failed ");
-            callback(err);
-        }
-        else{
-            log.raw('Backup source suceeded \o/');
-            log.raw('res : ' + JSON.stringify(res));
-            if(body)
-                log.raw("body : " + JSON.stringify(body));
-            callback();
-        }
 
-    });
-}});*/
 };
 
 var checkCredentials = function(config, callback) {
@@ -670,36 +531,15 @@ var run_cmd = function(cmd, args, callBack ) {
 };
 
 
+var sharePhotos = function(callback) {
+    // Retrieving all photos
+    Photo.request("all", function (err, notes) {
+        console.log(notes);
+    });
+
+};
 
 
-
-    //remoteProxyClient.setBasicAuth('plug', 'kjc7mvznum8nz5mi85okwoo4de4gqfrp');
-
- /* var remoteProxyClient = request.newClient("https://paulsharing1.cozycloud.cc");
-
-    remoteProxyClient.post('login', {username:'owner', password: 'sharing1'}, function(err, res, body) {
-        if(err)
-            console.log('error login: ' + err);
-        else{
-            console.log('ok login ' + res.statusCode);
-            console.log('body : ' + JSON.stringify(body));
-            var headers = res.headers;
-            var cookie = headers["set-cookie"];
-
-            remoteProxyClient.get('authenticated', {'Cookie' : cookie}, function(err, res, body) {
-                if(err)
-                    console.log('fail');
-                else{
-                    console.log('ok login ' + res.statusCode + ' body : ' + JSON.stringify(body) + ' - headers : ' + JSON.stringify(res.headers));
-                    
-                   // "_pk_id.1.b53c=bc95dad5da777bf5.1420724455.3.1422623068.1422018804.; express:sess=eyJwYXNzcG9ydCI6eyJ1c2VyIjoiYWRhYWY3Mjk1NmY0YTRkODkxZmVjODBlN2EwMDY1ZTQifX0=; express:sess.sig=viNPjxd06K-pH4x2rfax8tMTzTU"
-                    //express:sess=eyJwYXNzcG9ydCI6e319; path=/; expires=Wed, 11 Feb 2015 11:16:05 GMT; secure; httponly,express:sess.sig=hDmS2dUGD1OKq22qiiaZz34qiGk; path=/; expires=Wed, 11 Feb 2015 11:16:05 GMT; secure; httponly
-                }
-
-            });
-            
-        }
-    });*/
 
 
 }

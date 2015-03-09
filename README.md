@@ -1,5 +1,4 @@
 # cozy-plugdb
-Cozy app to communicate with plugdb
+Cozy app to share with others cozies
 
-Prerequisite : 
-You need a PlugDB running on /dev/ttyACM0
+Warning : for demo use only

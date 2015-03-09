@@ -1,31 +1,27 @@
-h1 Plug app
+h1 Sharing app
 
 p
-	| Status PlugDB :
+	| Status :
 	strong(id="status") #{status}
 hr
-
-form
-	button(id="initPlug") Start PlugDB
-	button(id="closePlug") Close PlugDB
 
 br
 
 form
 	label Target URL : 
 	input(type="text", name="targetURL")
-	label Device name : 
-	input(type="text", name="devicename", size=10)
-	label Password : 
-	input(type="password", name="pwd", size=10)
+	//label Device name : 
+	//input(type="text", name="devicename", size=10)
+	//label Password : 
+	//input(type="password", name="pwd", size=10)
 	input(id="registerDevice", type="submit", value="Register")
-	input(id="unregisterDevice", type="submit", value="Unregister")
+	//input(id="unregisterDevice", type="submit", value="Unregister")
 
 br
 br
 
 form
-	label Generate n Contacts and insert the ids in PlugDB :
+	label Generate n Contacts :
 	input(type="text",name="nDocs",size=1)
 	input(id="insertDocs", type="image", src="./images/generate.png", alt="submit", height="50", width="50");
 	//input(id="insertDocs", type="submit", value="Generate")

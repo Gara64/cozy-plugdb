@@ -7,9 +7,6 @@ module.exports = {
       get: plug.main
   },
 
-  'plug/init' : {
-      post: plug.init
-  },
   'plug/insert' : {
       post: plug.insert,
       get: plug.insert,
@@ -20,9 +17,6 @@ module.exports = {
   },
   'plug/register/:bool' : {
     post: plug.register
-  },
-  'plug/close' : {
-      post: plug.close
   }
 };
 

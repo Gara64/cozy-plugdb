@@ -6,10 +6,7 @@ module.exports = AppView = Backbone.View.extend({
     el: 'body',
     template: require('../templates/home'),
     events: {
-    	"click #initPlug" : "initPlug",
-    	"click #closePlug" : "closePlug",
     	"click #registerDevice" : "registerDevice",
-    	"click #unregisterDevice" : "unregisterDevice",
     	"click #insertDocs": "createDocs",
     	"click #replicate" :"replicate",
     	"click #cancel": "cancelReplications"
@@ -25,23 +22,6 @@ module.exports = AppView = Backbone.View.extend({
     	//this.$el.find('')
     },
 
-    initPlug: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({status: "Initialization..."});
-    	plug.init(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-    closePlug: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({status: "Shutdown..."});
-    	plug.close(function(res) {
-    		plug.set({status: res});
-    	});
-    },
 
     replicate: function(event) {
     	event.preventDefault();
@@ -63,9 +43,7 @@ module.exports = AppView = Backbone.View.extend({
     	event.preventDefault();
     	var plug = this.model;
     	plug.set({
-    		target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
+    		target: this.$el.find('input[name="targetURL"]').val()
     	});
 
     	plug.register(function(res) {
@@ -73,18 +51,6 @@ module.exports = AppView = Backbone.View.extend({
     	});
     },
 
-    unregisterDevice: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({
-    		target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
-    	});
-    	plug.unregister(function(res) {
-    		plug.set({status: res});
-    	});
-    },
 
     createDocs: function(event) {
     	event.preventDefault();

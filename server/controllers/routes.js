@@ -17,6 +17,6 @@ module.exports = {
   },
   'plug/register/:bool' : {
     post: plug.register
-  }
+  },
 };
 

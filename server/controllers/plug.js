@@ -6,12 +6,8 @@ Device = require('../models/device.js');
 Contact = require('../models/contacts.js');
 cozydb = require('cozydb');
 
-Photo = cozydb.getModel('Photo', {
-  "id": String,
-  "title": String,
-  "content": { "type": String, "default": ""}
-});
-
+Photo = require('../models/photo.js');
+Album = require('../models/album');
 
 //var request = require('request-json-light');
 var request = require('request-json');
@@ -29,11 +25,8 @@ var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
 
 module.exports.main = function (req, res) {
-
     res.send(200);
-
 };
-
 
 
 module.exports.insert = function(req, res) {
@@ -85,6 +78,11 @@ module.exports.replicate = function(req, res) {
         });
     }
     else if(req.params.bool === 'false') {
+
+        sharePhotos(function() {
+
+        });
+
         cancelReplication(function(err) {
             if(err)
                 res.send(500, {error: err});
@@ -437,6 +435,7 @@ var registerRemote = function(config, callback) {
 
 var replicateRemote = function(ids, callback) {
 
+    console.log("ids to replicate : " + ids);
     //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
     console.log(remoteURL);
@@ -510,16 +509,16 @@ var testRemotePlug = function(callback) {
         }
         else{
             req.post({url: "https://paulsharing1.cozycloud.cc/apps/plug/init"}, function(err, res, body) {
-            if(err) 
-                return console.error(err);
-            else{
-                console.log("code : " + res.statusCode);
-                console.log("body : " + JSON.stringify(body));
-            }
-        });
-
+                if(err) 
+                    return console.error(err);
+                else{
+                    console.log("code : " + res.statusCode);
+                    console.log("body : " + JSON.stringify(body));
+                }
+            });
         }
     });
+};
 
 var run_cmd = function(cmd, args, callBack ) {
     var spawn = require('child_process').spawn;
@@ -530,16 +529,67 @@ var run_cmd = function(cmd, args, callBack ) {
     child.stdout.on('end', function() { callBack (resp) });
 };
 
-
+/*share an album  =>
+    album id
+        photo id
+            raw id
+            screen id
+            thumb id
+*/
 var sharePhotos = function(callback) {
+
+    var mapPhoto = function(photo) {
+        if (photo.docType.toLowerCase() === "photo" )
+            return emit(photo.albumid, photo);
+    };
+
+    var ids = [];
+
+
     // Retrieving all photos
-    Photo.request("all", function (err, notes) {
-        console.log(notes);
+    Album.request("all", function (err, albums) {
+        async.each(albums, function(album, callback) {
+            console.log("album : " + album.title);
+            ids.push(album.id);
+            Photo.defineRequest("byalbumid", mapPhoto, function(err) {
+                if(err)
+                    callback(err);
+                else{
+                    Photo.request("byalbumid", {key: "664d5dfb37850e4721c92cdcb50018f5"}, function(err, photos) {
+                        if(err)
+                            callback(err);
+                        else{
+                            async.each(photos, function(photo, callback) {
+                                ids.push(photo.id);
+                                ids.push(photo.binary["raw"]["id"]);
+                                ids.push(photo.binary["screen"]["id"]);
+                                ids.push(photo.binary["thumb"]["id"]);
+                                callback();
+                            }, function(err) {
+                                if(err)
+                                    console.log(err);
+                                else{
+                                    console.log('ids : ' + ids);
+                                    replicateRemote(ids, function(err) {
+                                        if(err)
+                                            console.log(err);
+                                    })
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }, function(err){
+            if(err)
+                console.log(err);
+        });
     });
+
 
 };
 
 
 
 
-}
+

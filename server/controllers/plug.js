@@ -59,29 +59,38 @@ module.exports.replicate = function(req, res) {
     }
 
     console.log(req.params.bool);
+
     if(req.params.bool === 'true'){
         var repMode = req.body.repMode;
-    
+        var dataType = req.body.dataType;
         var getIdsMode;
-        if (repMode == "plug") 
-            getIdsMode = selectPlug;
-        else
-            getIdsMode = getIdsContacts; 
+        
+        if(dataType === "contact"){
+            if (repMode == "plug") 
+                getIdsMode = selectPlug;
+            else
+                getIdsMode = getIdsContacts; 
 
-        getIdsMode(function(ids) {
-            replicateRemote(ids, function(err) {
+            getIdsMode(function(ids) {
+                replicateRemote(ids, false, function(err) {
+                    if(err)
+                        res.send(500, {error: err});
+                    else
+                        res.send(200, req.body);
+                });
+            });
+        }
+        else if(dataType === "album"){
+            sharePhotos(function(err) {
                 if(err)
                     res.send(500, {error: err});
                 else
                     res.send(200, req.body);
             });
-        });
+        }
     }
+
     else if(req.params.bool === 'false') {
-
-        sharePhotos(function() {
-
-        });
 
         cancelReplication(function(err) {
             if(err)
@@ -433,7 +442,7 @@ var registerRemote = function(config, callback) {
       });
   };
 
-var replicateRemote = function(ids, callback) {
+var replicateRemote = function(ids, cancel, callback) {
 
     console.log("ids to replicate : " + ids);
     //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
@@ -443,7 +452,8 @@ var replicateRemote = function(ids, callback) {
         source: "cozy",
         target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
         continuous: true,
-        doc_ids: ids
+        doc_ids: ids,
+        cancel: cancel
     };
 
     var req = request_new.defaults({jar: true});
@@ -456,7 +466,7 @@ var replicateRemote = function(ids, callback) {
           req.post({url: "http://localhost:9104/_replicate", json:true, body: data}, function(err, res, body) {
                 if(res.statusCode == 302)
                     console.log("You are not authenticated"); 
-                else if(err || (res.statusCode != 202))
+                else if(err)  //|| (res.statusCode != 202))
                     console.log(err);
                 else{
                     console.log("code : " + res.statusCode);
@@ -570,10 +580,10 @@ var sharePhotos = function(callback) {
                                     console.log(err);
                                 else{
                                     console.log('ids : ' + ids);
-                                    replicateRemote(ids, function(err) {
+                                    replicateRemote(ids, false, function(err) {
                                         if(err)
                                             console.log(err);
-                                    })
+                                    });
                                 }
                             });
                         }

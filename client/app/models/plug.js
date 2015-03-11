@@ -5,7 +5,8 @@ module.exports = Plug = Backbone.Model.extend({
 		status: null,
         devicename: null,
         target: null,
-        password: null
+        password: null,
+        dataType: null
 	}, 
 
 
@@ -13,6 +14,9 @@ module.exports = Plug = Backbone.Model.extend({
 		$.ajax({
 	        url: 'plug/replicate/true',
 	        type: 'POST',
+	        data: {
+	        	dataType: this.get('dataType')
+	        },
 	        success:function(result){
 	        	callback("Sharing ok !");
 	        },

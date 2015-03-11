@@ -138,7 +138,8 @@ module.exports = Plug = Backbone.Model.extend({
 		status: null,
         devicename: null,
         target: null,
-        password: null
+        password: null,
+        dataType: null
 	}, 
 
 
@@ -146,6 +147,9 @@ module.exports = Plug = Backbone.Model.extend({
 		$.ajax({
 	        url: 'plug/replicate/true',
 	        type: 'POST',
+	        data: {
+	        	dataType: this.get('dataType')
+	        },
 	        success:function(result){
 	        	callback("Sharing ok !");
 	        },
@@ -245,7 +249,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><!--label Device name : --><!--input(type="text", name="devicename", size=10)--><!--label Password : --><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p>Share all my contacts ! <a href=""><img id="replicate" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><!--form--><!--	input(id="cancelReplication", type="submit", value="Cancel all replications")--><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><!--label Device name : --><!--input(type="text", name="devicename", size=10)--><!--label Password : --><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p>Share all my contacts ! <a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="60" width="60"/></a></p><p>Share all my photos ! <a href=""><img id="replicatePhotos" data-datatype="album" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
@@ -262,7 +266,8 @@ module.exports = AppView = Backbone.View.extend({
     events: {
     	"click #registerDevice" : "registerDevice",
     	"click #insertDocs": "createDocs",
-    	"click #replicate" :"replicate",
+    	"click #replicateContacts" :"replicate",
+    	"click #replicatePhotos" :"replicate",
     	"click #cancel": "cancelReplications"
 	},
 
@@ -280,6 +285,10 @@ module.exports = AppView = Backbone.View.extend({
     replicate: function(event) {
     	event.preventDefault();
     	var plug = this.model;
+        var dataType = $(event.currentTarget).data('datatype');
+    	plug.set({
+    		dataType: dataType
+    	});
     	plug.replicate(function(res) {
     		plug.set({status: res});
     	});

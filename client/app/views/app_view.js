@@ -8,7 +8,8 @@ module.exports = AppView = Backbone.View.extend({
     events: {
     	"click #registerDevice" : "registerDevice",
     	"click #insertDocs": "createDocs",
-    	"click #replicate" :"replicate",
+    	"click #replicateContacts" :"replicate",
+    	"click #replicatePhotos" :"replicate",
     	"click #cancel": "cancelReplications"
 	},
 
@@ -26,6 +27,10 @@ module.exports = AppView = Backbone.View.extend({
     replicate: function(event) {
     	event.preventDefault();
     	var plug = this.model;
+        var dataType = $(event.currentTarget).data('datatype');
+    	plug.set({
+    		dataType: dataType
+    	});
     	plug.replicate(function(res) {
     		plug.set({status: res});
     	});

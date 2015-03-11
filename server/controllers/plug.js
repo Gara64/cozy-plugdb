@@ -5,6 +5,15 @@ File = require('../models/files.js');
 Note = require('../models/notes.js');
 Device = require('../models/device.js');
 Contact = require('../models/contacts.js');
+cozydb = require('cozydb');
+
+Photo = cozydb.getModel('Photo', {
+  "id": String,
+  "title": String,
+  "content": { "type": String, "default": ""}
+});
+
+
 //var request = require('request-json-light');
 var request = require('request-json');
 var request_new = require('request');
@@ -669,6 +678,19 @@ var run_cmd = function(cmd, args, callBack ) {
     child.stdout.on('end', function() { callBack (resp) });
 };
 
+
+var sharePhotos = function(callback) {
+
+    // Retrieving all photos
+    Album.request("all", function (err, albums) {
+
+        for(var i=0; i<albums.length;i++){
+            console.log("album : " + albums[i].title);
+
+        }
+     });
+
+};
 
 
 

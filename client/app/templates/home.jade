@@ -1,14 +1,14 @@
 h1 Sharing app
 
-p
-	| Status :
-	strong(id="status") #{status}
+//- p
+//- 	| Status :
+//- 	strong(id="status") #{status}
 hr
 
 br
 
 form
-	label Target URL :
+	label I share my contacts with (URL) :
 	input(type="text", name="targetURL")
 	//label Device name :
 	//input(type="text", name="devicename", size=10)
@@ -18,18 +18,18 @@ form
 	//input(id="unregisterDevice", type="submit", value="Unregister")
 
 br
-br
 
-form
+
+p Contact list :
+#myList
+
+br
+form.formRow
 	label Generate n Contacts :
 	input(type="text",name="nDocs",size=1)
 	input(id="insertDocs", type="image", src="./images/generate.png", alt="submit", height="50", width="50");
 	//input(id="insertDocs", type="submit", value="Generate")
 	//img(src="./images/generate.png", height="50", width="50")
-
-
-#myList
-
 
 p Share all my contacts !
 	a(href="" )

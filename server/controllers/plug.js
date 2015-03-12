@@ -3,8 +3,9 @@ var log = require('printit')();
 File = require('../models/files.js');
 Note = require('../models/notes.js');
 Device = require('../models/device.js');
-Contact = require('../models/contacts.js');
+Contact = require('../models/contacts');
 cozydb = require('cozydb');
+
 
 Photo = require('../models/photo.js');
 Album = require('../models/album');
@@ -23,6 +24,8 @@ var remoteConfig = {
 
 var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
+var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
+var couchRemoteClient = request.newClient(couchUrlTarget);
 
 module.exports.main = function (req, res) {
     res.send(200);
@@ -88,7 +91,7 @@ module.exports.replicate = function(req, res) {
 
     else if(req.params.bool === 'false') {
 
-        cancelReplication(function(err) {
+        cancelReplication(true, function(err) {
             if(err)
                 res.send(500, {error: err});
             else
@@ -250,7 +253,8 @@ var getIdsContacts = function(callback) {
         else{
             var ids = [];
             for(var i=0;i<contacts.length;i++){
-                //TODO : wait for benjamin if(contacts[i].checked)
+                console.log("contact : " + contacts[i]);
+                if(contacts[i].shared)
                     ids.push(contacts[i].id);
             }
             callback(ids);
@@ -293,7 +297,7 @@ var deleteAllContacts = function(callback) {
 See replicateRemote instead */
 var replicateDocs = function(ids, callback) {
 
-    var couchUrlTarget = "http://192.168.50.5:5984/";
+    
     
 	var repSourceToTarget = { 
 		source: "cozy", 
@@ -330,46 +334,69 @@ var replicateDocs = function(ids, callback) {
 
 };
 
-var cancelReplication = function(callback) {
+var cancelReplication = function(twoWays, callback) {
  
-    var activeTasks = function(_callback) {
-        couchClient.get("_active_tasks", function(err, res, body){
-            var repIds;
-            if(err){
-                console.error('Cannot get active tasks');
-            }
-            else if(body.length) {
-                repIds = [];
-                for (var i=0;i<body.length; i++) {
-                    var rep = body[i];
-                    repIds.push(rep.replication_id);
-                }
-            }
-            _callback(err, repIds);
-            
-        });
-    };
+     var cancelCouchRep = function(client, ids, _callback) {
+        for(var i=0;i<ids.length;i++) {
 
-    activeTasks(function(err,repIds) {
+            client.post("_replicate", {replication_id: ids[i], cancel:true}, function(err, res, body){
+                if(err || !body.ok){
+                    console.log("Cancel replication failed");
+                    callback(err);
+                }
+                else{
+                    log.raw('Cancel replication ok');
+                    _callback();
+                }
+            });
+        }
+     };
+
+    getActiveTasks(couchClient, function(err, repIds) {
         if(err)
             callback(err);
         else if(repIds) {
-            for(var i=0;i<repIds.length;i++) {
+            cancelCouchRep(couchClient, repIds, function(err) {
+                callback(err);
+            });
+        }
+    });
 
-                couchClient.post("_replicate", {replication_id: repIds[i], cancel:true}, function(err, res, body){
-                    if(err || !body.ok){
-                        console.log("Cancel replication failed");
-                        callback(err);
-                    }
+  if(twoWays) {
+        getActiveTasks(couchRemoteClient, function(err, repIds) {
+            if(err)
+                console.log(err);
+            else if(repIds) {
+                cancelCouchRep(couchRemoteClient, repIds, function(err) {
+                    if(err)
+                        console.log(err);
                     else{
-                        log.raw('Cancel replication ok');
-                        callback();
+                        //callback();
                     }
                 });
             }
+        });
+    }
+};
+
+
+
+
+var getActiveTasks = function(client, callback) {
+    client.get("_active_tasks", function(err, res, body){
+        var repIds;
+        if(err){
+            console.error('Cannot get active tasks');
         }
-        else 
-            callback();
+        else if(body.length) {
+            repIds = [];
+            for (var i=0;i<body.length; i++) {
+                var rep = body[i];
+                repIds.push(rep.replication_id);
+            }
+        }
+        callback(err, repIds);
+        
     });
 };
 
@@ -547,7 +574,7 @@ var replicateWithProxy = function(data, target, password, callback) {
             });
         }
     });
-}
+};
 
 var checkCredentials = function(config, callback) {
     var remoteProxyClient = request.newClient("https://" + config.cozyURL);

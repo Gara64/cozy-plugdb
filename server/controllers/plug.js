@@ -61,18 +61,14 @@ module.exports.replicate = function(req, res) {
     console.log(req.params.bool);
 
     if(req.params.bool === 'true'){
-        var repMode = req.body.repMode;
+        
         var dataType = req.body.dataType;
         var getIdsMode;
         
         if(dataType === "contact"){
-            if (repMode == "plug") 
-                getIdsMode = selectPlug;
-            else
-                getIdsMode = getIdsContacts; 
-
-            getIdsMode(function(ids) {
-                replicateRemote(ids, false, function(err) {
+            getIdsContacts(function(ids) {
+                //replicateRemote(ids, false, function(err) {
+                 replicateDocs(ids, function(err) {
                     if(err)
                         res.send(500, {error: err});
                     else
@@ -254,7 +250,8 @@ var getIdsContacts = function(callback) {
         else{
             var ids = [];
             for(var i=0;i<contacts.length;i++){
-                ids.push(contacts[i].id);
+                //TODO : wait for benjamin if(contacts[i].checked)
+                    ids.push(contacts[i].id);
             }
             callback(ids);
         }
@@ -296,6 +293,7 @@ var deleteAllContacts = function(callback) {
 See replicateRemote instead */
 var replicateDocs = function(ids, callback) {
 
+    var couchUrlTarget = "http://192.168.50.5:5984/";
     
 	var repSourceToTarget = { 
 		source: "cozy", 
@@ -309,7 +307,6 @@ var replicateDocs = function(ids, callback) {
 		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy", 
 		target: "http://192.168.50.4:5984/cozy",
         continuous: true,
-        //cancel: true,
         doc_ids: ids
     };
     console.log("replication on ids " + ids);
@@ -319,7 +316,7 @@ var replicateDocs = function(ids, callback) {
 		else{
 			log.raw('Backup source suceeded \o/');
 			log.raw(body);
-            callback();
+            callback(err);
 		}
 	});
 	couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
@@ -447,8 +444,9 @@ var replicateRemote = function(ids, cancel, callback) {
     console.log("ids to replicate : " + ids);
     //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
+    var localURL = "http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104/cozy";
     console.log(remoteURL);
-    var data = { 
+    var sourceToTarget = { 
         source: "cozy",
         target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
         continuous: true,
@@ -456,14 +454,35 @@ var replicateRemote = function(ids, cancel, callback) {
         cancel: cancel
     };
 
+    var targetToSource = {
+        source: "http://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@localhost:5984/cozy",
+        target:  localURL, 
+        continuous: true,
+        doc_ids: ids
+    };
+
+    replicateWithProxy(sourceToTarget, "http://localhost:9104", "cozycloud", function(err) {
+        if(err)
+            console.log(err);
+        else{
+            replicateWithProxy(targetToSource, "https://paulsharing1.cozycloud.cc", "sharing1", function(err) {
+                if(err) 
+                    console.log(err);
+                else
+                    callback(err);
+            });
+        callback(err);
+        }
+    });
+/*
     var req = request_new.defaults({jar: true});
-    var remoteClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "cozycloud"}}, function(err, res, body) {
+    var localClient = req.post({url: "http://localhost:9104/login", qs: {username: "owner", password: "cozycloud"}}, function(err, res, body) {
         if(err) {
             return console.error(err);
         }
         else {
 
-          req.post({url: "http://localhost:9104/_replicate", json:true, body: data}, function(err, res, body) {
+            req.post({url: "http://localhost:9104/_replicate", json:true, body: sourceToTarget}, function(err, res, body) {
                 if(res.statusCode == 302)
                     console.log("You are not authenticated"); 
                 else if(err)  //|| (res.statusCode != 202))
@@ -475,9 +494,60 @@ var replicateRemote = function(ids, cancel, callback) {
                 callback(err);
             });
 
-}});
+        }
+    });
 
+    var remoteClient = req.post({url: "https://paulsharing1.cozycloud.cc/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
+        if(err) {
+            return console.error(err);
+        }
+        else {
+
+            req.post({url: "https://paulsharing1.cozycloud.cc/_replicate", json:true, body: targetToSource}, function(err, res, body) {
+                if(res.statusCode == 302)
+                    console.log("You are not authenticated"); 
+                else if(err)  //|| (res.statusCode != 202))
+                    console.log(err);
+                else{
+                    console.log("code : " + res.statusCode);
+                    console.log("body : " + JSON.stringify(body));
+                }
+                callback(err);
+            });
+
+        }
+    });*/
 };
+
+var replicateWithProxy = function(data, target, password, callback) {
+
+    var req = request_new.defaults({jar: true});
+    var loginURL = target + "/login";
+    var replicateURL = target + "/_replicate";
+
+    if(target.indexOf("paulsharing1") > -1)
+        replicateURL = "https://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@paulsharing1.cozycloud.cc/_replicate";
+
+    var localClient = req.post({url: loginURL, qs: {username: "owner", password: password}}, function(err, res, body) {
+        if(err) {
+            return console.error(err);
+        }
+        else {
+
+            req.post({url: replicateURL, json:true, body: data}, function(err, res, body) {
+                if(res.statusCode == 302)
+                    console.log("You are not authenticated"); 
+                else if(err)  //|| (res.statusCode != 202))
+                    console.log(err);
+                else{
+                    console.log("code : " + res.statusCode);
+                    console.log("body : " + JSON.stringify(body));
+                }
+                callback(err);
+            });
+        }
+    });
+}
 
 var checkCredentials = function(config, callback) {
     var remoteProxyClient = request.newClient("https://" + config.cozyURL);

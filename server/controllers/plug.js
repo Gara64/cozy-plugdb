@@ -357,7 +357,7 @@ var cancelReplication = function(twoWays, callback) {
             callback(err);
         else if(repIds) {
             cancelCouchRep(couchClient, repIds, function(err) {
-                callback(err);
+                //callback(err);
             });
         }
     });
@@ -371,7 +371,7 @@ var cancelReplication = function(twoWays, callback) {
                     if(err)
                         console.log(err);
                     else{
-                        //callback();
+                        callback();
                     }
                 });
             }

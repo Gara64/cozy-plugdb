@@ -5,27 +5,27 @@ module.exports = AppView = Backbone.View.extend(
     el: 'body'
     template: require('../templates/home')
     events:
-        'click #registerDevice': 'registerDevice'
-        'click #insertDocs': 'createDocs'
-        'click #replicateContacts': 'replicate'
-        'click #replicatePhotos': 'replicate'
-        'click #cancel': 'cancelReplications'
+        'click #registerDevice'    : 'registerDevice'
+        'click #insertDocs'        : 'createDocs'
+        'click #replicateContacts' : 'replicate'
+        'click #replicatePhotos'   : 'replicate'
+        'click #cancel'            : 'cancelReplications'
 
     render: ->
         model = @model
         @$el.html @template(status: model.get('status'))
 
-        # myCollection = new ContactCollection()
-        # myCollection.fetch()
+        myCollection = new ContactCollection()
+        myCollection.fetch(reset:true)
 
-        # realtimer = new ContactListener()
-        # realtimer.watch myCollection
+        realtimer = new ContactListener()
+        realtimer.watch myCollection
 
         # en supposant qu'il y ait un element d'id myList dans le html
 
-        # view = new ContactListView
-        #    el: '#myList'
-        #    collection: myCollection
+        view = new ContactListView
+           el         : '#myList'
+           collection : myCollection
 
         this
 
@@ -107,24 +107,49 @@ class ContactListener extends CozySocketListener
 
 class ContactListView extends Backbone.View
 
+    events :
+        "change" : "onChange"
+
+    onChange : (e) ->
+        console.log e.target
+        e.preventDefault()
+        model = @collection.get(e.target.id)
+        model.save({shared : !model.get('shared')}, {wait:true})
+
+
     initialize: ->
-        @listenTo @collection, @render
+        @listenTo @collection, 'change', @render
+        @listenTo @collection, 'add'   , @render
+        @listenTo @collection, 'remove', @render
+        @listenTo @collection, 'reset' , @render
 
     renderOne: (model) =>
+        console.log  model.get('shared')
+        checked = if model.get('shared') then "checked='checked'" else ''
         """
             <tr>
-                <td>#{model.get('name')}</td>
-                <td>#{model.get('notes')}</td>
-            <tr>
+                <td>#{model.get('id')}</td>
+                <td>#{model.get('fn')}</td>
+                <td><input type="checkbox" id="#{model.get('id')}" #{checked}></td>
+            </tr>
         """
 
     render: =>
-        html = '<table>'
+        html =
+        """
+            <table>
+            <tr>
+                <td>ID</td>
+                <td>First Name</td>
+                <td>Shared</td>
+            </tr>
+        """
         @collection.forEach (model) =>
             html += @renderOne model
 
         html += '</table>'
         @$el.html(html)
+
 
 
 

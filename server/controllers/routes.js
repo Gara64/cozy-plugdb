@@ -1,6 +1,7 @@
 // See documentation on https://github.com/frankrousseau/americano#routes
 
-var plug = require('./plug');
+var plug     = require('./plug');
+var contacts = require('./contacts');
 
 module.exports = {
   '': {
@@ -19,8 +20,11 @@ module.exports = {
     post: plug.register
   },
    'contacts': {
-    get: contact.list,
-    post: contact.create
+    get: contacts.list
+   },
+   'contacts/:id': {
+    get: contacts.get,
+    put: contacts.change
    }
 };
 

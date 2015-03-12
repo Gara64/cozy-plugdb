@@ -10,4 +10,4 @@ americano.start {name: 'plug', port: port}, (app, server) ->
     # start contact watch to upadte UI when new contact are added
     # or modified
     realtime = Realtimer server, ['contact.*']
-    callback? null, app, server
+    # callback? null, app, server

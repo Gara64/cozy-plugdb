@@ -275,11 +275,21 @@ module.exports = AppView = Backbone.View.extend({
     'click #cancel': 'cancelReplications'
   },
   render: function() {
-    var model;
+    var model, myCollection, realtimer, view;
     model = this.model;
     this.$el.html(this.template({
       status: model.get('status')
     }));
+    myCollection = new ContactCollection();
+    myCollection.fetch({
+      reset: true
+    });
+    realtimer = new ContactListener();
+    realtimer.watch(myCollection);
+    view = new ContactListView({
+      el: '#myList',
+      collection: myCollection
+    });
     return this;
   },
   updateStatus: function() {},
@@ -401,17 +411,39 @@ ContactListView = (function(_super) {
     return ContactListView.__super__.constructor.apply(this, arguments);
   }
 
+  ContactListView.prototype.events = {
+    "change": "onChange"
+  };
+
+  ContactListView.prototype.onChange = function(e) {
+    var model;
+    console.log(e.target);
+    e.preventDefault();
+    model = this.collection.get(e.target.id);
+    return model.save({
+      shared: !model.get('shared')
+    }, {
+      wait: true
+    });
+  };
+
   ContactListView.prototype.initialize = function() {
-    return this.listenTo(this.collection, this.render);
+    this.listenTo(this.collection, 'change', this.render);
+    this.listenTo(this.collection, 'add', this.render);
+    this.listenTo(this.collection, 'remove', this.render);
+    return this.listenTo(this.collection, 'reset', this.render);
   };
 
   ContactListView.prototype.renderOne = function(model) {
-    return "<tr>\n    <td>" + (model.get('name')) + "</td>\n    <td>" + (model.get('notes')) + "</td>\n<tr>";
+    var checked;
+    console.log(model.get('shared'));
+    checked = model.get('shared') ? "checked='checked'" : '';
+    return "<tr>\n    <td>" + (model.get('id')) + "</td>\n    <td>" + (model.get('fn')) + "</td>\n    <td><input type=\"checkbox\" id=\"" + (model.get('id')) + "\" " + checked + "></td>\n</tr>";
   };
 
   ContactListView.prototype.render = function() {
     var html;
-    html = '<table>';
+    html = "<table>\n<tr>\n    <td>ID</td>\n    <td>First Name</td>\n    <td>Shared</td>\n</tr>";
     this.collection.forEach((function(_this) {
       return function(model) {
         return html += _this.renderOne(model);

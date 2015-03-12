@@ -212,235 +212,255 @@ module.exports = Plug = Backbone.Model.extend({
 });
 
 require.register("router", function(exports, require, module) {
-var AppView = require('views/app_view');
-var PlugCollection = require('collections/plugs');
-var DeviceModel = require('models/device');
-var PlugModel = require('models/plug');
+var AppView, DeviceModel, PlugCollection, PlugModel, Router, device, plug, plugs;
 
-var plugs = new PlugCollection();
-var device = new DeviceModel();
-var plug = new PlugModel();
+AppView = require('views/app_view');
+
+PlugCollection = require('collections/plugs');
+
+DeviceModel = require('models/device');
+
+PlugModel = require('models/plug');
+
+plugs = new PlugCollection;
+
+device = new DeviceModel;
+
+plug = new PlugModel;
 
 module.exports = Router = Backbone.Router.extend({
-
-    routes: {
-        '': 'main',
-        'insert': 'insertPlug'
-    },
-
-    main: function() {
-        var mainView = new AppView({
-            //collection: plugs,
-            model: plug
-        });
-        mainView.render();
-    },
-
-    insertPlug: function() {
-    	//alert('toto');
-    }
+  routes: {
+    '': 'main',
+    'insert': 'insertPlug'
+  },
+  main: function() {
+    var mainView;
+    mainView = new AppView({
+      model: plug
+    });
+    mainView.render();
+  },
+  insertPlug: function() {}
+});
 });
 
-});
-
-require.register("templates/home", function(exports, require, module) {
+;require.register("templates/home", function(exports, require, module) {
 module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL : </label><input type="text" name="targetURL"/><!--label Device name : --><!--input(type="text", name="devicename", size=10)--><!--label Password : --><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p>Share all my contacts ! <a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="60" width="60"/></a></p><p>Share all my photos ! <a href=""><img id="replicatePhotos" data-datatype="album" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra : --><!--form--><!--	label Target URL : --><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications : <a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><ul></ul><li> <a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL :</label><input type="text" name="targetURL"/><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><div id="myList"></div><p>Share all my contacts !<a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="60" width="60"/></a></p><p>Share all my photos !<a href=""><img id="replicatePhotos" data-datatype="album" src="./images/share.jpg" height="60" width="60"/></a></p><br/><br/><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
 }
 return buf.join("");
 };
 });
 
 require.register("views/app_view", function(exports, require, module) {
-var Plug = require('../models/plug');
-//var Device = require('../models/device');
+var AppView, Contact, ContactCollection, ContactListView, ContactListener, Plug,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+Plug = require('../models/plug');
 
 module.exports = AppView = Backbone.View.extend({
-
-    el: 'body',
-    template: require('../templates/home'),
-    events: {
-    	"click #registerDevice" : "registerDevice",
-    	"click #insertDocs": "createDocs",
-    	"click #replicateContacts" :"replicate",
-    	"click #replicatePhotos" :"replicate",
-    	"click #cancel": "cancelReplications"
-	},
-
-    render: function() {
-    	var model = this.model;
-        this.$el.html(this.template({status:model.get('status')}));
-    	return this;
-    }, 
-
-    updateStatus: function() {
-    	//this.$el.find('')
-    },
-
-
-    replicate: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-        var dataType = $(event.currentTarget).data('datatype');
-    	plug.set({
-    		dataType: dataType
-    	});
-    	plug.replicate(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-    cancelReplications: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.cancelReplications(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-    registerDevice: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({
-    		target: this.$el.find('input[name="targetURL"]').val()
-    	});
-
-    	plug.register(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-
-    createDocs: function(event) {
-    	event.preventDefault();
-    	var plug = this.model;
-    	plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
-    	plug.generate(function(res) {
-    		plug.set({status: res});
-    	});
-    },
-
-/*
-    	event.preventDefault();
-    	var model = this.model;
-    	model.urlRoot = 'plug/replicate/true';
-    	model.save({}, {
-	    	success: function(model, response) {
-	    		_this.model.set({status: "Sharing ok !"});
-		        _this.render();
-	    	}, 
-	    	error: function(model, response) {
-	    		var rep = JSON.parse(response.responseText);
-	    		_this.model.set({status: rep.error});
-		        _this.render();
-	    	}
-	    });
-    },
-
-    cancelReplications: function(event) {
-    	event.preventDefault();
-    	var model = this.model;
-    	model.urlRoot = 'plug/replicate/false';
-    	model.save({}, {
-	    	success: function(model, response) {
-	    		_this.model.set({status: "Cancel replications ok"});
-		        _this.render();
-	    	}, 
-	    	error: function(model, response) {
-	    		var rep = JSON.parse(response.responseText);
-	    		_this.model.set({status: rep.error});
-		        _this.render();
-	    	}
-	    });
-    },
-
-	registerDevice: function(event) {
-		event.preventDefault();
-		_this = this;
-        var plug = new Plug({
-        	target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
-        })
-	    plug.urlRoot = 'plug/register/true';
-	    plug.save({}, {
-	    	success: function(model, response) {
-		        _this.model.set({status: "Device correctly registered"});
-		        _this.render();
-		    },
-		    error: function(model, response) {
-		    	var rep = JSON.parse(response.responseText);
-		        _this.model.set({status: rep.error});
-		        _this.render();
-		    }
-		});
-
-	}, 
-
-	unregisterDevice: function(event) {
-		event.preventDefault();
-		_this = this;
-        var plug = new Plug({
-        	target: this.$el.find('input[name="targetURL"]').val(), 
-	 		password: this.$el.find('input[name="pwd"]').val(),
-	 		devicename: this.$el.find('input[name="devicename"]').val()
-        })
-	    plug.urlRoot = 'plug/register/false';
-	    plug.save({}, {
-	    	success: function(model, response) {
-		        _this.model.set({status: "Device correctly unregistered"});
-		        _this.render();
-		    },
-		    error: function(model, response) {
-		        var rep = JSON.parse(response.responseText);
-		        _this.model.set({status: rep.error});
-		        _this.render();
-		    }
-		});
-	},
-
-    createDocs: function(event) {
-	    // submit button reload the page, we don't want that
-	   event.preventDefault();	
-	   _this = this;
-	    // create a new model
-	    var plug = this.model;
-        plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
-	    plug.urlRoot = 'plug/insert'; 
-
-	    // add it to the collection
-	   //his.collection.add(plug);
-
-	    plug.save({}, {
-		    success: function(model, response) {
-		        _this.model.set({status: "Insert " + plug.get('nDocs') + ' docs ok !'});
-		        _this.render();
-		    },
-		    error: function(model, response) {
-		        var rep = JSON.parse(response.responseText);
-		        _this.model.set({status: rep.error});
-		        _this.render();
-		    }
-		});
-	}, 
-*/
-	// initialize is automatically called once after the view is constructed
-	initialize: function() {
-	    //this.listenTo(this.collection, "insert", this.onInsertPlug);
-	    this.model.on('change:status', this.render, this);
-	},
-
-	onInsertPlug: function(model) {
-	    // re-render the view
-	    this.render();
-	}
+  el: 'body',
+  template: require('../templates/home'),
+  events: {
+    'click #registerDevice': 'registerDevice',
+    'click #insertDocs': 'createDocs',
+    'click #replicateContacts': 'replicate',
+    'click #replicatePhotos': 'replicate',
+    'click #cancel': 'cancelReplications'
+  },
+  render: function() {
+    var model, myCollection, realtimer, view;
+    model = this.model;
+    this.$el.html(this.template({
+      status: model.get('status')
+    }));
+    myCollection = new ContactCollection();
+    myCollection.fetch({
+      reset: true
+    });
+    realtimer = new ContactListener();
+    realtimer.watch(myCollection);
+    view = new ContactListView({
+      el: '#myList',
+      collection: myCollection
+    });
+    return this;
+  },
+  updateStatus: function() {},
+  replicate: function(event) {
+    var dataType, plug;
+    event.preventDefault();
+    plug = this.model;
+    dataType = $(event.currentTarget).data('datatype');
+    plug.set({
+      dataType: dataType
+    });
+    plug.replicate(function(res) {
+      plug.set({
+        status: res
+      });
+    });
+  },
+  cancelReplications: function(event) {
+    var plug;
+    event.preventDefault();
+    plug = this.model;
+    plug.cancelReplications(function(res) {
+      plug.set({
+        status: res
+      });
+    });
+  },
+  registerDevice: function(event) {
+    var plug;
+    event.preventDefault();
+    plug = this.model;
+    plug.set({
+      target: this.$el.find('input[name="targetURL"]').val()
+    });
+    plug.register(function(res) {
+      plug.set({
+        status: res
+      });
+    });
+  },
+  createDocs: function(event) {
+    var plug;
+    event.preventDefault();
+    plug = this.model;
+    plug.set({
+      nDocs: this.$el.find('input[name="nDocs"]').val()
+    });
+    plug.generate(function(res) {
+      plug.set({
+        status: res
+      });
+    });
+  },
+  initialize: function() {
+    this.model.on('change:status', this.render, this);
+  },
+  onInsertPlug: function(model) {
+    this.render();
+  }
 });
 
+Contact = (function(_super) {
+  __extends(Contact, _super);
+
+  function Contact() {
+    return Contact.__super__.constructor.apply(this, arguments);
+  }
+
+  return Contact;
+
+})(Backbone.Model);
+
+ContactCollection = (function(_super) {
+  __extends(ContactCollection, _super);
+
+  function ContactCollection() {
+    return ContactCollection.__super__.constructor.apply(this, arguments);
+  }
+
+  ContactCollection.prototype.model = Contact;
+
+  ContactCollection.prototype.url = 'contacts';
+
+  return ContactCollection;
+
+})(Backbone.Collection);
+
+ContactListener = (function(_super) {
+  __extends(ContactListener, _super);
+
+  function ContactListener() {
+    return ContactListener.__super__.constructor.apply(this, arguments);
+  }
+
+  ContactListener.prototype.models = {
+    'contact': Contact
+  };
+
+  ContactListener.prototype.events = ['contact.create', 'contact.update', 'contact.delete'];
+
+  ContactListener.prototype.onRemoteCreate = function(model) {
+    return this.collection.add(model);
+  };
+
+  ContactListener.prototype.onRemoteDelete = function(model) {
+    return this.collection.remove(model);
+  };
+
+  return ContactListener;
+
+})(CozySocketListener);
+
+ContactListView = (function(_super) {
+  __extends(ContactListView, _super);
+
+  function ContactListView() {
+    this.render = __bind(this.render, this);
+    this.renderOne = __bind(this.renderOne, this);
+    return ContactListView.__super__.constructor.apply(this, arguments);
+  }
+
+  ContactListView.prototype.events = {
+    "change": "onChange"
+  };
+
+  ContactListView.prototype.onChange = function(e) {
+    var model;
+    console.log(e.target);
+    e.preventDefault();
+    model = this.collection.get(e.target.id);
+    return model.save({
+      shared: !model.get('shared')
+    }, {
+      wait: true
+    });
+  };
+
+  ContactListView.prototype.initialize = function() {
+    this.listenTo(this.collection, 'change', this.render);
+    this.listenTo(this.collection, 'add', this.render);
+    this.listenTo(this.collection, 'remove', this.render);
+    return this.listenTo(this.collection, 'reset', this.render);
+  };
+
+  ContactListView.prototype.renderOne = function(model) {
+    var checked;
+    console.log(model.get('shared'));
+    checked = model.get('shared') ? "checked='checked'" : '';
+    return "<tr>\n    <td>" + (model.get('id')) + "</td>\n    <td>" + (model.get('fn')) + "</td>\n    <td><input type=\"checkbox\" id=\"" + (model.get('id')) + "\" " + checked + "></td>\n</tr>";
+  };
+
+  ContactListView.prototype.render = function() {
+    var html;
+    html = "<table>\n<tr>\n    <td>ID</td>\n    <td>First Name</td>\n    <td>Shared</td>\n</tr>";
+    this.collection.forEach((function(_this) {
+      return function(model) {
+        return html += _this.renderOne(model);
+      };
+    })(this));
+    html += '</table>';
+    return this.$el.html(html);
+  };
+
+  return ContactListView;
+
+})(Backbone.View);
 });
 
+;require.register("views/contact-list", function(exports, require, module) {
 
+});
+
+;
 //# sourceMappingURL=app.js.map

@@ -18,5 +18,9 @@ module.exports = {
   'plug/register/:bool' : {
     post: plug.register
   },
+   'contacts': {
+    get: contact.list,
+    post: contact.create
+   }
 };
 

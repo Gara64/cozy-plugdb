@@ -196,7 +196,7 @@ var createContacts = function(nContacts, baseName, callback) {
     for(var i=0;i<nContacts;i++) {
         var firstName = baseName + "_" + i
         var lastName = ""
-        var fullName = "contact " + i;
+        var fullName = "";//"contact " + i;
         var n = lastName + ";" + firstName + ";;;"
         var datapoint = new Array();
         Contact.create({fn: fullName, n:n, datapoints: datapoint, note:''}, function(err, contact) {

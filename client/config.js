@@ -17,9 +17,15 @@ exports.config = {
             }
         },
 
+        "stylesheets":{
+          "defaultExtension": "styl",
+          "joinTo":
+            {"stylesheets/app.css": /^(app|vendor)/}
+        },
+
         "templates": {
             "defaultExtension": 'jade',
             "joinTo": 'scripts/app.js'
         }
     }
-}
+};

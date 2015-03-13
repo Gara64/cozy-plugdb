@@ -63,7 +63,8 @@ module.exports = AppView = Backbone.View.extend(
     createDocs: (event) ->
         event.preventDefault()
         plug = @model
-        plug.set nDocs: @$el.find('input[name="nDocs"]').val()
+        plug.set nDocs   : @$el.find('input[name="nDocs"]').val()
+        plug.set baseName: @$el.find('input[name="baseName"]').val()
         plug.generate (res) ->
             plug.set status: res
             return
@@ -110,11 +111,29 @@ class ContactListView extends Backbone.View
     events :
         "change" : "onChange"
 
+
     onChange : (e) ->
         console.log e.target
         e.preventDefault()
-        model = @collection.get(e.target.id)
-        model.save({shared : !model.get('shared')}, {wait:true})
+        if e.target.type == "checkbox"
+            model = @collection.get(e.target.id)
+            model.save({shared : !model.get('shared')}, {wait:true})
+        else
+            @handleInputChange(e.target)
+
+
+    handleInputChange : (elt)->
+        console.log "handleInputChange !"
+        parent = elt.parentElement.parentElement
+        firstName = parent.children[1].children[0].value
+        lastName  = parent.children[2].children[0].value
+        note      = parent.children[3].children[0].value
+        data =
+            n    : lastName + ";" + firstName + ";;;"
+            fn   : firstName + " " + lastName
+            note : note
+        model = @collection.get(parent.id)
+        model.save(data, {wait:true})
 
 
     initialize: ->
@@ -122,15 +141,26 @@ class ContactListView extends Backbone.View
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
+        console.log @el
+        # @el.addEventListener('blur',@onBlur)
 
     renderOne: (model) =>
         console.log  model.get('shared')
         checked = if model.get('shared') then "checked='checked'" else ''
+        n = model.get('n')
+        if n
+            n = n.split(';')
+        else
+            n = [model.get('fn'),'']
+        console.log n
+        id = model.get('id')
         """
-            <tr>
-                <td>#{model.get('id')}</td>
-                <td>#{model.get('fn')}</td>
-                <td><input type="checkbox" id="#{model.get('id')}" #{checked}></td>
+            <tr class='contac-row' id=#{id}>
+                <td role="id">#{id}</td>
+                <td role="fn"><input value="#{n[1]}"></input></td>
+                <td role="ln"><input value="#{n[0]}"></input></td>
+                <td role="pn"><input value="#{model.get('note')}"></input></td>
+                <td><input type="checkbox" id="#{id}" #{checked}></td>
             </tr>
         """
 
@@ -138,11 +168,15 @@ class ContactListView extends Backbone.View
         html =
         """
             <table>
-            <tr>
+            <thead>
+            <tr class="titles">
                 <td>ID</td>
-                <td>First Name</td>
+                <td role="fn">First name</td>
+                <td role="ln">Last name</td>
+                <td role="pn">Note</td>
                 <td>Shared</td>
             </tr>
+            </thead>
         """
         @collection.forEach (model) =>
             html += @renderOne model

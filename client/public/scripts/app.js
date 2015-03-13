@@ -132,79 +132,81 @@ module.exports = Device = Backbone.Model.extend({
 
 require.register("models/plug", function(exports, require, module) {
 module.exports = Plug = Backbone.Model.extend({
-	urlRoot: 'plug',
-	defaults: {
-		nDocs: null,
-		status: null,
+    urlRoot: 'plug',
+    defaults: {
+        nDocs: null,
+        baseName:null,
+        status: null,
         devicename: null,
         target: null,
         password: null,
         dataType: null
-	}, 
+    },
 
 
-	replicate: function(callback) {
-		$.ajax({
-	        url: 'plug/replicate/true',
-	        type: 'POST',
-	        data: {
-	        	dataType: this.get('dataType')
-	        },
-	        success:function(result){
-	        	callback("Sharing ok !");
-	        },
-	        error: function(result, response) {
-	        	callback("Replication failed !");
-	        }
-	    });
-	},
+    replicate: function(callback) {
+        $.ajax({
+            url: 'plug/replicate/true',
+            type: 'POST',
+            data: {
+                dataType: this.get('dataType')
+            },
+            success:function(result){
+                callback("Sharing ok !");
+            },
+            error: function(result, response) {
+                callback("Replication failed !");
+            }
+        });
+    },
 
-	cancelReplications: function(callback) {
-		$.ajax({
-	        url: 'plug/replicate/false',
-	        type: 'POST',
-	        success:function(result){
-	        	callback("Cancel replication successful !");
-	        },
-	        error: function(result, response) {
-	        	callback("Cancel failed !");
-	        }
-	    });
-	},
+    cancelReplications: function(callback) {
+        $.ajax({
+            url: 'plug/replicate/false',
+            type: 'POST',
+            success:function(result){
+                callback("Cancel replication successful !");
+            },
+            error: function(result, response) {
+                callback("Cancel failed !");
+            }
+        });
+    },
 
-	register: function(callback) {
-		$.ajax({
-	        url: 'plug/register/true',
-	        type: 'POST',
-	        data: {
-	        	target: this.get('target')
-	        },
-	        success:function(result){
-	        	callback("Ready to share !");
-	        },
-	        error: function(result, response) {
-	        	callback("Not ready :/");
-	        }
-	    });
-	},
+    register: function(callback) {
+        $.ajax({
+            url: 'plug/register/true',
+            type: 'POST',
+            data: {
+                target: this.get('target')
+            },
+            success:function(result){
+                callback("Ready to share !");
+            },
+            error: function(result, response) {
+                callback("Not ready :/");
+            }
+        });
+    },
 
 
-	generate: function(callback) {
-		_this = this;
-		$.ajax({
-	        url: 'plug/insert',
-	        type: 'POST',
-	        data: {
-	        	nDocs: this.get('nDocs')
-	        },
-	        success:function(result){
-	        	callback("Insert " + _this.get('nDocs') + " docs ok !");
-	        },
-	        error: function(result, response) {
-	        	callback("Insertion failed !");
-	        }
-	    });
-	},
+    generate: function(callback) {
+        _this = this;
+        $.ajax({
+            url: 'plug/insert',
+            type: 'POST',
+            data: {
+                nDocs: this.get('nDocs'),
+                baseName: this.get('baseName')
+            },
+            success:function(result){
+                callback("Insert " + _this.get('nDocs') + " docs ok !");
+            },
+            error: function(result, response) {
+                callback("Insertion failed !");
+            }
+        });
+    },
 
 
 });
@@ -250,7 +252,11 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
+<<<<<<< HEAD
 buf.push('<h1>Sharing app</h1><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>Target URL :</label><input type="text" name="targetURL"/><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--><input id="registerDevice" type="submit" value="Register"/><!--input(id="unregisterDevice", type="submit", value="Unregister")--></form><br/><br/><form><label>Generate n Contacts :</label><input type="text" name="nDocs" size="1"/><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="50" width="50"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><div id="myList"></div><p>Share the selected contacts : <a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="60" width="60"/></a></p><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")--><!--br--><!--br--><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p>Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="50" width="50"/></a></p><ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>');
+=======
+buf.push('<h1>Sharing controle panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><form><label>1/ Share my contacts with (URL) :</label><input type="text" name="targetURL"/><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></form><br/><p>2/ Select shared contact</p><div id="myList"></div><p class="formRow">3/ Start sharing&nbsp;<a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="30" width="30"/></a></p><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li></div>');
+>>>>>>> cozy-sharing-fork/cozy-sharing
 }
 return buf.join("");
 };
@@ -337,6 +343,9 @@ module.exports = AppView = Backbone.View.extend({
     plug.set({
       nDocs: this.$el.find('input[name="nDocs"]').val()
     });
+    plug.set({
+      baseName: this.$el.find('input[name="baseName"]').val()
+    });
     plug.generate(function(res) {
       plug.set({
         status: res
@@ -419,10 +428,32 @@ ContactListView = (function(_super) {
     var model;
     console.log(e.target);
     e.preventDefault();
-    model = this.collection.get(e.target.id);
-    return model.save({
-      shared: !model.get('shared')
-    }, {
+    if (e.target.type === "checkbox") {
+      model = this.collection.get(e.target.id);
+      return model.save({
+        shared: !model.get('shared')
+      }, {
+        wait: true
+      });
+    } else {
+      return this.handleInputChange(e.target);
+    }
+  };
+
+  ContactListView.prototype.handleInputChange = function(elt) {
+    var data, firstName, lastName, model, note, parent;
+    console.log("handleInputChange !");
+    parent = elt.parentElement.parentElement;
+    firstName = parent.children[1].children[0].value;
+    lastName = parent.children[2].children[0].value;
+    note = parent.children[3].children[0].value;
+    data = {
+      n: lastName + ";" + firstName + ";;;",
+      fn: firstName + " " + lastName,
+      note: note
+    };
+    model = this.collection.get(parent.id);
+    return model.save(data, {
       wait: true
     });
   };
@@ -431,19 +462,28 @@ ContactListView = (function(_super) {
     this.listenTo(this.collection, 'change', this.render);
     this.listenTo(this.collection, 'add', this.render);
     this.listenTo(this.collection, 'remove', this.render);
-    return this.listenTo(this.collection, 'reset', this.render);
+    this.listenTo(this.collection, 'reset', this.render);
+    return console.log(this.el);
   };
 
   ContactListView.prototype.renderOne = function(model) {
-    var checked;
+    var checked, id, n;
     console.log(model.get('shared'));
     checked = model.get('shared') ? "checked='checked'" : '';
-    return "<tr>\n    <td>" + (model.get('id')) + "</td>\n    <td>" + (model.get('fn')) + "</td>\n    <td><input type=\"checkbox\" id=\"" + (model.get('id')) + "\" " + checked + "></td>\n</tr>";
+    n = model.get('n');
+    if (n) {
+      n = n.split(';');
+    } else {
+      n = [model.get('fn'), ''];
+    }
+    console.log(n);
+    id = model.get('id');
+    return "<tr class='contac-row' id=" + id + ">\n    <td role=\"id\">" + id + "</td>\n    <td role=\"fn\"><input value=\"" + n[1] + "\"></input></td>\n    <td role=\"ln\"><input value=\"" + n[0] + "\"></input></td>\n    <td role=\"pn\"><input value=\"" + (model.get('note')) + "\"></input></td>\n    <td><input type=\"checkbox\" id=\"" + id + "\" " + checked + "></td>\n</tr>";
   };
 
   ContactListView.prototype.render = function() {
     var html;
-    html = "<table>\n<tr>\n    <td>ID</td>\n    <td>First Name</td>\n    <td>Shared</td>\n</tr>";
+    html = "<table>\n<thead>\n<tr class=\"titles\">\n    <td>ID</td>\n    <td role=\"fn\">First name</td>\n    <td role=\"ln\">Last name</td>\n    <td role=\"pn\">Note</td>\n    <td>Shared</td>\n</tr>\n</thead>";
     this.collection.forEach((function(_this) {
       return function(model) {
         return html += _this.renderOne(model);

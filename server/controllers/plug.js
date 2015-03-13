@@ -37,10 +37,8 @@ module.exports.insert = function(req, res) {
     }
 
         var nDocs = req.body.nDocs;
-       // var nDocs = req.params.ndocs;
-        console.log("n contacts : " + nDocs);
         deleteAllContacts(function() {
-            createContacts(nDocs, function() {
+            createContacts(nDocs, req.body.baseName, function() {
                 msg = "generation done";
                 res.send(200, req.body);
             });
@@ -64,12 +62,12 @@ module.exports.replicate = function(req, res) {
         var repMode = req.body.repMode;
         var dataType = req.body.dataType;
         var getIdsMode;
-        
+
         if(dataType === "contact"){
-            if (repMode == "plug") 
+            if (repMode == "plug")
                 getIdsMode = selectPlug;
             else
-                getIdsMode = getIdsContacts; 
+                getIdsMode = getIdsContacts;
 
             getIdsMode(function(ids) {
                 replicateRemote(ids, false, function(err) {
@@ -102,7 +100,7 @@ module.exports.replicate = function(req, res) {
     else
         res.redirect('back');
 
-    
+
 
 };
 
@@ -148,8 +146,8 @@ module.exports.register = function(req, res) {
         console.log('replication ready !');
         Device = new Device({url: config.cozyURL, login: config.login, password: config.password });
         res.send(200, req.body);
-        
-    
+
+
     }
 
     else
@@ -184,10 +182,10 @@ var createNotes = function(nNotes, callback) {
 	    		console.error(err);
 	    	else{
 	    		log.raw('note created : ' + note.id);
-	        }	
+	        }
         });
     }
-    cback(nNotes); 
+    cback(nNotes);
     };
 
     create(nNotes, function() {
@@ -195,12 +193,14 @@ var createNotes = function(nNotes, callback) {
     });
 };
 
-var createContacts = function(nContacts, callback) {
+var createContacts = function(nContacts, baseName, callback) {
     for(var i=0;i<nContacts;i++) {
-        var contactName = "contact " + i;
+        var firstName = baseName + "_" + i
+        var lastName = ""
+        var fullName = "contact " + i;
+        var n = lastName + ";" + firstName + ";;;"
         var datapoint = new Array();
-
-        Contact.create({fn: contactName, datapoints: datapoint }, function(err, contact) {
+        Contact.create({fn: fullName, n:n, datapoints: datapoint, note:''}, function(err, contact) {
             if(err)
                 console.error(err);
             else{
@@ -292,21 +292,21 @@ var deleteAllContacts = function(callback) {
     });
 };
 
-/* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!! 
+/* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!!
 See replicateRemote instead */
 var replicateDocs = function(ids, callback) {
 
-    
-	var repSourceToTarget = { 
-		source: "cozy", 
+
+	var repSourceToTarget = {
+		source: "cozy",
 		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
         continuous: true,
         //cancel: true,
         doc_ids: ids
     };
     var couchTarget = request.newClient(couchUrlTarget);
-	var repTargetToSource = { 
-		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy", 
+	var repTargetToSource = {
+		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
 		target: "http://192.168.50.4:5984/cozy",
         continuous: true,
         //cancel: true,
@@ -334,7 +334,7 @@ var replicateDocs = function(ids, callback) {
 };
 
 var cancelReplication = function(callback) {
- 
+
     var activeTasks = function(_callback) {
         couchClient.get("_active_tasks", function(err, res, body){
             var repIds;
@@ -349,7 +349,7 @@ var cancelReplication = function(callback) {
                 }
             }
             _callback(err, repIds);
-            
+
         });
     };
 
@@ -371,7 +371,7 @@ var cancelReplication = function(callback) {
                 });
             }
         }
-        else 
+        else
             callback();
     });
 };
@@ -437,7 +437,7 @@ var registerRemote = function(config, callback) {
             //var fullURL = "https://" + config.cozyURL;
             Device = new Device({id:body.id, password: body.password, login: config.deviceName, url: config.cozyURL});
             callback();
-            
+
         }
       });
   };
@@ -448,9 +448,9 @@ var replicateRemote = function(ids, cancel, callback) {
     //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
     console.log(remoteURL);
-    var data = { 
+    var data = {
         source: "cozy",
-        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/", 
+        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/",
         continuous: true,
         doc_ids: ids,
         cancel: cancel
@@ -465,7 +465,7 @@ var replicateRemote = function(ids, cancel, callback) {
 
           req.post({url: "http://localhost:9104/_replicate", json:true, body: data}, function(err, res, body) {
                 if(res.statusCode == 302)
-                    console.log("You are not authenticated"); 
+                    console.log("You are not authenticated");
                 else if(err)  //|| (res.statusCode != 202))
                     console.log(err);
                 else{
@@ -511,7 +511,7 @@ var unregisterDevice = function (config, callback) {
 };
 
 var testRemotePlug = function(callback) {
-  
+
     var req = request_new.defaults({jar: true});
     var remoteClient = req.post({url: "https://paulsharing1.cozycloud.cc/login", qs: {username: "owner", password: "sharing1"}}, function(err, res, body) {
         if(err) {
@@ -519,7 +519,7 @@ var testRemotePlug = function(callback) {
         }
         else{
             req.post({url: "https://paulsharing1.cozycloud.cc/apps/plug/init"}, function(err, res, body) {
-                if(err) 
+                if(err)
                     return console.error(err);
                 else{
                     console.log("code : " + res.statusCode);

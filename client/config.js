@@ -18,7 +18,9 @@ exports.config = {
         },
 
         "stylesheets":{
-          "joinTo": {"stylesheets/app.css": "/^(app|vendor)/"}
+          "defaultExtension": "styl",
+          "joinTo":
+            {"stylesheets/app.css": /^(app|vendor)/}
         },
 
         "templates": {
@@ -26,4 +28,4 @@ exports.config = {
             "joinTo": 'scripts/app.js'
         }
     }
-}
+};

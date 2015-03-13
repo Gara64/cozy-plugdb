@@ -1,2 +1,48 @@
-.form
+@font-face
+  font-family: 'Source Code Pro'
+  font-style: normal
+  font-weight: 400
+  src: local('Source Code Pro'), local('SourceCodePro-Regular'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasD9V_2ngZ8dMf8fLgjYEouxg.woff2) format('woff2'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasDxM0YzuT7MdOe03otPbuUS0.woff) format('woff')
+
+body
+  font-family: 'Source Code Pro'
+
+
+.formRow
     display:flex
+    align-items:center
+
+#more-tools
+    display:none
+
+#toggle-more-tools:checked ~ #more-tools
+    display:block
+
+table
+    padding-left:15px
+
+.titles
+    height:40px
+
+td
+    padding-left:15px
+    padding-right:15px
+
+td input
+  border:0
+  font-family : 'Source Code Pro'
+  font-size   : 16px
+
+
+td input:focus
+  outline      :0
+  background-color:#96D7FF
+
+
+// to hide or show the id column
+// [role="id"]
+//   display:none
+
+// to hide or show the last name column
+[role="ln"]
+  display:none

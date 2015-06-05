@@ -692,8 +692,26 @@ var sharePhotos = function(callback) {
                 console.log(err);
         });
     });
+};
 
-
+var uploadFiles = function(file, callback) {
+    var req = request_new.defaults({jar: true});
+    var remoteClient = req.post({url: "https://paulsharing2.cozycloud.cc/login", qs: {username: "owner", password: "sharing2"}}, function(err, res, body) {
+        if(err) {
+            return console.error(err);
+        }
+        else {
+           // var data 
+            req.post({url: "https://paulsharing2.cozycloud.cc/apps/files/files", body: file}, function(err, res, body) {
+                if(err)
+                    return console.error(err);
+                else{
+                    console.log("code : " + res.statusCode);
+                    console.log("body : " + JSON.stringify(body));
+                }
+            });
+        }
+    });
 };
 
 

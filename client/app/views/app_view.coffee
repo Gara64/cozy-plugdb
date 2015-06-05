@@ -125,12 +125,12 @@ class ContactListView extends Backbone.View
     handleInputChange : (elt)->
         console.log "handleInputChange !"
         parent = elt.parentElement.parentElement
-        firstName = parent.children[1].children[0].value
-        lastName  = parent.children[2].children[0].value
-        note      = parent.children[3].children[0].value
+        firstName = parent.children[0].children[0].value
+        lastName  = parent.children[1].children[0].value
+        note      = parent.children[2].children[0].value
         data =
             n    : lastName + ";" + firstName + ";;;"
-            fn   : firstName + " " + lastName
+            fn   : firstName #+ " " + lastName
             note : note
         model = @collection.get(parent.id)
         model.save(data, {wait:true})
@@ -156,7 +156,7 @@ class ContactListView extends Backbone.View
         id = model.get('id')
         """
             <tr class='contac-row' id=#{id}>
-                <td role="id">#{id}</td>
+               <!-- <td role="id">#{id}</td> -->
                 <td role="fn"><input value="#{n[1]}"></input></td>
                 <td role="ln"><input value="#{n[0]}"></input></td>
                 <td role="pn"><input value="#{model.get('note')}"></input></td>
@@ -170,7 +170,7 @@ class ContactListView extends Backbone.View
             <table>
             <thead>
             <tr class="titles">
-                <td>ID</td>
+               <!-- <td>ID</td> -->
                 <td role="fn">First name</td>
                 <td role="ln">Last name</td>
                 <td role="pn">Note</td>

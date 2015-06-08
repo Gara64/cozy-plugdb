@@ -1,5 +1,6 @@
 var async = require('async');
 var log = require('printit')();
+var plug = require('../lib/plug.js');
 File = require('../models/files.js');
 Note = require('../models/notes.js');
 Device = require('../models/device.js');
@@ -14,7 +15,7 @@ Album = require('../models/album');
 var request = require('request-json');
 var request_new = require('request');
 var basic = require('../lib/basic.js');
-var init = false; //used to test plugDB connection
+var plugInit = false; //used to test plugDB connection
 
 var remoteConfig = {
     cozyURL: "192.168.50.5",
@@ -32,9 +33,101 @@ module.exports.main = function (req, res) {
 };
 
 
+module.exports.init = function(req, res) {
+    initPlug(req, res);
+};
+
+var initPlug = function(req, res, callback) {
+    var msg;
+    if(plugInit) {
+        msg = 'PlugDb already initialized';
+        console.log(msg);
+        res.send(500, {error: msg});
+    }
+    else {
+        plug.init( function(err) {
+            if(callback)
+                callback(err);
+            else if(err) {
+                console.log(err);
+                msg = "Init failed";
+                res.send(500, {error: msg});
+            }
+            else{
+                plugInit = true;
+                msg = "Init succeeded";
+                console.log(msg);
+                res.send(200, msg);
+            }
+        });
+    }
+};
+
+module.exports.close = function(req, res) {
+    closePlug(req, res);
+};
+
+var closePlug = function(req, res, callback) {
+    var msg; 
+    if(!plugInit){
+        msg = "PlugDB is not initialized";
+        console.log(msg);
+        res.send(500, {error: msg});
+    }
+    else {
+        plug.close( function(err) {
+            if(callback)
+                callback(err);
+            else if(err) {
+                msg = "Shutdown failed";
+                res.send(500, {error: msg});
+            }
+            else {
+                plugInit = false;
+                msg = "Closed correctly";
+                res.send(200, msg);
+            }
+        });
+    }
+};
+
+
+module.exports.reset = function(req, res) {
+    var msg;
+    var init = function(req, res) {
+        initPlug(req, res, function(err) {
+            if(err) {
+                msg = "Init failed";
+                res.send(500, {error: msg});
+            }
+            else {
+                plugInit = true;
+                msg = "Reset ok";
+                res.send(200, msg);
+            }
+        });
+    };
+
+    if(plugInit) {
+        closePlug(req, res, function(err) {
+            if(err) {
+                msg = "Reset failed";
+                res.send(500, {error: msg});
+            }
+            else {
+                plugInit = false;
+                init(req, res);
+            }
+        });
+    }
+    else 
+        init(req, res);
+    
+};
+
 module.exports.insert = function(req, res) {
     var msg;
-    if(!init){
+    if(!plugInit){
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
     }
@@ -53,7 +146,7 @@ module.exports.insert = function(req, res) {
 module.exports.replicate = function(req, res) {
 
     var msg;
-    if(!init){
+    if(!plugInit){
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
         //res.redirect('back');
@@ -104,7 +197,7 @@ module.exports.replicate = function(req, res) {
 };
 
 module.exports.register = function(req, res) {
-    if(!init){
+    if(!plugInit){
         console.log("PlugDB is not initialized");
         //res.redirect('back');
     }
@@ -152,7 +245,41 @@ module.exports.register = function(req, res) {
     else
         res.redirect('back');
 
-}
+};
+
+module.exports.authFP = function(req, res) {
+
+     if(!plugInit){
+        initPlug(req, res, function(err) {
+            if(err)
+                res.send(500, {error: err});
+            else {
+                plug.authFP(function(err, authID) {
+                    auth(err, res, authID);
+                });
+            }
+        });
+     }
+     else {
+        plug.authFP(function(err, authID) {
+             auth(err, res, authID);
+        });
+     }
+};
+
+var auth = function(err, res, authID) {
+    if(err || authID === undefined || authID < 0) {
+        console.log("err : " + err + " - authID : " + authID);
+        msg = "Authentication failed";
+        res.send(500, {error: msg});
+    }
+    else {
+        console.log("authID : " + authID);
+        plugInit = true;
+        msg = "Authentication succeeded";
+        res.send(200, msg);
+    }
+};
 
 
 

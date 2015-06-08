@@ -7,9 +7,9 @@ module.exports = Plug = Backbone.Model.extend({
         devicename: null,
         target: null,
         password: null,
-        dataType: null
+        dataType: null, 
+        auth: false
     },
-
 
     replicate: function(callback) {
         $.ajax({
@@ -71,6 +71,63 @@ module.exports = Plug = Backbone.Model.extend({
             },
             error: function(result, response) {
                 callback("Insertion failed !");
+            }
+        });
+    },
+
+    init: function(callback) {
+        $.ajax({
+            url: 'plug/init',
+            type: 'POST',
+            success:function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
+            }
+        });
+    },
+
+    close: function(callback) {
+        $.ajax({
+            url: 'plug/close',
+            type: 'POST',
+            success:function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
+            }
+        });
+    },
+
+    reset: function(callback) {
+        $.ajax({
+            url: 'plug/reset',
+            type: 'POST',
+            success:function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
+            }
+        });
+    },
+
+    authenticateFP: function(callback) {
+        _this = this;
+        $.ajax({
+            url: 'plug/authFP', 
+            type: 'POST',
+            success: function(result){
+                callback(result, true);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
             }
         });
     },

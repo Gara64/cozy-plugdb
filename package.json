@@ -22,7 +22,8 @@
     "request": "^2.53.0",
     "request-json": "^0.5.0",
     "request-json-light": "^0.5.12",
-    "tough-cookie": "^0.12.1"
+    "tough-cookie": "^0.12.1",
+    "java": "0.4.6"
   },
   "engines": [
     "node = 0.10.x"

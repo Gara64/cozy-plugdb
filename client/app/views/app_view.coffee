@@ -10,10 +10,16 @@ module.exports = AppView = Backbone.View.extend(
         'click #replicateContacts' : 'replicate'
         'click #replicatePhotos'   : 'replicate'
         'click #cancel'            : 'cancelReplications'
+        'click #authenticate'      : 'authenticateFP'
+        'click #init'              : 'initPlug'
+        'click #close'             : 'closePlug'
+        'click #reset'             : 'resetPlug'
 
     render: ->
         model = @model
         @$el.html @template(status: model.get('status'))
+        isAuth = model.get('auth')
+        $('#myList').css('display', if isAuth then 'block' else 'none')
 
         myCollection = new ContactCollection()
         myCollection.fetch(reset:true)
@@ -70,10 +76,49 @@ module.exports = AppView = Backbone.View.extend(
             return
         return
 
+    initPlug: (event) ->
+        event.preventDefault()
+        plug = @model
+        plug.set status: 'Initialization...'
+        plug.init (res) ->
+            plug.set status: res
+            return
+        return
+
+    closePlug: (event) ->
+        event.preventDefault()
+        plug = @model
+        plug.set status: 'Shut down...'
+        plug.close (res) ->
+            plug.set status: res
+            plug.set auth: false
+            return
+        return
+
+    resetPlug: (event) ->
+        event.preventDefault()
+        plug = @model
+        plug.set status: 'Restart plugDB...'
+        plug.reset (res) ->
+            plug.set status: res
+            return
+        return
+
+    authenticateFP: (event) ->
+        event.preventDefault()
+        plug = @model
+        plug.set status: 'Authentication...'
+        plug.authenticateFP (res, authenticated) ->
+            plug.set status: res
+            plug.set auth: authenticated
+            return
+        return
+
     # initialize is automatically called once after the view is constructed
     initialize: ->
         #this.listenTo(this.collection, "insert", this.onInsertPlug);
         @model.on 'change:status', @render, this
+        @model.on 'change:auth', @render, this
         return
 
     onInsertPlug: (model) ->
@@ -145,14 +190,14 @@ class ContactListView extends Backbone.View
         # @el.addEventListener('blur',@onBlur)
 
     renderOne: (model) =>
-        console.log  model.get('shared')
+        #console.log  model.get('shared')
         checked = if model.get('shared') then "checked='checked'" else ''
         n = model.get('n')
         if n
             n = n.split(';')
         else
             n = [model.get('fn'),'']
-        console.log n
+        #console.log n
         id = model.get('id')
         """
             <tr class='contac-row' id=#{id}>

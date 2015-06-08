@@ -5,9 +5,12 @@ p
 	strong(id="status") #{status}
 hr
 br
-form
-	label 1/ Share my contacts with (URL) :
-	input(type="text", name="targetURL")
+
+p.formRow 1/ Authenticate on your PlugDB&nbsp;
+	a(href="")
+		img(id="authenticate", src="./images/authenticate.png", height="30", width="30")
+
+
 	//label Device name :
 	//input(type="text", name="devicename", size=10)
 	//label Password :
@@ -15,24 +18,22 @@ form
 	//- input(id="registerDevice", type="submit", value="Register")
 	//- //input(id="unregisterDevice", type="submit", value="Unregister")
 
-br
+//span Show contacts
+//input#show-list(type='checkbox')
 
 
 p 2/ Select shared contact
 #myList
 
+br
+form
+	label 3/ Share my contacts with (URL) :
+	input(type="text", name="targetURL")
 
-//p Share the selected contacts : 
-//	a(href="" )
-//		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")
-
-//p Share all my photos !
-//	a(href="" )
-//		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")
-
-p.formRow 3/ Start sharing&nbsp;
+p.formRow 4/ Start sharing&nbsp;
 	a(href="" )
 		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="30", width="30")
+
 
 hr
 br
@@ -52,6 +53,18 @@ br
 		//img(src="./images/generate.png", height="50", width="50")
 
 
+
+	p.formRow Cancel all current replications :
+		a(href="")
+			img(id="cancel", src="./images/cancel.png", height="25", width="25")
+
+
+	p.formRow Plug functions : 
+		input(type="submit", id="init", value="Init")
+		input(type="submit", id="close", value="Close")
+		input(type="submit", id="reset", value="Reset")
+
+
 	//- p Share all my photos !
 	//- 	a(href="" )
 	//- 		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")
@@ -64,12 +77,13 @@ br
 	//	input(id="registerDevice", type="submit", value="Unregister device")
 	//
 
-	p.formRow Cancel all current replications :
-		a(href="")
-			img(id="cancel", src="./images/cancel.png", height="25", width="25")
+//p Share the selected contacts : 
+//	a(href="" )
+//		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")
 
-
-
+//p Share all my photos !
+//	a(href="" )
+//		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")
 
 	ul
 	li

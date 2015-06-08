@@ -25,6 +25,18 @@ module.exports = {
    'contacts/:id': {
     get: contacts.get,
     put: contacts.change
-   }
+   },
+   'plug/init' : {
+      post: plug.init
+  },
+   'plug/close' : {
+      post: plug.close
+  },
+  'plug/reset' : {
+    post: plug.reset
+  },
+  'plug/authFP' : {
+    post: plug.authFP
+  },
 };
 

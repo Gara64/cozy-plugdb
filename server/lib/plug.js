@@ -12,7 +12,9 @@ var init = function (callback){
 
 //insert docids and associated rules
 var insert = function(ids, callback){
-	plug.plugInsert(ids, function(err) {
+	//The js Object needs to be converted into a java String array
+	var array = java.newArray("java.lang.String", ids);
+	plug.plugInsert(array, function(err) {
 		callback(err);
 	});
 };
@@ -37,6 +39,7 @@ var authFP = function(callback){
 		callback(err, authID);
 	});
 };
+
 
 
 /*

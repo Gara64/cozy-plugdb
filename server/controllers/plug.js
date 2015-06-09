@@ -1,21 +1,17 @@
 var async = require('async');
 var log = require('printit')();
 var plug = require('../lib/plug.js');
-File = require('../models/files.js');
-Note = require('../models/notes.js');
 Device = require('../models/device.js');
 Contact = require('../models/contacts');
 cozydb = require('cozydb');
 
-
-Photo = require('../models/photo.js');
-Album = require('../models/album');
 
 //var request = require('request-json-light');
 var request = require('request-json');
 var request_new = require('request');
 var basic = require('../lib/basic.js');
 var plugInit = false; //used to test plugDB connection
+var plugAuth = false; //used to check if authenticated
 
 var remoteConfig = {
     cozyURL: "192.168.50.5",
@@ -42,7 +38,7 @@ var initPlug = function(req, res, callback) {
     if(plugInit) {
         msg = 'PlugDb already initialized';
         console.log(msg);
-        res.send(500, {error: msg});
+        res.send(200, msg);
     }
     else {
         plug.init( function(err) {
@@ -71,8 +67,7 @@ var closePlug = function(req, res, callback) {
     var msg; 
     if(!plugInit){
         msg = "PlugDB is not initialized";
-        console.log(msg);
-        res.send(500, {error: msg});
+        res.send(200, msg);
     }
     else {
         plug.close( function(err) {
@@ -84,6 +79,7 @@ var closePlug = function(req, res, callback) {
             }
             else {
                 plugInit = false;
+                plugAuth = false;
                 msg = "Closed correctly";
                 res.send(200, msg);
             }
@@ -102,6 +98,7 @@ module.exports.reset = function(req, res) {
             }
             else {
                 plugInit = true;
+                plugAuth = false;
                 msg = "Reset ok";
                 res.send(200, msg);
             }
@@ -116,6 +113,7 @@ module.exports.reset = function(req, res) {
             }
             else {
                 plugInit = false;
+                plugAuth = false;
                 init(req, res);
             }
         });
@@ -130,16 +128,38 @@ module.exports.insert = function(req, res) {
     if(!plugInit){
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
+        res.send(500, {error: msg});
     }
-
+    else {
         var nDocs = req.body.nDocs;
-        deleteAllContacts(function() {
-            createContacts(nDocs, req.body.baseName, function() {
-                msg = "generation done";
-                res.send(200, req.body);
-            });
-        });
 
+        //synchronous execution, to pass an array to the plugdb insert function
+        async.waterfall([
+            function(callback) {
+                deleteAllContacts(function() {
+                    callback();
+                });
+            },
+            function(callback) {
+                createContacts(nDocs, req.body.baseName, function(ids) {
+                    callback(null, ids);
+                });
+            },
+            function(ids, callback) {
+                plug.insert(ids, function(err) {
+                    if(err) {
+                        console.log(err);
+                        msg = "Insertion failed";
+                        res.send(500, {error: msg});
+                    }
+                    else {
+                        msg = nDocs + " docs generated and ids inserted in PlugDB";
+                        res.send(200, msg);
+                    }
+                });
+            }
+        ]);
+    }
 };
 
 
@@ -252,8 +272,9 @@ module.exports.authFP = function(req, res) {
      if(!plugInit){
         initPlug(req, res, function(err) {
             if(err)
-                res.send(500, {error: err});
+                res.send(500, {error: err}); //TODO ; handle init with auth failed
             else {
+                plugInit = true;
                 plug.authFP(function(err, authID) {
                     auth(err, res, authID);
                 });
@@ -271,104 +292,28 @@ var auth = function(err, res, authID) {
     if(err || authID === undefined || authID < 0) {
         console.log("err : " + err + " - authID : " + authID);
         msg = "Authentication failed";
+        plugAuth = false;
         res.send(500, {error: msg});
     }
     else {
         console.log("authID : " + authID);
         plugInit = true;
+        plugAuth = true;
         msg = "Authentication succeeded";
         res.send(200, msg);
     }
 };
 
 
-
-
-var createFiles = function(nDocs) {
-	for(var i=0;i<nDocs;i++){
-		var docName = "gen_doc_" + i;
-		File.create({"name":"test", "content":"doc"}, function(err, file) {
-			if(err)
-	    		console.error(err);
-	    	else
-	    		log.raw('file created : ' + file.id);
-		});
-	}
-};
-
-var createNotes = function(nNotes, callback) {
-	var create = function(nNotes,cback) {
-    for(var i=0;i<nNotes;i++){
-		var noteName = "gen_note_" + i;
-        var contentText = "coucou " + i;
-        var path = [];
-        path.push(noteName);
-		Note.create({title:noteName, parent_id:'tree-node-all', version:1, content:contentText}, function(err, note) {
-			if(err)
-	    		console.error(err);
-	    	else{
-	    		log.raw('note created : ' + note.id);
-	        }
-        });
-    }
-    cback(nNotes);
+module.exports.status = function(req, res) {
+    var status = {
+        init: plugInit,
+        auth: plugAuth
     };
-
-    create(nNotes, function() {
-        callback();
-    });
-};
-
-var createContacts = function(nContacts, baseName, callback) {
-    for(var i=0;i<nContacts;i++) {
-        var firstName = baseName + "_" + i
-        var lastName = ""
-        var fullName = "";//"contact " + i;
-        var n = lastName + ";" + firstName + ";;;"
-        var datapoint = new Array();
-        Contact.create({fn: fullName, n:n, datapoints: datapoint, note:''}, function(err, contact) {
-            if(err)
-                console.error(err);
-            else{
-                log.raw('contact created : ' + contact.id);
-            }
-        });
-    }
-    callback();
+    res.send(200, status);
 };
 
 
-var getFiles = function(callback, target) {
-	// Getting request results
-	File.request("all", function (err, files) {
-		if(err)
-			console.error(err);
-		else{
-			var ids = [];
-		    for(var i=0;i<files.length;i++){
-		    	ids.push(files[i].id);
-		    }
-	   		callback(ids, target);
-	   	}
-	});
-};
-
-var getIdsNotes = function(callback) {
-	// Getting request results
-	Note.request("all", function (err, files) {
-		if(err){
-			console.error(err);
-            return;
-		}
-        else{
-			var ids = [];
-		    for(var i=0;i<files.length;i++){
-		    	ids.push(files[i].id);
-		    }
-	   	    callback(ids);
-        }
-	});
-};
 
 var getIdsContacts = function(callback) {
     // Getting request results
@@ -390,25 +335,6 @@ var getIdsContacts = function(callback) {
 };
 
 
-var deleteAllFiles = function(callback, nDocs) {
-	File.requestDestroy("all", function(err) {
-		if(err)
-    		log.raw(err);
-    	else
-    		log.raw("all files deleted");
-    	callback(nDocs);
-	});
-};
-
-var deleteAllNotes = function( callback) {
-	Note.requestDestroy("all", function(err) {
-		if(err)
-    		log.raw(err);
-    	else
-    		log.raw("all notes deleted");
-    	callback();
-	});
-};
 
 var deleteAllContacts = function(callback) {
     Contact.requestDestroy("all", function(err) {
@@ -419,6 +345,36 @@ var deleteAllContacts = function(callback) {
         callback();
     });
 };
+
+var createContacts = function(nDocs, baseName, callback) {
+    var ids = [];
+    var cpt = 0;
+    for(var i=0; i<nDocs; i++) {
+        createCozyContact(baseName, function(id) {
+            ids.push(id);
+            cpt++;
+            console.log('id' + id + ' in array - cpt = ' + cpt + ' (ndocs = ' + nDocs);
+            if(cpt == nDocs ){
+                console.log('done');
+                callback(ids);
+            }
+        });
+    }
+};
+
+var createCozyContact = function(baseName, callback) {
+    var datapoint = new Array();
+    Contact.create({fn: baseName, datapoints: datapoint }, function(err, contact) {
+        if(err)
+            console.error(err);
+
+        else{
+            log.raw('contact created : ' + contact.id);
+            callback(contact.id);
+        }
+    });
+};
+
 
 /* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!!
 See replicateRemote instead */

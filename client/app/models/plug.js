@@ -8,7 +8,9 @@ module.exports = Plug = Backbone.Model.extend({
         target: null,
         password: null,
         dataType: null, 
-        auth: false
+        auth: false, 
+        init: false,
+        ids: null
     },
 
     replicate: function(callback) {
@@ -60,17 +62,18 @@ module.exports = Plug = Backbone.Model.extend({
     generate: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/insert',
+            url: 'plug/generate',
             type: 'POST',
             data: {
                 nDocs: this.get('nDocs'),
                 baseName: this.get('baseName')
             },
             success:function(result){
-                callback("Insert " + _this.get('nDocs') + " docs ok !");
+                callback(result);
             },
             error: function(result, response) {
-                callback("Insertion failed !");
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
             }
         });
     },
@@ -80,7 +83,7 @@ module.exports = Plug = Backbone.Model.extend({
             url: 'plug/init',
             type: 'POST',
             success:function(result){
-                callback(result);
+                callback(result, true);
             },
             error: function(result, response) {
                 var txt = JSON.parse(result.responseText);
@@ -94,7 +97,7 @@ module.exports = Plug = Backbone.Model.extend({
             url: 'plug/close',
             type: 'POST',
             success:function(result){
-                callback(result);
+                callback(result, true);
             },
             error: function(result, response) {
                 var txt = JSON.parse(result.responseText);
@@ -108,7 +111,7 @@ module.exports = Plug = Backbone.Model.extend({
             url: 'plug/reset',
             type: 'POST',
             success:function(result){
-                callback(result);
+                callback(result, true);
             },
             error: function(result, response) {
                 var txt = JSON.parse(result.responseText);
@@ -131,6 +134,51 @@ module.exports = Plug = Backbone.Model.extend({
             }
         });
     },
+
+    select: function(callback) {
+        _this = this;
+        $.ajax({
+            url: 'plug/select', 
+            type: 'GET',
+            success: function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error);
+            }
+        });
+    }, 
+
+    insert: function(callback) {
+        _this = this;
+        $.ajax({
+            url: 'plug/insert/:id', 
+            type: 'GET',
+            success: function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error);
+            }
+        });
+    }, 
+
+    status: function(callback) {
+        _this = this;
+        $.ajax({
+            url: 'plug/status', 
+            type: 'GET',
+            success: function(result){
+                callback(result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error);
+            }
+        });
+    }
 
 
 });

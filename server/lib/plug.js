@@ -5,8 +5,25 @@ var plug = java.newInstanceSync('org.cozy.plug.Plug');
 
 //initialize PlugDB
 var init = function (callback){
+
+	// Setup the timeout handler
+var timeoutProtect = setTimeout(function() {
+  // Clear the local timer variable, indicating the timeout has been triggered.
+  timeoutProtect = null;
+  // Execute the callback with an error argument.
+  callback({error:'plugdb timed out'});
+
+}, 5000);
+
 	plug.plugInit('/dev/ttyACM0', function(err) {
-		callback(err);
+		// Proceed only if the timeout handler has not yet fired.
+		  if (timeoutProtect) {
+		    // Clear the scheduled timeout handler
+		    clearTimeout(timeoutProtect);
+		    // Run the real callback.
+		    callback(err);
+		  }
+		//callback(err);
 	});
 };
 
@@ -39,6 +56,8 @@ var authFP = function(callback){
 		callback(err, authID);
 	});
 };
+
+
 
 
 

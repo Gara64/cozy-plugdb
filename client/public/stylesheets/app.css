@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Source Code Pro'), local('SourceCodePro-Regular'), url("http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasD9V_2ngZ8dMf8fLgjYEouxg.woff2") format('woff2'), url("http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasDxM0YzuT7MdOe03otPbuUS0.woff") format('woff');
+}
+body {
+  font-family: 'Source Code Pro';
+}
+#sharingBlock {
+  border: 2px groove #000;
+  display: inline-block;
+}
+#plugBlock {
+  border: 4px solid #f00;
+  display: inline-block;
+  margin-left: 150px;
+}
+.formRow {
+  display: flex;
+  align-items: center;
+}
+#more-tools {
+  display: none;
+}
+#toggle-more-tools:checked ~ #more-tools {
+  display: block;
+}
+#myList {
+  display: none;
+}
+table {
+  padding-left: 15px;
+  border: 2px groove #000;
+}
+.titles {
+  height: 35px;
+}
+td {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+td input {
+  border: 0;
+  font-family: 'Source Code Pro';
+  font-size: 16px;
+}
+td input:focus {
+  outline: 0;
+  background-color: #96d7ff;
+  border: 1px dotted #000;
+}
+
+
+/*# sourceMappingURL=app.css.map*/

@@ -11,12 +11,19 @@ body {
   border: 2px groove #000;
   display: inline-block;
 }
+#imgplug {
+  z-index: 0;
+}
+#imglock {
+  z-index: 1;
+}
 #plugBlock {
   border: 4px solid #f00;
   display: inline-block;
   margin-right: 150px;
   margin-left: 20px;
 }
+#,
 .formRow {
   display: flex;
   align-items: center;

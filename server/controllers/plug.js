@@ -169,20 +169,22 @@ module.exports.replicate = function(req, res) {
     if(!plugInit){
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
-        //res.redirect('back');
+        res.send(500, {error: msg});
     }
 
     console.log(req.params.bool);
 
+    //create replication request
     if(req.params.bool === 'true'){
         
         var dataType = req.body.dataType;
+        var target = req.body.target;
         var getIdsMode;
 
         if(dataType === "contact"){
             getIdsContacts(function(ids) {
                 //replicateRemote(ids, false, function(err) {
-                 replicateDocs(ids, function(err) {
+                 replicateDocs(target, ids, function(err) {
                     if(err)
                         res.send(500, {error: err});
                     else
@@ -200,6 +202,7 @@ module.exports.replicate = function(req, res) {
         }
     }
 
+    //cancel replication request
     else if(req.params.bool === 'false') {
 
         cancelReplication(true, function(err) {
@@ -378,7 +381,7 @@ var createCozyContact = function(baseName, callback) {
 
 /* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!!
 See replicateRemote instead */
-var replicateDocs = function(ids, callback) {
+var replicateDocs = function(target, ids, callback) {
 
     
 	var repSourceToTarget = { 

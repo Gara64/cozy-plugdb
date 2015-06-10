@@ -78,7 +78,16 @@ module.exports = AppView = Backbone.View.extend(
         event.preventDefault()
         plug = @model
         dataType = $(event.currentTarget).data('datatype')
+        target = @$el.find('input[name="targetURL"]').val()
+        if target is ''
+            alert 'Please type the target URL'
+            return
+        if not plug.get 'auth'
+            alert 'Please authenticate first'
+            return
+        
         plug.set dataType: dataType
+        plug.set target: target
         plug.replicate (res) ->
             plug.set status: res
             return

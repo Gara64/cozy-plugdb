@@ -7,7 +7,8 @@ hr
 br
 
 #plugBlock
-	img(id="plug", src="./images/plugdb.png")
+	img(id="imgplugdb", class="superpose", src="./images/plugdb.png")
+	img(id="imglock", class="superpose", src="./images/lock.png", height="50", width="50")
 	br
 	a(href="")
 		input(type="button", id="init", value="Init")
@@ -37,7 +38,7 @@ br
 	br
 	form
 		label 3/ Share my contacts with (URL) :
-		input(type="text", name="targetURL")
+		input(id="targetURL", type="text", name="targetURL")
 
 	p.formRow 4/ Start sharing&nbsp;
 		a(href="" )

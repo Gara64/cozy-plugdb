@@ -151,7 +151,8 @@ module.exports = Plug = Backbone.Model.extend({
             url: 'plug/replicate/true',
             type: 'POST',
             data: {
-                dataType: this.get('dataType')
+                dataType: this.get('dataType'),
+                target: this.get('target')
             },
             success:function(result){
                 callback("Sharing ok !");
@@ -357,7 +358,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="plug" src="./images/plugdb.png"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form><label>3/ Share my contacts with (URL) :</label><input type="text" name="targetURL"/></form><p class="formRow">4/ Start sharing&nbsp;<a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="30" width="30"/></a></p></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts : --><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
+buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="imgplugdb" src="./images/plugdb.png" class="superpose"/><img id="imglock" src="./images/lock.png" height="50" width="50" class="superpose"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form><label>3/ Share my contacts with (URL) :</label><input id="targetURL" type="text" name="targetURL"/></form><p class="formRow">4/ Start sharing&nbsp;<a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="30" width="30"/></a></p></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts : --><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
 }
 return buf.join("");
 };
@@ -442,12 +443,24 @@ module.exports = AppView = Backbone.View.extend({
     });
   },
   replicate: function(event) {
-    var dataType, plug;
+    var dataType, plug, target;
     event.preventDefault();
     plug = this.model;
     dataType = $(event.currentTarget).data('datatype');
+    target = this.$el.find('input[name="targetURL"]').val();
+    if (target === '') {
+      alert('Please type the target URL');
+      return;
+    }
+    if (!plug.get('auth')) {
+      alert('Please authenticate first');
+      return;
+    }
     plug.set({
       dataType: dataType
+    });
+    plug.set({
+      target: target
     });
     plug.replicate(function(res) {
       plug.set({

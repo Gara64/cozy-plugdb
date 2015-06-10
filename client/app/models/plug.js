@@ -18,7 +18,8 @@ module.exports = Plug = Backbone.Model.extend({
             url: 'plug/replicate/true',
             type: 'POST',
             data: {
-                dataType: this.get('dataType')
+                dataType: this.get('dataType'),
+                target: this.get('target')
             },
             success:function(result){
                 callback("Sharing ok !");

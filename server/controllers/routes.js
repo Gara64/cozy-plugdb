@@ -9,8 +9,11 @@ module.exports = {
   },
 
   'plug/generate' : {
-      post: plug.insert,
-      put: plug.insert
+      post: plug.generate,
+      put: plug.generate
+  },
+  'plug/insert' : {
+      post: plug.insert
   },
   'plug/select': {
       //get: plug.select

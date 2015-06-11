@@ -21,8 +21,10 @@ var remoteConfig = {
 
 var couchUrl = "http://192.168.50.4:5984/";
 var couchClient = request.newClient(couchUrl);
-var couchUrlTarget = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
-var couchRemoteClient = request.newClient(couchUrlTarget);
+
+var targetURL;
+var couchTarget;
+
 
 module.exports.main = function (req, res) {
     res.send(200);
@@ -123,11 +125,15 @@ module.exports.reset = function(req, res) {
     
 };
 
-module.exports.insert = function(req, res) {
+module.exports.generate = function(req, res) {
     var msg;
     if(!plugInit){
         console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
+        res.send(500, {error: msg});
+    }
+    else if(!plugAuth) {
+        msg = "Not authenticated";
         res.send(500, {error: msg});
     }
     else {
@@ -162,13 +168,43 @@ module.exports.insert = function(req, res) {
     }
 };
 
+module.exports.insert = function(req, res) {
+    var msg;
+    if(!plugInit){
+        msg = "PlugDB not initialized :/";
+        res.send(500, {error: msg});
+    }
+    else if(!plugAuth) {
+        msg = "Not authenticated";
+        res.send(500, {error: msg});
+    }
+    else {
+        var baseName = req.body.baseName;
+        createCozyContact(baseName, function(id) {
+            plug.insert(id.split(), function(err) {
+                if(err) {
+                    console.log(err);
+                    msg = "Insertion failed";
+                    res.send(500, {error: msg});
+                }
+                else {
+                    msg = baseName + ' has been added and the id inserted in PlugDB';
+                    res.send(200, msg);
+                }
+            });
+        });
+    }
+};
 
 module.exports.replicate = function(req, res) {
 
     var msg;
     if(!plugInit){
-        console.log("PlugDB not initialized");
         msg = "PlugDB not initialized :/";
+        res.send(500, {error: msg});
+    }
+    else if(!plugAuth) {
+        msg = "Not authenticated";
         res.send(500, {error: msg});
     }
 
@@ -369,7 +405,7 @@ var createCozyContact = function(baseName, callback) {
     var datapoint = new Array();
     Contact.create({fn: baseName, datapoints: datapoint }, function(err, contact) {
         if(err)
-            console.error(err);
+            callback(err);
 
         else{
             log.raw('contact created : ' + contact.id);
@@ -383,39 +419,57 @@ var createCozyContact = function(baseName, callback) {
 See replicateRemote instead */
 var replicateDocs = function(target, ids, callback) {
 
-    
+    var source;
+    if(targetURL === "192.168.50.5") {
+        source = "http://192.168.50.4:5984/cozy";
+        targetURL = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
+    }
+    else{
+        source = "http://192.168.0.1:5985/cozy";
+        targetURL = "http://" + target + ":5984/cozy";
+    }
+
 	var repSourceToTarget = { 
 		source: "cozy", 
-		target: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
+		target: targetURL,
         continuous: true,
         //cancel: true,
         doc_ids: ids
     };
-    var couchTarget = request.newClient(couchUrlTarget);
+    couchTarget = request.newClient(targetURL);
 	var repTargetToSource = {
-		source: "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy",
-		target: "http://192.168.50.4:5984/cozy",
+		source: "cozy",
+		target: "http://192.168.0.1:5985/cozy",
         continuous: true,
         doc_ids: ids
     };
     console.log("replication on ids " + ids);
 	couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
-		if(err || !body.ok)
-			handleError(err, body, "Backup source failed ");
+        //err is sometimes empty, even if it has failed
+		if(err || !body.ok){
+            log.raw(body);
+			console.log("Replication from source failed");
+            callback("Replication from source failed"); 
+        }
 		else{
-			log.raw('Backup source suceeded \o/');
+			log.raw('Replication from source suceeded \o/');
 			log.raw(body);
-            callback(err);
+            couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
+                if(err || !body.ok){
+                    log.raw(body);
+                    console.log("Replication from target failed");
+                    callback("Replication from target failed"); 
+
+                }
+                else{
+                    log.raw('Replication from target suceeded \o/');
+                    log.raw(body);
+                    callback(err);
+                }
+            });
 		}
 	});
-	couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
-		if(err || !body.ok)
-			handleError(err, body, "Backup target failed ");
-		else{
-			log.raw('Backup target suceeded \o/');
-			log.raw(body);
-		}
-	});
+	
 
 };
 
@@ -448,19 +502,20 @@ var cancelReplication = function(twoWays, callback) {
     });
 
   if(twoWays) {
-        getActiveTasks(couchRemoteClient, function(err, repIds) {
-            if(err)
-                console.log(err);
-            else if(repIds) {
-                cancelCouchRep(couchRemoteClient, repIds, function(err) {
-                    if(err)
-                        console.log(err);
-                    else{
-                        callback();
-                    }
-                });
-            }
-        });
+        if(couchTarget != null) {
+            getActiveTasks(couchTarget, function(err, repIds) {
+                if(err)
+                    callback(err);
+                else if(repIds) {
+                    cancelCouchRep(couchTarget, repIds, function(err) {
+                        callback(err);
+                    });
+                }
+            });
+        }
+        else {
+            callback('No target defined');
+        }
     }
 };
 

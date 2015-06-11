@@ -154,8 +154,11 @@ module.exports = Plug = Backbone.Model.extend({
     insert: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/insert/:id', 
-            type: 'GET',
+            url: 'plug/insert', 
+            type: 'POST',
+            data: {
+                baseName: this.get('baseName')
+            },
             success: function(result){
                 callback(result);
             },

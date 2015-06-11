@@ -14,6 +14,7 @@ module.exports = AppView = Backbone.View.extend(
         'click #init'              : 'initPlug'
         'click #close'             : 'closePlug'
         'click #reset'             : 'resetPlug'
+        'click #insertSingleDoc'   : 'insertSingleDoc'
 
 
 
@@ -155,7 +156,7 @@ module.exports = AppView = Backbone.View.extend(
 
     authenticateFP: (event) ->
         event.preventDefault()
-        _this = this;
+        _this = this
         plug = @model
         plug.set status: 'Authentication...'
         plug.authenticateFP (res, authenticated) ->
@@ -168,6 +169,18 @@ module.exports = AppView = Backbone.View.extend(
                 plug.set init: true
             return
         return
+
+    insertSingleDoc: (event) ->
+        event.preventDefault()
+        _this = this
+        plug = @model
+        plug.set baseName: @$el.find('input[name="singleBaseName"]').val()
+        plug.set status: 'Insertion of a new contact...'
+        plug.insert (res) ->
+            plug.set status: res
+            return
+        return
+
 
     # initialize is automatically called once after the view is constructed
     initialize: ->

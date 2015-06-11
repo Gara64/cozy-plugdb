@@ -13,7 +13,7 @@ var timeoutProtect = setTimeout(function() {
   // Execute the callback with an error argument.
   callback({error:'plugdb timed out'});
 
-}, 5000);
+}, 20000);
 
 	plug.plugInit('/dev/ttyACM0', function(err) {
 		// Proceed only if the timeout handler has not yet fired.

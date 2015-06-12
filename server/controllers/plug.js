@@ -425,7 +425,7 @@ var replicateDocs = function(target, ids, callback) {
         targetURL = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
     }
     else if(target === "192.168.0.1") {
-        source = "http://192.168.0.2:5985/cozy";
+        source = "http://192.168.0.2:5984/cozy";
         targetURL = "http://192.168.0.1:5985/cozy";
     }
     else if(target === "192.168.0.2") {

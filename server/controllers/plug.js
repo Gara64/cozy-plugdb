@@ -420,11 +420,15 @@ See replicateRemote instead */
 var replicateDocs = function(target, ids, callback) {
 
     var source;
-    if(targetURL === "192.168.50.5") {
+    if(target === "192.168.50.5") {
         source = "http://192.168.50.4:5984/cozy";
         targetURL = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
     }
-    else{
+    else if(target === "192.168.0.1" {
+        source = "http://192.168.0.2:5985/cozy";
+        targetURL = "http://192.168.0.1:5985/cozy";
+    }
+    else if(target === "192.168.0.2" {
         source = "http://192.168.0.1:5985/cozy";
         targetURL = "http://" + target + ":5984/cozy";
     }
@@ -439,7 +443,7 @@ var replicateDocs = function(target, ids, callback) {
     couchTarget = request.newClient(targetURL);
 	var repTargetToSource = {
 		source: "cozy",
-		target: "http://192.168.0.1:5985/cozy",
+		target: targetURL,
         continuous: true,
         doc_ids: ids
     };

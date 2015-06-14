@@ -443,7 +443,7 @@ var replicateDocs = function(target, ids, callback) {
     couchTarget = request.newClient(targetURL);
 	var repTargetToSource = {
 		source: "cozy",
-		target: targetURL,
+		target: source,
         continuous: true,
         doc_ids: ids
     };

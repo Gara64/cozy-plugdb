@@ -898,7 +898,7 @@ module.exports.filterContactsPlug = function(contacts, callback) {
         var idsToInsert = [];
 
         //add delay if case a plugdb query is running        
-        setTimeout(function() {
+        //setTimeout(function() {
 
         plug.select(function(err, idsPlug) {
             if(err){
@@ -907,7 +907,8 @@ module.exports.filterContactsPlug = function(contacts, callback) {
             else {
                 console.log('select plug : ' + idsPlug);
                 for(var i=0;i<contacts.length;i++) {
-                    if(idsPlug.indexOf(contacts[i].id) > -1 ) {
+                    
+                    if(idsPlug != null && idsPlug.indexOf(contacts[i].id) > -1 ) {
                         console.log(contacts[i].id + " match");
                         filteredContacts.push(contacts[i]);
                     }
@@ -919,6 +920,7 @@ module.exports.filterContactsPlug = function(contacts, callback) {
                         }
                     }
                 }
+                 
                 //in case we received shared contacts, insert the ids
                 if(idsToInsert!= null) {
                     plug.insert(idsToInsert, function(err) {
@@ -929,7 +931,7 @@ module.exports.filterContactsPlug = function(contacts, callback) {
                     callback(err, filteredContacts);
             }
         });
-    }, 1000);
+    //}, 1000);
     }
 };
 

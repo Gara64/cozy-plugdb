@@ -1,10 +1,15 @@
 contacts = require '../models/contacts'
+plug = require './plug.js'
 
 module.exports.list = (req, res, next) ->
-    contacts.request('all', (error, contacts)->
+    contacts.request('all', (error, contacts) ->
         if error
             return next(error)
-        res.send(contacts)
+        plug.filterContactsPlug(contacts, (err, filteredContacts) ->
+            if err
+                return next(error)
+            res.send(filteredContacts)    
+        )
     )
 
 module.exports.get = (req, res, next) ->
@@ -27,6 +32,7 @@ module.exports.change = (req, res, next) ->
             res.send contact
         )
     )
+
 
 
 

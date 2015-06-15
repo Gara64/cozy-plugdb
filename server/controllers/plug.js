@@ -4,6 +4,7 @@ var plug = require('../lib/plug.js');
 Device = require('../models/device.js');
 Contact = require('../models/contacts');
 cozydb = require('cozydb');
+var contacts = require('../models/contacts');
 
 
 //var request = require('request-json-light');
@@ -66,17 +67,20 @@ module.exports.close = function(req, res) {
 };
 
 var closePlug = function(req, res, callback) {
+
     var msg; 
     if(!plugInit){
         msg = "PlugDB is not initialized";
         res.send(200, msg);
     }
     else {
+        plugInit = false; //immediatly set at false to avoid request during the shutdown
         plug.close( function(err) {
             if(callback)
                 callback(err);
             else if(err) {
                 msg = "Shutdown failed";
+                plugInit = true;
                 res.send(500, {error: msg});
             }
             else {
@@ -96,6 +100,7 @@ module.exports.reset = function(req, res) {
         initPlug(req, res, function(err) {
             if(err) {
                 msg = "Init failed";
+                plugInit = true;
                 res.send(500, {error: msg});
             }
             else {
@@ -196,6 +201,30 @@ module.exports.insert = function(req, res) {
     }
 };
 
+module.exports.select = function(req, res) {
+    var msg;
+    if(!plugInit){
+        msg = "PlugDB not initialized :/";
+        res.send(500, {error: msg});
+    }
+    else if(!plugAuth) {
+        msg = "Not authenticated";
+        res.send(500, {error: msg});
+    }
+    else {
+        plug.select( function(err, ids) {
+            if(err){
+                msg = "Selection failed";
+                res.send(500, {error: msg});
+            }
+            else {
+                console.log("ids : " + ids);
+                res.send(200, ids.toString());
+            }
+        });
+    }
+};
+
 module.exports.replicate = function(req, res) {
 
     var msg;
@@ -245,7 +274,7 @@ module.exports.replicate = function(req, res) {
             if(err)
                 res.send(500, {error: err});
             else
-                res.send(200, req.body);
+                res.send(200, "Replication successfully cancelled");
         });
     }
     else
@@ -859,6 +888,50 @@ var uploadFiles = function(file, callback) {
     });
 };
 
+//get the ids present in contacts and plug
+module.exports.filterContactsPlug = function(contacts, callback) {
+    if(!plugInit) {
+        callback("plugdb not initialized");
+    }
+    else {
+        var filteredContacts = [];
+        var idsToInsert = [];
+
+        //add delay if case a plugdb query is running        
+        setTimeout(function() {
+
+        plug.select(function(err, idsPlug) {
+            if(err){
+                callback(err);
+            }
+            else {
+                console.log('select plug : ' + idsPlug);
+                for(var i=0;i<contacts.length;i++) {
+                    if(idsPlug.indexOf(contacts[i].id) > -1 ) {
+                        console.log(contacts[i].id + " match");
+                        filteredContacts.push(contacts[i]);
+                    }
+                    else {
+                        console.log(contacts[i].id + " does not match");
+                        if(contacts[i].shared) {
+                            console.log(contacts[i].id + ' is a shared contact, insert the id');
+                            idsToInsert.push(contacts[i].id);
+                        }
+                    }
+                }
+                //in case we received shared contacts, insert the ids
+                if(idsToInsert!= null) {
+                    plug.insert(idsToInsert, function(err) {
+                        callback(err, filteredContacts);
+                    });
+                }
+                else
+                    callback(err, filteredContacts);
+            }
+        });
+    }, 1000);
+    }
+};
 
 
 

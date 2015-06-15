@@ -745,7 +745,7 @@ ContactListView = (function(_super) {
 
   ContactListView.prototype.render = function() {
     var html;
-    html = "<table>\n<thead>\n<tr class=\"titles\">\n   <!-- <td>ID</td> -->\n    <td role=\"fn\">First name</td>\n    <td role=\"ln\">Last name</td>\n    <td role=\"pn\">Note</td>\n    <td>Shared</td>\n</tr>\n</thead>";
+    html = "<table>\n<thead>\n<tr class=\"titles\">\n   <!-- <td>ID</td> -->\n    <td role=\"ln\">Last name</td>\n    <td role=\"fn\">First name</td>\n    <td role=\"pn\">Note</td>\n    <td>Shared</td>\n</tr>\n</thead>";
     this.collection.forEach((function(_this) {
       return function(model) {
         return html += _this.renderOne(model);

@@ -288,8 +288,8 @@ class ContactListView extends Backbone.View
             <thead>
             <tr class="titles">
                <!-- <td>ID</td> -->
-                <td role="fn">First name</td>
                 <td role="ln">Last name</td>
+                <td role="fn">First name</td>
                 <td role="pn">Note</td>
                 <td>Shared</td>
             </tr>

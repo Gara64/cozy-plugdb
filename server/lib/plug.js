@@ -7,23 +7,16 @@ var plug = java.newInstanceSync('org.cozy.plug.Plug');
 var init = function (callback){
 
 	// Setup the timeout handler
-var timeoutProtect = setTimeout(function() {
-  // Clear the local timer variable, indicating the timeout has been triggered.
-  timeoutProtect = null;
-  // Execute the callback with an error argument.
-  callback({error:'plugdb timed out'});
-
-}, 20000);
+	var timeoutProtect = setTimeout(function() {
+	  timeoutProtect = null;
+	  callback({error:'PlugDB timed out'});
+	}, 20000);
 
 	plug.plugInit('/dev/ttyACM0', function(err) {
-		// Proceed only if the timeout handler has not yet fired.
 		  if (timeoutProtect) {
-		    // Clear the scheduled timeout handler
 		    clearTimeout(timeoutProtect);
-		    // Run the real callback.
 		    callback(err);
 		  }
-		//callback(err);
 	});
 };
 
@@ -56,45 +49,6 @@ var authFP = function(callback){
 		callback(err, authID);
 	});
 };
-
-
-
-
-
-/*
-REMOVE IT?
-function insertPlug(ids, callback){
-
-	plug.plugInsert(ids, function(err, result){
-		if(err) { console.error(err); return; }
-		else{
-			callback();
-		}
-	});
-};
-
-
-var convert = function(ids, insertPlug, callback){
-	var ArrayList = java.import('java.util.ArrayList');
-	var list = new ArrayList();
-	for(var i=0;i<ids.length;i++)
-		list.add(ids[i]);
-	insertPlug(list, callback);
-}
-
-var insert = function(ids, callback){
-	convert(ids, insertPlug, callback);
-}
-
-var getIds = function(){
-	plug.couchDocs( function(err, result) {
-		if(err) { console.error(err); return; }
-		else
-			insertPlug(result);
-		});
-	};
-*/
-
 
 
 exports.init = init;

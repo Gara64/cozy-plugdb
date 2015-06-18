@@ -1,5 +1,5 @@
 contacts = require '../models/contacts'
-plug = require './plug.js'
+request = require 'request-json'
 
 module.exports.list = (req, res, next) ->
     contacts.request('all', (error, contacts) ->
@@ -35,7 +35,60 @@ module.exports.change = (req, res, next) ->
 
 
 
+###
+var getIdsContacts = function(callback) {
+    // Getting request results
+    Contact.request("all", function (err, contacts) {
+        if(err){
+            console.error(err);
+            return;
+        }
+        else{
+            var ids = [];
+            for(var i=0;i<contacts.length;i++){
+                console.log("contact : " + contacts[i]);
+                if(contacts[i].shared)
+                    ids.push(contacts[i].id);
+            }
+            callback(ids);
+        }
+    });
+};
+###
 
 
 
 
+
+###  function(nDocs, baseName, callback) {
+    var ids = [];
+    var cpt = 0;
+    for(var i=0; i<nDocs; i++) {
+        createCozyContact(baseName, function(id) {
+            ids.push(id);
+            cpt++;
+            console.log('id' + id + ' in array - cpt = ' + cpt + ' (ndocs = ' + nDocs);
+            if(cpt == nDocs ){
+                console.log('done');
+                callback(ids);
+            }
+        });
+    }
+    };
+    
+
+
+
+var createCozyContact = function(baseName, callback) {
+    var datapoint = new Array();
+    Contact.create({fn: baseName, datapoints: datapoint }, function(err, contact) {
+        if(err)
+            callback(err);
+
+        else{
+            log.raw('contact created : ' + contact.id);
+            callback(contact.id);
+        }
+    });
+    };
+    ###

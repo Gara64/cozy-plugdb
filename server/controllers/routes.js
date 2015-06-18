@@ -2,6 +2,7 @@
 
 var plug     = require('./plug');
 var contacts = require('./contacts');
+var sharing = require('./sharing');
 
 module.exports = {
   '': {
@@ -16,13 +17,13 @@ module.exports = {
       post: plug.insert
   },
   'plug/select': {
-      //get: plug.select
+      get: plug.select
   },
   'plug/replicate/:bool' : {
-      post: plug.replicate
+      post: sharing.replicate
   },
   'plug/register/:bool' : {
-      post: plug.register
+      post: sharing.register
   },
    'contacts': {
       get: contacts.list

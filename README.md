@@ -1,7 +1,7 @@
 # cozy-sharing
 Cozy app to share documents with others cozies protected by PlugDB
 
-*Warning : for demo use only*
+**Warning : for demo use only**
 
 ##Prerequisite : 
 * 2 Cozy instances with admin party mode on the CouchDB (no authentication).

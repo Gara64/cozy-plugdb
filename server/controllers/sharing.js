@@ -2,7 +2,11 @@ Contact = require('../models/contacts');
 Device = require('../models/device.js');
 var request_new = require('request');
 var request = require('request-json');
-Sharing = require('../models/sharing.js');
+var log = require('printit')();
+Sharing = require('../models/sharing');
+
+var couchClient = Sharing.initClient("http://localhost:5985");
+var couchTarget;
 
 
 module.exports.replicate = function(req, res) {
@@ -27,12 +31,12 @@ module.exports.replicate = function(req, res) {
         var getIdsMode;
 
         if(dataType === "contact"){
-            Contact.getIdsSharedContacts(function(err, ids) {
+            Contact.getSharedContacts(function(err, docs) {
                 if(err)
                     res.send(500, {error: err});
                 else {
                     //replicateRemote(ids, false, function(err) {
-                     replicateDocs(target, ids, function(err) {
+                     replicateDocs(target, docs, function(err) {
                         if(err)
                             res.send(500, {error: err});
                         else
@@ -84,16 +88,16 @@ module.exports.register = function(req, res) {
         console.log('go register');
 
         var config;
-        //paulsharing1 device : paul - kuzqgv069xz2gldie0yobrn18vbzkt9w
-        if(target.indexOf("paulsharing1") > -1) {
+        //paulSharing.1 device : paul - kuzqgv069xz2gldie0yobrn18vbzkt9w
+        if(target.indexOf("paulSharing.1") > -1) {
             config = {
                 cozyURL: target,
                 login: "paul",
                 password: "kuzqgv069xz2gldie0yobrn18vbzkt9w"
             };
         }
-        //paulsharing2 device : test - hqthj9ggjnqoxbt9pl1sgja0mv5f80k9
-        else if(target.indexOf("paulsharing2") > -1) {
+        //paulSharing.2 device : test - hqthj9ggjnqoxbt9pl1sgja0mv5f80k9
+        else if(target.indexOf("paulSharing.2") > -1) {
             config = {
                 cozyURL: target,
                 login: "test",
@@ -145,7 +149,7 @@ var replicateDocs = function(target, ids, callback) {
         //cancel: true,
         doc_ids: ids
     };
-    Sharing.couchTarget = request.newClient(Sharing.targetURL);
+    couchTarget = Sharing.initClient(Sharing.targetURL);
     var repTargetToSource = {
         source: "cozy",
         target: source,
@@ -153,7 +157,7 @@ var replicateDocs = function(target, ids, callback) {
         doc_ids: ids
     };
     console.log("replication on ids " + ids + " to " + repSourceToTarget.target);
-    Sharing.couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
+    couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
         //err is sometimes empty, even if it has failed
         if(err || !body.ok){
             log.raw(body);
@@ -163,7 +167,7 @@ var replicateDocs = function(target, ids, callback) {
         else{
             log.raw('Replication from source suceeded \o/');
             log.raw(body);
-            Sharing.couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
+            couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
                 if(err || !body.ok){
                     log.raw(body);
                     console.log("Replication from target failed");
@@ -200,23 +204,23 @@ var cancelReplication = function(twoWays, callback) {
         }
      };
 
-    getActiveTasks(Sharing.couchClient, function(err, repIds) {
+    getActiveTasks(couchClient, function(err, repIds) {
         if(err)
             callback(err);
         else if(repIds) {
-            cancelCouchRep(Sharing.couchClient, repIds, function(err) {
+            cancelCouchRep(couchClient, repIds, function(err) {
                 //callback(err);
             });
         }
     });
 
   if(twoWays) {
-        if(Sharing.couchTarget != null) {
-            getActiveTasks(Sharing.couchTarget, function(err, repIds) {
+        if(couchTarget != null) {
+            getActiveTasks(couchTarget, function(err, repIds) {
                 if(err)
                     callback(err);
                 else if(repIds) {
-                    cancelCouchRep(Sharing.couchTarget, repIds, function(err) {
+                    cancelCouchRep(couchTarget, repIds, function(err) {
                         callback(err);
                     });
                 }
@@ -286,7 +290,7 @@ var replicateRemote = function(ids, cancel, callback) {
     
 var sourceToTarget = { 
         source: "cozy",
-        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulsharing2.cozycloud.cc/cozy/",
+        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulSharing.2.cozycloud.cc/cozy/",
         continuous: true,
         doc_ids: ids,
         cancel: cancel
@@ -303,7 +307,7 @@ var sourceToTarget = {
         if(err)
             console.log(err);
         else{
-            replicateWithProxy(targetToSource, "https://paulsharing1.cozycloud.cc", "sharing1", function(err) {
+            replicateWithProxy(targetToSource, "https://paulSharing.1.cozycloud.cc", "Sharing.1", function(err) {
                 if(err) 
                     console.log(err);
                 else
@@ -320,8 +324,8 @@ var replicateWithProxy = function(data, target, password, callback) {
     var loginURL = target + "/login";
     var replicateURL = target + "/_replicate";
 
-    if(target.indexOf("paulsharing1") > -1)
-        replicateURL = "https://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@paulsharing1.cozycloud.cc/_replicate";
+    if(target.indexOf("paulSharing.1") > -1)
+        replicateURL = "https://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@paulSharing.1.cozycloud.cc/_replicate";
 
     var localClient = req.post({url: loginURL, qs: {username: "owner", password: password}}, function(err, res, body) {
         if(err) {
@@ -418,13 +422,13 @@ var sharePhotos = function(callback) {
 
 var uploadFiles = function(file, callback) {
     var req = request_new.defaults({jar: true});
-    var remoteClient = req.post({url: "https://paulsharing2.cozycloud.cc/login", qs: {username: "owner", password: "sharing2"}}, function(err, res, body) {
+    var remoteClient = req.post({url: "https://paulSharing.2.cozycloud.cc/login", qs: {username: "owner", password: "Sharing.2"}}, function(err, res, body) {
         if(err) {
             return console.error(err);
         }
         else {
            // var data 
-            req.post({url: "https://paulsharing2.cozycloud.cc/apps/files/files", body: file}, function(err, res, body) {
+            req.post({url: "https://paulSharing.2.cozycloud.cc/apps/files/files", body: file}, function(err, res, body) {
                 if(err)
                     return console.error(err);
                 else{

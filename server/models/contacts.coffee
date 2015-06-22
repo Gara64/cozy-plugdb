@@ -10,21 +10,22 @@ module.exports = Contacts = americano.getModel('Contact', {
       "shared"     : Boolean
 })
 
-createRequest = ->
+#Defining shared request
+mapSharedDoc = (doc) ->
+    if doc.shared
+        emit(doc._id, doc)
+    return
+
+do createRequest = ->
+    console.log('request creation')
     Contacts.defineRequest("shared", mapSharedDoc, (err) -> 
         if err
             console.log(err)
     )
 
-#Defining shared request
-mapSharedDoc = (doc) ->
-    if doc.shared
-        emit(doc._id, null)
-    return
-
 
 module.exports.deleteAll = (callback) ->
-    contacts.requestDestroy("all", (err) ->
+    Contacts.requestDestroy("all", (err) ->
         return callback(err)
     )
 
@@ -41,12 +42,16 @@ module.exports.createContacts = (nDocs, baseName, callback) ->
     ) for i in [0 .. nDocs] 
 
 module.exports.createSingleContact = (baseName, callback) ->
-    contacts.create({fn: baseName}, (err, result) ->
+    Contacts.create({fn: baseName}, (err, result) ->
         callback(err, result.id)
     )
 
-module.exports.getIdsSharedContacts = (callback) ->
-    contacts.request("shared", (err, results) ->
-        console.log "ids shared contacts : " + results
-        callback(err, results)
+module.exports.getSharedContacts = (callback) ->
+    Contacts.request("shared", (err, results) ->
+        getIds = (results.id for results in results)
+        callback(err, getIds)
     )
+
+
+
+

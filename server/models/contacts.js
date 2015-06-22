@@ -15,22 +15,23 @@
     "shared": Boolean
   });
 
-  createRequest = function() {
+  mapSharedDoc = function(doc) {
+    if (doc.shared) {
+      emit(doc._id, doc);
+    }
+  };
+
+  (createRequest = function() {
+    console.log('request creation');
     return Contacts.defineRequest("shared", mapSharedDoc, function(err) {
       if (err) {
         return console.log(err);
       }
     });
-  };
-
-  mapSharedDoc = function(doc) {
-    if (doc.shared) {
-      emit(doc._id, null);
-    }
-  };
+  })();
 
   module.exports.deleteAll = function(callback) {
-    return contacts.requestDestroy("all", function(err) {
+    return Contacts.requestDestroy("all", function(err) {
       return callback(err);
     });
   };
@@ -55,17 +56,26 @@
   };
 
   module.exports.createSingleContact = function(baseName, callback) {
-    return contacts.create({
+    return Contacts.create({
       fn: baseName
     }, function(err, result) {
       return callback(err, result.id);
     });
   };
 
-  module.exports.getIdsSharedContacts = function(callback) {
-    return contacts.request("shared", function(err, results) {
-      console.log("ids shared contacts : " + results);
-      return callback(err, results);
+  module.exports.getSharedContacts = function(callback) {
+    return Contacts.request("shared", function(err, results) {
+      var getIds;
+      getIds = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = results.length; _i < _len; _i++) {
+          results = results[_i];
+          _results.push(results.id);
+        }
+        return _results;
+      })();
+      return callback(err, getIds);
     });
   };
 

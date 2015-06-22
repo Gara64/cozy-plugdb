@@ -1,5 +1,4 @@
 var async = require('async');
-var log = require('printit')();
 var plug = require('../lib/plug.js');
 var basic = require('../lib/basic.js');
 Contact = require('../models/contacts');
@@ -210,68 +209,7 @@ module.exports.select = function(req, res) {
     }
 };
 
-module.exports.replicate = function(req, res) {
 
-    var msg;
-    if(!plugInit){
-        msg = "PlugDB not initialized :/";
-        res.send(500, {error: msg});
-    }
-    else if(!plugAuth) {
-        msg = "Not authenticated";
-        res.send(500, {error: msg});
-    }
-
-    console.log(req.params.bool);
-
-    //create replication request
-    if(req.params.bool === 'true'){
-        
-        var dataType = req.body.dataType;
-        var target = req.body.target;
-        var getIdsMode;
-
-        if(dataType === "contact"){
-            Contact.getIdsSharedContacts(function(err, ids) {
-                if(err)
-                    res.send(500, {error: err});
-                else {
-                    //replicateRemote(ids, false, function(err) {
-                     replicateDocs(target, ids, function(err) {
-                        if(err)
-                            res.send(500, {error: err});
-                        else
-                            res.send(200, req.body);
-                    });
-                }
-            });
-        }
-        else if(dataType === "album"){
-            sharePhotos(function(err) {
-                if(err)
-                    res.send(500, {error: err});
-                else
-                    res.send(200, req.body);
-            });
-        }
-    }
-
-    //cancel replication request
-    else if(req.params.bool === 'false') {
-
-        cancelReplication(true, function(err) {
-            if(err)
-                res.send(500, {error: err});
-            else
-                res.send(200, "Replication successfully cancelled");
-        });
-    }
-    else
-        res.redirect('back');
-
-
-
-};
 
 
 

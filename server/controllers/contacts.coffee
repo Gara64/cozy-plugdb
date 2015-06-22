@@ -1,5 +1,6 @@
 contacts = require '../models/contacts'
 request = require 'request-json'
+plug = require './plug'
 
 module.exports.list = (req, res, next) ->
     contacts.request('all', (error, contacts) ->
@@ -32,7 +33,6 @@ module.exports.change = (req, res, next) ->
             res.send contact
         )
     )
-
 
 
 ###

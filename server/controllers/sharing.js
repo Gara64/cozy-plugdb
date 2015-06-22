@@ -58,7 +58,7 @@ module.exports.replicate = function(req, res) {
     //cancel replication request
     else if(req.params.bool === 'false') {
 
-        cancelReplication(true, function(err) {
+        cancelReplication(function(err) {
             if(err)
                 res.send(500, {error: err});
             else
@@ -186,7 +186,7 @@ var replicateDocs = function(target, ids, callback) {
 
 };
 
-var cancelReplication = function(twoWays, callback) {
+var cancelReplication = function(callback) {
  
      var cancelCouchRep = function(client, ids, _callback) {
         for(var i=0;i<ids.length;i++) {
@@ -214,22 +214,21 @@ var cancelReplication = function(twoWays, callback) {
         }
     });
 
-  if(twoWays) {
-        if(couchTarget != null) {
-            getActiveTasks(couchTarget, function(err, repIds) {
-                if(err)
+    if(couchTarget != null) {
+        getActiveTasks(couchTarget, function(err, repIds) {
+            if(err)
+                callback(err);
+            else if(repIds) {
+                cancelCouchRep(couchTarget, repIds, function(err) {
                     callback(err);
-                else if(repIds) {
-                    cancelCouchRep(couchTarget, repIds, function(err) {
-                        callback(err);
-                    });
-                }
-            });
-        }
-        else {
-            callback('No target defined');
-        }
+                });
+            }
+        });
     }
+    else {
+        callback(null);
+    }
+    
 };
 
 

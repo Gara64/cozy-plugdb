@@ -48,8 +48,11 @@ module.exports.createSingleContact = (baseName, callback) ->
 
 module.exports.getSharedContacts = (callback) ->
     Contacts.request("shared", (err, results) ->
-        getIds = (results.id for results in results)
-        callback(err, getIds)
+        if results
+            getIds = (res.id for res in results)
+            callback(err, getIds)
+        else
+            callback(err)
     )
 
 

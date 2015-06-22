@@ -65,17 +65,21 @@
 
   module.exports.getSharedContacts = function(callback) {
     return Contacts.request("shared", function(err, results) {
-      var getIds;
-      getIds = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = results.length; _i < _len; _i++) {
-          results = results[_i];
-          _results.push(results.id);
-        }
-        return _results;
-      })();
-      return callback(err, getIds);
+      var getIds, res;
+      if (results) {
+        getIds = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = results.length; _i < _len; _i++) {
+            res = results[_i];
+            _results.push(res.id);
+          }
+          return _results;
+        })();
+        return callback(err, getIds);
+      } else {
+        return callback(err);
+      }
     });
   };
 

@@ -10,8 +10,6 @@ module.exports.initClient = function(couchUrl) {
 	return request.newClient(couchUrl);
 };
 
-
-
 module.exports.targetURL = "";
 
 

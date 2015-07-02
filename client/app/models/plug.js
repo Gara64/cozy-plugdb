@@ -38,7 +38,9 @@ module.exports = Plug = Backbone.Model.extend({
                 callback("Cancel replication successful !");
             },
             error: function(result, response) {
-                callback("Cancel failed !");
+                //callback("Cancel failed !");
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
             }
         });
     },

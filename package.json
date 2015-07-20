@@ -36,24 +36,9 @@
     "Contact": {
       "description": "Generates contacts"
     },
-    "File": {
-      "description": "Could generate files"
-    },
-    "Note": {
-      "description": "Used to generate notes"
-    },
     "Device": {
       "description": "share as a device"
     },
-    "Photo" : {
-      "description": "Share photos"
-    },
-    "Album" : {
-      "description": "share albums"
-    },
-    "Binary" : {
-      "description": "needed for photos binary"
-    }
   },
   "cozy-displayname": "Shary"
 }

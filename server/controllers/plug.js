@@ -309,5 +309,18 @@ module.exports.filterContactsPlug = function(contacts, callback) {
 };
 
 
+var sharePhotos = function(callback) {
+
+    // Retrieving all photos
+    Album.request("all", function (err, albums) {
+
+        for(var i=0; i<albums.length;i++){
+            console.log("album : " + albums[i].title);
+
+        }
+     });
+
+};
+
 
 

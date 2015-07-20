@@ -1,4 +1,4 @@
-# cozy-sharing
+# cozy-plugdb sharing
 Cozy app to share documents with others cozies protected by PlugDB
 
 **Warning : for demo use only**

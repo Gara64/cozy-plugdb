@@ -38,7 +38,7 @@
     },
     "Device": {
       "description": "share as a device"
-    },
+    }
   },
   "cozy-displayname": "Shary"
 }

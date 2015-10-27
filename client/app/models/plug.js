@@ -7,8 +7,8 @@ module.exports = Plug = Backbone.Model.extend({
         devicename: null,
         target: null,
         password: null,
-        dataType: null, 
-        auth: false, 
+        dataType: null,
+        auth: false,
         init: false,
         ids: null
     },
@@ -126,7 +126,7 @@ module.exports = Plug = Backbone.Model.extend({
     authenticateFP: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/authFP', 
+            url: 'plug/authenticate', 
             type: 'POST',
             success: function(result){
                 callback(result, true);
@@ -141,7 +141,7 @@ module.exports = Plug = Backbone.Model.extend({
     select: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/select', 
+            url: 'plug/select',
             type: 'GET',
             success: function(result){
                 callback(result);
@@ -151,12 +151,12 @@ module.exports = Plug = Backbone.Model.extend({
                 callback(txt.error);
             }
         });
-    }, 
+    },
 
     insert: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/insert', 
+            url: 'plug/insert',
             type: 'POST',
             data: {
                 baseName: this.get('baseName')
@@ -169,12 +169,12 @@ module.exports = Plug = Backbone.Model.extend({
                 callback(txt.error);
             }
         });
-    }, 
+    },
 
     status: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/status', 
+            url: 'plug/status',
             type: 'GET',
             success: function(result){
                 callback(result);

@@ -128,7 +128,30 @@ module.exports = Plugs = Backbone.Collection.extend({
 });
 });
 
-require.register("initialize", function(exports, require, module) {
+require.register("collections/sharingRules", function(exports, require, module) {
+var SharingRule, SharingRuleCollection,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+SharingRule = require('../models/sharingRule');
+
+module.exports = SharingRuleCollection = (function(_super) {
+  __extends(SharingRuleCollection, _super);
+
+  function SharingRuleCollection() {
+    return SharingRuleCollection.__super__.constructor.apply(this, arguments);
+  }
+
+  SharingRuleCollection.prototype.model = SharingRule;
+
+  SharingRuleCollection.prototype.url = 'sharingrule';
+
+  return SharingRuleCollection;
+
+})(Backbone.Collection);
+});
+
+;require.register("initialize", function(exports, require, module) {
 // The function called from index.html
 $(document).ready(function() {
     var app = require('application');
@@ -343,36 +366,43 @@ module.exports = Plug = Backbone.Model.extend({
 
 });
 
-require.register("router", function(exports, require, module) {
-var AppView, DeviceModel, PlugCollection, PlugModel, Router, device, plug, plugs;
+require.register("models/sharingRule", function(exports, require, module) {
+var SharingRule,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = SharingRule = (function(_super) {
+  __extends(SharingRule, _super);
+
+  function SharingRule() {
+    return SharingRule.__super__.constructor.apply(this, arguments);
+  }
+
+  SharingRule.prototype.rootUrl = 'sharingurl';
+
+  return SharingRule;
+
+})(Backbone.Model);
+});
+
+;require.register("router", function(exports, require, module) {
+var AppView, Router, SharingRuleCollection;
 
 AppView = require('views/app_view');
 
-PlugCollection = require('collections/plugs');
-
-DeviceModel = require('models/device');
-
-PlugModel = require('models/plug');
-
-plugs = new PlugCollection;
-
-device = new DeviceModel;
-
-plug = new PlugModel;
+SharingRuleCollection = require('collections/sharingRules');
 
 module.exports = Router = Backbone.Router.extend({
   routes: {
-    '': 'main',
-    'insert': 'insertPlug'
+    '': 'main'
   },
   main: function() {
     var mainView;
     mainView = new AppView({
-      model: plug
+      collection: new SharingRuleCollection()
     });
-    mainView.render();
-  },
-  insertPlug: function() {}
+    return mainView.render();
+  }
 });
 });
 
@@ -382,7 +412,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),status = locals_.status;
-buf.push("<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id=\"status\">" + (jade.escape((jade_interp = status) == null ? '' : jade_interp)) + "</strong></p><hr/><br/><div id=\"plugBlock\"><img id=\"imgplugdb\" src=\"./images/plugdb.png\" class=\"superpose\"/><img id=\"imglock\" src=\"./images/lock.png\" height=\"50\" width=\"50\" class=\"superpose\"/><br/><a href=\"\"><input type=\"button\" id=\"init\" value=\"Init\"/><input type=\"button\" id=\"close\" value=\"Close\"/><input type=\"button\" id=\"reset\" value=\"Reset\"/></a></div><div id=\"sharingBlock\"><p class=\"formRow\">1/ Authenticate on your PlugDB&nbsp;<a href=\"\"><img id=\"authenticate\" src=\"./images/authenticate.png\" height=\"30\" width=\"30\"/></a><!--label Device name :--><!--input(type=\"text\", name=\"devicename\", size=10)--><!--label Password :--><!--input(type=\"password\", name=\"pwd\", size=10)--></p><!--span Show contacts--><!--input#show-list(type='checkbox')--><p>2/ Select shared contact</p><div id=\"myList\"></div><br/><form><label>3/ Share my contacts with (URL) :</label><input id=\"targetURL\" type=\"text\" name=\"targetURL\"/></form><p class=\"formRow\">4/ Start sharing&nbsp;<a href=\"\"><img id=\"replicateContacts\" data-datatype=\"contact\" src=\"./images/share.jpg\" height=\"30\" width=\"30\"/></a></p></div><hr/><br/><span>More tools</span><input id=\"toggle-more-tools\" type=\"checkbox\"/><br/><br/><div id=\"more-tools\"><form class=\"formRow\"><label>Reset contacts & create&nbsp;</label><input type=\"text\" name=\"nDocs\" size=\"1\" value=\"4\"/><span>&nbsp;new ones called&nbsp;</span><input type=\"text\" name=\"baseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertDocs\" type=\"image\" src=\"./images/generate.png\" alt=\"submit\" height=\"25\" width=\"25\"/><!--input(id=\"insertDocs\", type=\"submit\", value=\"Generate\")--><!--img(src=\"./images/generate.png\", height=\"50\", width=\"50\")--></form><br/><form class=\"formRow\"><label>Add 1 contact named</label><input type=\"text\" name=\"singleBaseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertSingleDoc\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/></form><p class=\"formRow\">Cancel all current replications :<a href=\"\"><img id=\"cancel\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/></a></p><!--p Extra :--><!--form--><!--\tlabel Target URL :--><!--\tinput(type=\"text\", name=\"targetURL\", size=10)--><!--\tinput(id=\"registerDevice\", type=\"submit\", value=\"Unregister device\")--><!----></div><!--p Share the selected contacts :--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><!--p Share all my photos !--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicatePhotos\", data-datatype=\"album\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")ul\nli\n a(href=\"https://github.com/Gara64/cozy-plugdb\") Github-->");;return buf.join("");
+buf.push("<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id=\"status\">" + (jade.escape((jade_interp = status) == null ? '' : jade_interp)) + "</strong></p><hr/><br/><div id=\"plugBlock\"><img id=\"imgplugdb\" src=\"./images/plugdb.png\" class=\"superpose\"/><img id=\"imglock\" src=\"./images/lock.png\" height=\"50\" width=\"50\" class=\"superpose\"/><br/><a href=\"\"><input type=\"button\" id=\"init\" value=\"Init\"/><input type=\"button\" id=\"close\" value=\"Close\"/><input type=\"button\" id=\"reset\" value=\"Reset\"/></a></div><div id=\"sharingBlock\"><p class=\"formRow\">1/ Authenticate on your PlugDB&nbsp;<a href=\"\"><img id=\"authenticate\" src=\"./images/authenticate.png\" height=\"30\" width=\"30\"/></a><!--label Device name :--><!--input(type=\"text\", name=\"devicename\", size=10)--><!--label Password :--><!--input(type=\"password\", name=\"pwd\", size=10)--></p><!--span Show contacts--><!--input#show-list(type='checkbox')--><p>Sharing rules</p><div id=\"sharingrules-list\"></div><!--p 2/ Select shared contact--><!--#myList--><!--br--><!--form--><!--\tlabel 3/ Share my contacts with (URL) :--><!--\tinput(id=\"targetURL\", type=\"text\", name=\"targetURL\")--><!--p.formRow 4/ Start sharing&nbsp;--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"30\", width=\"30\")--></div><hr/><br/><span>More tools</span><input id=\"toggle-more-tools\" type=\"checkbox\"/><br/><br/><div id=\"more-tools\"><form class=\"formRow\"><label>Reset contacts & create&nbsp;</label><input type=\"text\" name=\"nDocs\" size=\"1\" value=\"4\"/><span>&nbsp;new ones called&nbsp;</span><input type=\"text\" name=\"baseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertDocs\" type=\"image\" src=\"./images/generate.png\" alt=\"submit\" height=\"25\" width=\"25\"/><!--input(id=\"insertDocs\", type=\"submit\", value=\"Generate\")--><!--img(src=\"./images/generate.png\", height=\"50\", width=\"50\")--></form><br/><form class=\"formRow\"><label>Add 1 contact named</label><input type=\"text\" name=\"singleBaseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertSingleDoc\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/></form><p class=\"formRow\">Cancel all current replications :<a href=\"\"><img id=\"cancel\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/></a></p><!--p Extra :--><!--form--><!--\tlabel Target URL :--><!--\tinput(type=\"text\", name=\"targetURL\", size=10)--><!--\tinput(id=\"registerDevice\", type=\"submit\", value=\"Unregister device\")--><!----></div><!--p Share the selected contacts :--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><!--p Share all my photos !--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicatePhotos\", data-datatype=\"album\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")ul\nli\n a(href=\"https://github.com/Gara64/cozy-plugdb\") Github-->");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -404,7 +434,7 @@ var AppView, Contact, ContactCollection, ContactListView, ContactListener, Plug,
 Plug = require('../models/plug');
 
 module.exports = AppView = Backbone.View.extend({
-  el: 'body',
+  el: '#sharingrules-list',
   template: require('../templates/home'),
   events: {
     'click #registerDevice': 'registerDevice',
@@ -418,31 +448,28 @@ module.exports = AppView = Backbone.View.extend({
     'click #reset': 'resetPlug',
     'click #insertSingleDoc': 'insertSingleDoc'
   },
-  render: function() {
-    var model, myCollection, realtimer, view;
-    model = this.model;
-    this.$el.html(this.template());
-    this.renderStatus();
-    this.renderPlug();
-    myCollection = new ContactCollection();
-    myCollection.fetch({
-      reset: true
+  afterRender: function() {
+    return this.collection.fetch({
+      success: (function(_this) {
+        return function(collection, response, option) {
+          return console.log('collection : ' + JSON.stringify(collection));
+        };
+      })(this),
+      error: (function(_this) {
+        return function() {
+          var msg;
+          return msg = "Sharing Rules couldn't be retrieved due to a server error.";
+        };
+      })(this)
     });
-    realtimer = new ContactListener();
-    realtimer.watch(myCollection);
-    view = new ContactListView({
-      el: '#myList',
-      collection: myCollection
-    });
-    return this;
   },
-  renderStatus: function() {
+  render: function() {
     var model;
     model = this.model;
-    return this.$el.html(this.template({
-      status: model.get('status')
-    }));
+    this.$el.html(this.template());
+    return this;
   },
+  renderStatus: function() {},
   renderPlug: function() {
     var isAuth, isInit, model;
     model = this.model;
@@ -640,12 +667,7 @@ module.exports = AppView = Backbone.View.extend({
   initialize: function() {
     var _this;
     _this = this;
-    this.getPlugStatus(function() {
-      return _this.renderPlug(_this);
-    });
-    this.model.on('change:status', this.render, this);
-    this.model.on('change:auth', this.render, this);
-    this.model.on('change:init', this.render, this);
+    this.afterRender();
   },
   onInsertPlug: function(model) {
     this.render();
@@ -750,13 +772,7 @@ ContactListView = (function(_super) {
     });
   };
 
-  ContactListView.prototype.initialize = function() {
-    this.listenTo(this.collection, 'change', this.render);
-    this.listenTo(this.collection, 'add', this.render);
-    this.listenTo(this.collection, 'remove', this.render);
-    this.listenTo(this.collection, 'reset', this.render);
-    return console.log(this.el);
-  };
+  ContactListView.prototype.initialize = function() {};
 
   ContactListView.prototype.renderOne = function(model) {
     var checked, id, n;

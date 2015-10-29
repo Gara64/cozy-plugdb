@@ -1,25 +1,16 @@
-AppView        = require('views/app_view')
-PlugCollection = require('collections/plugs')
-DeviceModel    = require('models/device')
-PlugModel      = require('models/plug')
-plugs          = new PlugCollection
-device         = new DeviceModel
-plug           = new PlugModel
-
+AppView        = require 'views/app_view'
+SharingRuleCollection = require 'collections/sharingRules'
 
 module.exports = Router = Backbone.Router.extend(
 
     routes:
         ''       : 'main'
-        'insert' : 'insertPlug'
 
-    main: ()->
-        mainView = new AppView(model: plug)
+    main: ->
+        # We create the collection here but do it where it fits the better for
+        # your case.
+        mainView = new AppView collection: new SharingRuleCollection()
         mainView.render()
-        return
 
-    insertPlug: ()->
-        # alert('toto')
-        return
 
 )

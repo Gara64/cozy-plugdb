@@ -27,7 +27,10 @@ config =
 
     production: [
         americano.logger 'short'
-    ]
+    ],
+    plugins: [
+        'cozydb'
+  ]
 
 
 

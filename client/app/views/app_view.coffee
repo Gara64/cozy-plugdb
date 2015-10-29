@@ -2,7 +2,8 @@ Plug = require('../models/plug')
 
 #var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend(
-    el: 'body'
+    el: '#sharingrules-list'
+
     template: require('../templates/home')
     events:
         'click #registerDevice'    : 'registerDevice'
@@ -16,34 +17,41 @@ module.exports = AppView = Backbone.View.extend(
         'click #reset'             : 'resetPlug'
         'click #insertSingleDoc'   : 'insertSingleDoc'
 
-
-
+    afterRender: ->
+        # Retrieves the data from the database
+        @collection.fetch
+            success: (collection, response, option) =>
+                #@$el.find('em').remove()
+                console.log 'collection : ' + JSON.stringify collection
+            error: =>
+                msg = "Sharing Rules couldn't be retrieved due to a server error."
+                #@$collectionEl.find('em').html msg
 
     render: ->
         model = @model
-        
+
         # render the template
         @$el.html @template()
-       
-        @renderStatus()
-        @renderPlug()
 
-        myCollection = new ContactCollection()
-        myCollection.fetch(reset:true)
+        #@renderStatus()
+        #@renderPlug()
 
-        realtimer = new ContactListener()
-        realtimer.watch myCollection
+        #myCollection = new ContactCollection()
+        #myCollection.fetch(reset:true)
+
+        #realtimer = new ContactListener()
+        #realtimer.watch myCollection
 
         # en supposant qu'il y ait un element d'id myList dans le html
-        view = new ContactListView
-           el         : '#myList'
-           collection : myCollection
+        #view = new ContactListView
+        #   el         : '#myList'
+        #   collection : myCollection
 
         this
 
     renderStatus: ->
-        model = @model
-        @$el.html @template(status: model.get('status')) 
+        #model = @model
+        #@$el.html @template(status: model.get('status'))
 
 
     renderPlug: ->
@@ -58,7 +66,7 @@ module.exports = AppView = Backbone.View.extend(
             @render
         else
             $('#myList').css('display', 'none')
-        
+
         this
 
     updateStatus: ->
@@ -86,7 +94,7 @@ module.exports = AppView = Backbone.View.extend(
         if not plug.get 'auth'
             alert 'Please authenticate first'
             return
-        
+
         plug.set dataType: dataType
         plug.set target: target
         plug.replicate (res) ->
@@ -185,12 +193,13 @@ module.exports = AppView = Backbone.View.extend(
     # initialize is automatically called once after the view is constructed
     initialize: ->
         _this = this
-        @getPlugStatus () ->
-            _this.renderPlug _this
+        @afterRender()
+        #@getPlugStatus () ->
+        #    _this.renderPlug _this
         #@renderPlug this
-        @model.on 'change:status', @render, this
-        @model.on 'change:auth', @render, this
-        @model.on 'change:init', @render, this
+        #@model.on 'change:status', @render, this
+        #@model.on 'change:auth', @render, this
+        #@model.on 'change:init', @render, this
         return
 
     onInsertPlug: (model) ->
@@ -254,11 +263,11 @@ class ContactListView extends Backbone.View
 
 
     initialize: ->
-        @listenTo @collection, 'change', @render
-        @listenTo @collection, 'add'   , @render
-        @listenTo @collection, 'remove', @render
-        @listenTo @collection, 'reset' , @render
-        console.log @el
+        #@listenTo @collection, 'change', @render
+        #@listenTo @collection, 'add'   , @render
+        #@listenTo @collection, 'remove', @render
+        #@listenTo @collection, 'reset' , @render
+        #console.log @el
         # @el.addEventListener('blur',@onBlur)
 
     renderOne: (model) =>
@@ -300,114 +309,3 @@ class ContactListView extends Backbone.View
 
         html += '</table>'
         @$el.html(html)
-
-
-
-
-
-
-
-# /*
-#         event.preventDefault();
-#         var model = this.model;
-#         model.urlRoot = 'plug/replicate/true';
-#         model.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Sharing ok !"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     cancelReplications: function(event) {
-#         event.preventDefault();
-#         var model = this.model;
-#         model.urlRoot = 'plug/replicate/false';
-#         model.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Cancel replications ok"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     registerDevice: function(event) {
-#         event.preventDefault();
-#         _this = this;
-#         var plug = new Plug({
-#             target: this.$el.find('input[name="targetURL"]').val(),
-#             password: this.$el.find('input[name="pwd"]').val(),
-#             devicename: this.$el.find('input[name="devicename"]').val()
-#         })
-#         plug.urlRoot = 'plug/register/true';
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Device correctly registered"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-
-#     },
-
-#     unregisterDevice: function(event) {
-#         event.preventDefault();
-#         _this = this;
-#         var plug = new Plug({
-#             target: this.$el.find('input[name="targetURL"]').val(),
-#             password: this.$el.find('input[name="pwd"]').val(),
-#             devicename: this.$el.find('input[name="devicename"]').val()
-#         })
-#         plug.urlRoot = 'plug/register/false';
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Device correctly unregistered"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     createDocs: function(event) {
-#         // submit button reload the page, we don't want that
-#        event.preventDefault();
-#        _this = this;
-#         // create a new model
-#         var plug = this.model;
-#         plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
-#         plug.urlRoot = 'plug/insert';
-
-#         // add it to the collection
-#        //his.collection.add(plug);
-
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Insert " + plug.get('nDocs') + ' docs ok !'});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-# */

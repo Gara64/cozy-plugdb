@@ -1,8 +1,12 @@
 Plug = require('../models/plug')
+SharingRuleView = require './sharingRuleView'
+AddSharingRuleView = require './addSharingRuleView'
+
+
 
 #var Device = require('../models/device');
-module.exports = AppView = Backbone.View.extend(
-    el: '#sharingrules-list'
+module.exports = AppView = Backbone.View.extend
+    el: 'body'
 
     template: require('../templates/home')
     events:
@@ -10,28 +14,31 @@ module.exports = AppView = Backbone.View.extend(
         'click #insertDocs'        : 'createDocs'
         'click #replicateContacts' : 'replicate'
         'click #replicatePhotos'   : 'replicate'
-        'click #cancel'            : 'cancelReplications'
         'click #authenticate'      : 'authenticateFP'
         'click #init'              : 'initPlug'
         'click #close'             : 'closePlug'
         'click #reset'             : 'resetPlug'
-        'click #insertSingleDoc'   : 'insertSingleDoc'
+        'click #addRule'           : 'addRule'
+        'click #deleteRule'        : 'deleRule'
 
-    afterRender: ->
-        # Retrieves the data from the database
-        @collection.fetch
-            success: (collection, response, option) =>
-                #@$el.find('em').remove()
-                console.log 'collection : ' + JSON.stringify collection
-            error: =>
-                msg = "Sharing Rules couldn't be retrieved due to a server error."
-                #@$collectionEl.find('em').html msg
 
     render: ->
         model = @model
 
         # render the template
         @$el.html @template()
+
+        @collection.fetch();
+
+        @collection.forEach (sharingRule) ->
+            @onRuleAdded sharingRule
+
+    onRuleAdded: (sharingRule) ->
+        ruleView = new SharingRuleView model: sharingRule
+        ruleView.render()
+        #append the view on the 1st ul element in the el childs (body)
+        @$el.find('ul').append ruleView.$el
+
 
         #@renderStatus()
         #@renderPlug()
@@ -48,6 +55,13 @@ module.exports = AppView = Backbone.View.extend(
         #   collection : myCollection
 
         this
+
+    addRule: ->
+
+        addRuleView = new AddSharingRuleView()
+        addRuleView.render()
+        @$('#createRule').empty() #In case there is already a form
+        @$('#createRule').append addRuleView.$el
 
     renderStatus: ->
         #model = @model
@@ -193,7 +207,7 @@ module.exports = AppView = Backbone.View.extend(
     # initialize is automatically called once after the view is constructed
     initialize: ->
         _this = this
-        @afterRender()
+        @listenTo(@collection, "add", this.onRuleAdded);
         #@getPlugStatus () ->
         #    _this.renderPlug _this
         #@renderPlug this
@@ -206,7 +220,7 @@ module.exports = AppView = Backbone.View.extend(
         # re-render the view
         @render()
         return
-)
+
 
 
 

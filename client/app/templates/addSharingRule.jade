@@ -1,12 +1,16 @@
 p Enter your sharing rule :
 form
     label Name :
-    input(type="text",name="ruleName", size=10)
+    input(type="text",id="ruleName", size=10)
     br
     label Filter Doc :
-    textarea(rows="3", cols="75",name="filterDoc")
+    textarea(rows="3", cols="75",id="filterDoc")
+    label User Description :
+    input(type="text",id="docUserDesc", size=10)
     br
     label Filter User :
-    textarea(rows="3", cols="75",name="filterUser")
+    textarea(rows="3", cols="75",id="filterUser")
+    label User Description :
+    input(type="text",id="userUserDesc", size=10)
     br
     input(id="submitRule" type="submit", value="Submit")

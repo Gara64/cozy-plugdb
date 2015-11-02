@@ -534,6 +534,10 @@ module.exports = SharingRule = (function(_super) {
 
   SharingRule.prototype.rootUrl = 'sharingurl';
 
+  SharingRule.prototype.defaults = {
+    docType: "sharingRule"
+  };
+
   return SharingRule;
 
 })(Backbone.Model);
@@ -566,7 +570,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<p>Enter your sharing rule :</p><form><label>Name :</label><input type=\"text\" name=\"ruleName\" size=\"10\"/><br/><label>Filter Doc :</label><textarea rows=\"3\" cols=\"75\" name=\"filterDoc\"></textarea><br/><label>Filter User :</label><textarea rows=\"3\" cols=\"75\" name=\"filterUser\"></textarea><br/><input id=\"submitRule\" type=\"submit\" value=\"Submit\"/></form>");;return buf.join("");
+buf.push("<p>Enter your sharing rule :</p><form><label>Name :</label><input type=\"text\" id=\"ruleName\" size=\"10\"/><br/><label>Filter Doc :</label><textarea rows=\"3\" cols=\"75\" id=\"filterDoc\"></textarea><label>User Description :</label><input type=\"text\" id=\"docUserDesc\" size=\"10\"/><br/><label>Filter User :</label><textarea rows=\"3\" cols=\"75\" id=\"filterUser\"></textarea><label>User Description :</label><input type=\"text\" id=\"userUserDesc\" size=\"10\"/><br/><input id=\"submitRule\" type=\"submit\" value=\"Submit\"/></form>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -633,8 +637,36 @@ module.exports = AddSharingRuleView = Backbone.View.extend({
     return console.log('add rule');
   },
   submitRule: function() {
-    this.remove();
-    return this.render();
+    var dUserDesc, fDoc, fUser, filterDoc, filterUser, name, newRule, uUserDesc;
+    name = $('#ruleName').val();
+    fDoc = $('#filterDoc').val();
+    dUserDesc = $('#docUserDesc').val();
+    fUser = $('#filterUser').val();
+    uUserDesc = $('#userUserDesc').val();
+    if (this.checkAttributes(name, fDoc, fUser)) {
+      filterDoc = {
+        rule: fDoc,
+        userDesc: dUserDesc
+      };
+      filterUser = {
+        rule: fUser,
+        userDesc: uUserDesc
+      };
+      newRule = new SharingRule({
+        name: name,
+        filterDoc: filterDoc,
+        filterUser: filterUser
+      });
+      newRule.save();
+      this.collection.add(newRule);
+      this.remove();
+      return this.render();
+    } else {
+      return alert('Please enter all mandatory fields');
+    }
+  },
+  checkAttributes: function(name, filterDoc, filterUser) {
+    return (name != null) && (filterDoc != null) && (filterUser != null);
   }
 });
 });
@@ -1024,10 +1056,6 @@ ContactListView = (function(_super) {
   return ContactListView;
 
 })(Backbone.View);
-});
-
-;require.register("views/contact-list", function(exports, require, module) {
-
 });
 
 ;require.register("views/sharingRuleView", function(exports, require, module) {

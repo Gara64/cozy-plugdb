@@ -13,10 +13,25 @@ module.exports = AddSharingRuleView = Backbone.View.extend
         console.log 'add rule'
 
     submitRule: ->
-        #TODO: add the new rule (+ doctype & co?)
-        #newRule = new SharingRule
+        name = $('#ruleName').val()
+        fDoc = $('#filterDoc').val()
+        dUserDesc = $('#docUserDesc').val()
+        fUser= $('#filterUser').val()
+        uUserDesc = $('#userUserDesc').val()
 
-        #do this only if the rule has been correctly created
-        #and notify the user
-        @remove()
-        @render()
+        if @checkAttributes name, fDoc, fUser
+            filterDoc = {rule: fDoc, userDesc: dUserDesc}
+            filterUser = {rule: fUser, userDesc: uUserDesc}
+
+            newRule = new SharingRule {name, filterDoc, filterUser}
+            newRule.save()
+            @collection.add newRule
+
+            #do this only if the rule has been created and notify the user
+            @remove()
+            @render()
+        else
+            alert 'Please enter all mandatory fields'
+
+    checkAttributes: (name, filterDoc, filterUser) ->
+        return name? and filterDoc? and filterUser?

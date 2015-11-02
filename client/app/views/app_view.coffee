@@ -2,9 +2,6 @@ Plug = require('../models/plug')
 SharingRuleView = require './sharingRuleView'
 AddSharingRuleView = require './addSharingRuleView'
 
-
-
-#var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend
     el: 'body'
 
@@ -19,26 +16,24 @@ module.exports = AppView = Backbone.View.extend
         'click #close'             : 'closePlug'
         'click #reset'             : 'resetPlug'
         'click #addRule'           : 'addRule'
-        'click #deleteRule'        : 'deleRule'
 
 
     render: ->
-        model = @model
-
         # render the template
         @$el.html @template()
 
         @collection.fetch();
-
         @collection.forEach (sharingRule) ->
             @onRuleAdded sharingRule
 
     onRuleAdded: (sharingRule) ->
         ruleView = new SharingRuleView model: sharingRule
         ruleView.render()
+
         #append the view on the 1st ul element in the el childs (body)
         @$el.find('ul').append ruleView.$el
 
+        console.log 'new rule added'
 
         #@renderStatus()
         #@renderPlug()
@@ -56,12 +51,14 @@ module.exports = AppView = Backbone.View.extend
 
         this
 
-    addRule: ->
 
+    addRule: ->
         addRuleView = new AddSharingRuleView()
         addRuleView.render()
+
         @$('#createRule').empty() #In case there is already a form
         @$('#createRule').append addRuleView.$el
+
 
     renderStatus: ->
         #model = @model
@@ -178,36 +175,41 @@ module.exports = AppView = Backbone.View.extend
 
     authenticateFP: (event) ->
         event.preventDefault()
-        _this = this
-        plug = @model
-        plug.set status: 'Authentication...'
-        plug.authenticateFP (res, authenticated) ->
+        $('#status').html 'Authentification...'
+
+        $.ajax
+            url: 'plug/authenticate',
+            type: 'POST',
+            success: (result) =>
+                console.log 'auth ok'
+                $('#status').html 'Authentification successful'
+                @render()
+            error: (result, response) ->
+                console.log 'auth nok : ' + JSON.stringify result
+                $('#status').html 'Authentification failed'
+
+        #plug.set status: 'Authentication...'
+        ###plug.authenticateFP (res, authenticated) ->
             plug.set status: res
             plug.set auth: authenticated
-            #check if the authentication failed but not the initialization
-            if(not authenticated)
+            #check if the authenticaion failed but not the initialization
+            if not authenticated
                 _this.getPlugStatus()
             else
                 plug.set init: true
             return
         return
+        ###
 
-    insertSingleDoc: (event) ->
-        event.preventDefault()
-        _this = this
-        plug = @model
-        plug.set baseName: @$el.find('input[name="singleBaseName"]').val()
-        plug.set status: 'Insertion of a new contact...'
-        plug.insert (res) ->
-            plug.set status: res
-            return
-        return
+
+
 
 
     # initialize is automatically called once after the view is constructed
     initialize: ->
         _this = this
-        @listenTo(@collection, "add", this.onRuleAdded);
+        @listenTo(@collection, "add", @onRuleAdded)
+
         #@getPlugStatus () ->
         #    _this.renderPlug _this
         #@renderPlug this

@@ -1,4 +1,5 @@
 SharingRule = require '../models/sharingRule'
+SharingRuleView = require './sharingRuleView'
 
 module.exports = AddSharingRuleView = Backbone.View.extend
 
@@ -10,7 +11,6 @@ module.exports = AddSharingRuleView = Backbone.View.extend
 
     render: ->
         @$el.html @template()
-        console.log 'add rule'
 
     submitRule: ->
         name = $('#ruleName').val()
@@ -25,11 +25,12 @@ module.exports = AddSharingRuleView = Backbone.View.extend
 
             newRule = new SharingRule {name, filterDoc, filterUser}
             newRule.save()
-            @collection.add newRule
 
             #do this only if the rule has been created and notify the user
             @remove()
             @render()
+
+
         else
             alert 'Please enter all mandatory fields'
 

@@ -532,7 +532,7 @@ module.exports = SharingRule = (function(_super) {
     return SharingRule.__super__.constructor.apply(this, arguments);
   }
 
-  SharingRule.prototype.rootUrl = 'sharingurl';
+  SharingRule.prototype.urlRoot = 'sharingrule';
 
   SharingRule.prototype.defaults = {
     docType: "sharingRule"
@@ -588,8 +588,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),status = locals_.status;
-buf.push("<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id=\"status\">" + (jade.escape((jade_interp = status) == null ? '' : jade_interp)) + "</strong></p><hr/><br/><div id=\"plugBlock\"><img id=\"imgplugdb\" src=\"./images/plugdb.png\" class=\"superpose\"/><img id=\"imglock\" src=\"./images/lock.png\" height=\"50\" width=\"50\" class=\"superpose\"/><br/><a href=\"\"><input type=\"button\" id=\"init\" value=\"Init\"/><input type=\"button\" id=\"close\" value=\"Close\"/><input type=\"button\" id=\"reset\" value=\"Reset\"/></a></div><div id=\"sharingBlock\"><p class=\"formRow\">1/ Authenticate on your PlugDB&nbsp;<a href=\"\"><img id=\"authenticate\" src=\"./images/authenticate.png\" height=\"30\" width=\"30\"/></a><!--label Device name :--><!--input(type=\"text\", name=\"devicename\", size=10)--><!--label Password :--><!--input(type=\"password\", name=\"pwd\", size=10)--></p><!--span Show contacts--><!--input#show-list(type='checkbox')--></div><p>Sharing rules</p><div id=\"sharingrules-list\"><!--p 2/ Select shared contact--><!--#myList--><!--br--><!--form--><!--\tlabel 3/ Share my contacts with (URL) :--><!--\tinput(id=\"targetURL\", type=\"text\", name=\"targetURL\")--><!--p.formRow 4/ Start sharing&nbsp;--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"30\", width=\"30\")--></div><hr/><br/><span>More tools</span><input id=\"toggle-more-tools\" type=\"checkbox\"/><br/><br/><div id=\"more-tools\"><form class=\"formRow\"><label>Reset contacts & create&nbsp;</label><input type=\"text\" name=\"nDocs\" size=\"1\" value=\"4\"/><span>&nbsp;new ones called&nbsp;</span><input type=\"text\" name=\"baseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertDocs\" type=\"image\" src=\"./images/generate.png\" alt=\"submit\" height=\"25\" width=\"25\"/><!--input(id=\"insertDocs\", type=\"submit\", value=\"Generate\")--><!--img(src=\"./images/generate.png\", height=\"50\", width=\"50\")--></form><br/><form class=\"formRow\"><label>Add 1 contact named</label><input type=\"text\" name=\"singleBaseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertSingleDoc\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/></form><p class=\"formRow\">Cancel all current replications :<a href=\"\"><img id=\"cancel\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/></a></p><!--p Extra :--><!--form--><!--\tlabel Target URL :--><!--\tinput(type=\"text\", name=\"targetURL\", size=10)--><!--\tinput(id=\"registerDevice\", type=\"submit\", value=\"Unregister device\")--><!----></div><!--p Share the selected contacts :--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><!--p Share all my photos !--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicatePhotos\", data-datatype=\"album\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><label>Add a sharing rule</label><input id=\"addRule\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/><div id=\"createRule\"></div><ul></ul><a href=\"https://github.com/Gara64/cozy-plugdb\">Github</a>");;return buf.join("");
+
+buf.push("<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id=\"status\"></strong></p><hr/><br/><div id=\"plugBlock\"><img id=\"imgplugdb\" src=\"./images/plugdb.png\" class=\"superpose\"/><img id=\"imglock\" src=\"./images/lock.png\" height=\"50\" width=\"50\" class=\"superpose\"/><br/><a href=\"\"><input type=\"button\" id=\"init\" value=\"Init\"/><input type=\"button\" id=\"close\" value=\"Close\"/><input type=\"button\" id=\"reset\" value=\"Reset\"/></a></div><div id=\"sharingBlock\"><p class=\"formRow\">Authenticate on your PlugDB&nbsp;<a href=\"\"><img id=\"authenticate\" src=\"./images/authenticate.png\" height=\"30\" width=\"30\"/></a><!--label Device name :--><!--input(type=\"text\", name=\"devicename\", size=10)--><!--label Password :--><!--input(type=\"password\", name=\"pwd\", size=10)--></p><!--span Show contacts--><!--input#show-list(type='checkbox')--></div><p>Sharing rules</p><div id=\"sharingrules-list\"><!--p 2/ Select shared contact--><!--#myList--><!--br--><!--form--><!--\tlabel 3/ Share my contacts with (URL) :--><!--\tinput(id=\"targetURL\", type=\"text\", name=\"targetURL\")--><!--p.formRow 4/ Start sharing&nbsp;--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"30\", width=\"30\")--></div><hr/><br/><span>More tools</span><input id=\"toggle-more-tools\" type=\"checkbox\"/><br/><br/><div id=\"more-tools\"><form class=\"formRow\"><label>Reset contacts & create&nbsp;</label><input type=\"text\" name=\"nDocs\" size=\"1\" value=\"4\"/><span>&nbsp;new ones called&nbsp;</span><input type=\"text\" name=\"baseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertDocs\" type=\"image\" src=\"./images/generate.png\" alt=\"submit\" height=\"25\" width=\"25\"/><!--input(id=\"insertDocs\", type=\"submit\", value=\"Generate\")--><!--img(src=\"./images/generate.png\", height=\"50\", width=\"50\")--></form><br/><form class=\"formRow\"><label>Add 1 contact named</label><input type=\"text\" name=\"singleBaseName\" size=\"5\" value=\"Alice\"/><span>&nbsp;</span><input id=\"insertSingleDoc\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/></form><p class=\"formRow\">Cancel all current replications :<a href=\"\"><img id=\"cancel\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/></a></p><!--p Extra :--><!--form--><!--\tlabel Target URL :--><!--\tinput(type=\"text\", name=\"targetURL\", size=10)--><!--\tinput(id=\"registerDevice\", type=\"submit\", value=\"Unregister device\")--><!----></div><!--p Share the selected contacts :--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicateContacts\", data-datatype=\"contact\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><!--p Share all my photos !--><!--\ta(href=\"\" )--><!--\t\timg(id=\"replicatePhotos\", data-datatype=\"album\", src=\"./images/share.jpg\", height=\"60\", width=\"60\")--><label>Add a sharing rule</label><input id=\"addRule\" type=\"image\" src=\"./images/add.png\" alt=\"submit\" height=\"25\" width=\"25\"/><div id=\"createRule\"></div><ul></ul><a href=\"https://github.com/Gara64/cozy-plugdb\">Github</a>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -608,7 +608,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),sharingRule = locals_.sharingRule;
-buf.push("<h3>" + (jade.escape((jade_interp = sharingRule.name) == null ? '' : jade_interp)) + "</h3><p>FilterDoc : " + (jade.escape((jade_interp = sharingRule.filterDoc.rule) == null ? '' : jade_interp)) + "</p><p>FilterUser: " + (jade.escape((jade_interp = sharingRule.filterUser.rule) == null ? '' : jade_interp)) + "</p><img id=\"deleteRule\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/>");;return buf.join("");
+buf.push("<h3>" + (jade.escape((jade_interp = sharingRule.name) == null ? '' : jade_interp)) + "</h3><p>FilterDoc : " + (jade.escape((jade_interp = sharingRule.filterDoc.rule) == null ? '' : jade_interp)) + "</p><p>FilterUser: " + (jade.escape((jade_interp = sharingRule.filterUser.rule) == null ? '' : jade_interp)) + "</p><p><i>Current replications :</i></p><div id=\"replication\"></div><img id=\"deleteRule\" src=\"./images/cancel.png\" height=\"25\" width=\"25\"/>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -622,9 +622,11 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("views/addSharingRuleView", function(exports, require, module) {
-var AddSharingRuleView, SharingRule;
+var AddSharingRuleView, SharingRule, SharingRuleView;
 
 SharingRule = require('../models/sharingRule');
+
+SharingRuleView = require('./sharingRuleView');
 
 module.exports = AddSharingRuleView = Backbone.View.extend({
   template: require('../templates/addSharingRule'),
@@ -633,8 +635,7 @@ module.exports = AddSharingRuleView = Backbone.View.extend({
     'click #submitRule': 'submitRule'
   },
   render: function() {
-    this.$el.html(this.template());
-    return console.log('add rule');
+    return this.$el.html(this.template());
   },
   submitRule: function() {
     var dUserDesc, fDoc, fUser, filterDoc, filterUser, name, newRule, uUserDesc;
@@ -658,7 +659,6 @@ module.exports = AddSharingRuleView = Backbone.View.extend({
         filterUser: filterUser
       });
       newRule.save();
-      this.collection.add(newRule);
       this.remove();
       return this.render();
     } else {
@@ -695,12 +695,9 @@ module.exports = AppView = Backbone.View.extend({
     'click #init': 'initPlug',
     'click #close': 'closePlug',
     'click #reset': 'resetPlug',
-    'click #addRule': 'addRule',
-    'click #deleteRule': 'deleRule'
+    'click #addRule': 'addRule'
   },
   render: function() {
-    var model;
-    model = this.model;
     this.$el.html(this.template());
     this.collection.fetch();
     return this.collection.forEach(function(sharingRule) {
@@ -714,6 +711,7 @@ module.exports = AppView = Backbone.View.extend({
     });
     ruleView.render();
     this.$el.find('ul').append(ruleView.$el);
+    console.log('new rule added');
     return this;
   },
   addRule: function() {
@@ -878,45 +876,35 @@ module.exports = AppView = Backbone.View.extend({
     });
   },
   authenticateFP: function(event) {
-    var plug, _this;
     event.preventDefault();
-    _this = this;
-    plug = this.model;
-    plug.set({
-      status: 'Authentication...'
-    });
-    plug.authenticateFP(function(res, authenticated) {
-      plug.set({
-        status: res
-      });
-      plug.set({
-        auth: authenticated
-      });
-      if (!authenticated) {
-        _this.getPlugStatus();
-      } else {
-        plug.set({
-          init: true
-        });
+    $('#status').html('Authentification...');
+    return $.ajax({
+      url: 'plug/authenticate',
+      type: 'POST',
+      success: (function(_this) {
+        return function(result) {
+          console.log('auth ok');
+          $('#status').html('Authentification successful');
+          return _this.render();
+        };
+      })(this),
+      error: function(result, response) {
+        console.log('auth nok : ' + JSON.stringify(result));
+        return $('#status').html('Authentification failed');
       }
     });
-  },
-  insertSingleDoc: function(event) {
-    var plug, _this;
-    event.preventDefault();
-    _this = this;
-    plug = this.model;
-    plug.set({
-      baseName: this.$el.find('input[name="singleBaseName"]').val()
-    });
-    plug.set({
-      status: 'Insertion of a new contact...'
-    });
-    plug.insert(function(res) {
-      plug.set({
-        status: res
-      });
-    });
+
+    /*plug.authenticateFP (res, authenticated) ->
+        plug.set status: res
+        plug.set auth: authenticated
+         *check if the authenticaion failed but not the initialization
+        if not authenticated
+            _this.getPlugStatus()
+        else
+            plug.set init: true
+        return
+    return
+     */
   },
   initialize: function() {
     var _this;
@@ -1058,28 +1046,31 @@ ContactListView = (function(_super) {
 })(Backbone.View);
 });
 
+;require.register("views/contact-list", function(exports, require, module) {
+
+});
+
 ;require.register("views/sharingRuleView", function(exports, require, module) {
 var SharingRuleView;
 
 module.exports = SharingRuleView = Backbone.View.extend({
   template: require('../templates/sharingRule'),
   tagName: 'div',
+  className: 'sharingRule',
+  events: {
+    'click #deleteRule': 'deleteRule'
+  },
   render: function() {
-
-    /*
-    @collection.forEach (model) =>
-    
-        html += @renderOne model
-    
-    html += '</table>'
-    @$el.html(html)
-     */
     this.$el.html(this.template({
       sharingRule: this.model.toJSON()
     }));
     return console.log('collection sharing rule: ' + JSON.stringify(this.model));
   },
-  initialize: function() {}
+  deleteRule: function() {
+    console.log('id : ' + this.model.id);
+    this.model.destroy();
+    return this.remove();
+  }
 });
 });
 

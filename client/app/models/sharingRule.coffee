@@ -1,6 +1,6 @@
 module.exports = class SharingRule extends Backbone.Model
 
-    rootUrl: 'sharingurl'
+    urlRoot: 'sharingrule'
 
     defaults:
         docType: "sharingRule"

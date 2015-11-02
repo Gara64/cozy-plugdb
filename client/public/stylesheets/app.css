@@ -25,7 +25,9 @@ body {
   margin-left: 20px;
   vertical-align: top;
 }
-#,
+div.sharingRule {
+  border: 2px solid #000;
+}
 .formRow {
   display: flex;
   align-items: center;

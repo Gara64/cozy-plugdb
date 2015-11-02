@@ -11,5 +11,5 @@ module.exports =
         get: sharingrule.all
         post: sharingrule.create
 
-    'sharingrule/:id':
+    'sharingrule/:ruleid':
         delete: sharingrule.destroy

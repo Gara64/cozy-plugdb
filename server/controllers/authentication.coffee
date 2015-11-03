@@ -6,17 +6,29 @@ clientDS = new Client "http://#{dsHost}:#{dsPort}/"
 if process.env.NODE_ENV is "production" or process.env.NODE_ENV is "test"
     clientDS.setBasicAuth process.env.NAME, process.env.TOKEN
 
-isAuth = false
-
 module.exports.fingerprint = (req, res, next) ->
-    clientDS.post "fingerprint/", null, (err, result, body) =>
-        if err? or result.statusCode is 500
+    clientDS.post "fingerprint/", null, (err, result, body) ->
+        console.log 'err : ' + JSON.stringify err
+        console.log 'res : ' + JSON.stringify result
+        console.log 'body : ' + JSON.stringify body
+
+        if result.statusCode is 500
             res.send 500
-        else if res.statusCode is 401
+        else if result.statusCode is 401
             res.send 401
         else
-            isAuth = true
-            res.send 200
+            res.send 200, 'ok'
 
-module.exports.isAuth = ->
-    return isAuth
+
+###
+module.exports.isAuth = (req, res, next) ->
+    clientDS.get "fingerprint/", null, (err, res, body) ->
+        if result.statusCode is 500 or not body.isInit?
+            res.send 500
+        else
+            res.send 200, body.isInit
+###
+
+module.exports.isAuth = (callback) ->
+    clientDS.get "fingerprint/", null, (err, result, body) ->
+        callback err, body.isAuth

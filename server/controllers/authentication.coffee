@@ -8,9 +8,6 @@ if process.env.NODE_ENV is "production" or process.env.NODE_ENV is "test"
 
 module.exports.fingerprint = (req, res, next) ->
     clientDS.post "fingerprint/", null, (err, result, body) ->
-        console.log 'err : ' + JSON.stringify err
-        console.log 'res : ' + JSON.stringify result
-        console.log 'body : ' + JSON.stringify body
 
         if result.statusCode is 500
             res.send 500

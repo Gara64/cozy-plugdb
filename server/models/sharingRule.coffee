@@ -10,5 +10,4 @@ module.exports = SharingRule = cozydb.getModel('sharingRule', {
 
 
 SharingRule.all = (params, callback) ->
-    console.log 'hop'
     SharingRule.request "all", params, callback

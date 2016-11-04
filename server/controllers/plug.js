@@ -272,6 +272,9 @@ module.exports.filterContactsPlug = function(contacts, callback) {
     if(!plugInit) {
         callback("plugdb not initialized");
     }
+    else if(!plugAuth) {
+        callback("plugdb not auth");
+    }
     else {
         var filteredContacts = [];
         var idsToInsert = [];

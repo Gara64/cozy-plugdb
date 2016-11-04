@@ -49,7 +49,7 @@ module.exports.close = function(req, res) {
 
 var closePlug = function(req, res, callback) {
 
-    var msg; 
+    var msg;
     if(!plugInit){
         msg = "PlugDB is not initialized";
         res.send(200, msg);
@@ -106,9 +106,9 @@ module.exports.reset = function(req, res) {
             }
         });
     }
-    else 
+    else
         init(req, res);
-    
+
 };
 
 module.exports.generate = function(req, res) {
@@ -128,16 +128,22 @@ module.exports.generate = function(req, res) {
         //synchronous execution, to pass an array to the plugdb insert function
         async.waterfall([
             function(callback) {
-                Contact.deleteAllContacts(function(err) {
+                Contact.deleteAll(function(err) {
                     callback();
                 });
             },
             function(callback) {
-                Contact.createContacts(nDocs, req.body.baseName, function(err, ids) {
-                    callback(null, ids);
+                async.times(nDocs, function(i, cb) {
+                    Contact.createSingleContact(req.body.baseName, function(err, id) {
+                        cb(err, id);
+                    });
+                }, function(err, ids) {
+                    console.log('ids ' + JSON.stringify(ids));
+                    callback(err, ids);
                 });
             },
             function(ids, callback) {
+                console.log('lets insert ids ' + JSON.stringify(ids));
                 plug.insert(ids, function(err) {
                     if(err) {
                         console.log(err);
@@ -270,7 +276,7 @@ module.exports.filterContactsPlug = function(contacts, callback) {
         var filteredContacts = [];
         var idsToInsert = [];
 
-        //add delay if case a plugdb query is running        
+        //add delay if case a plugdb query is running
         //setTimeout(function() {
 
         plug.select(function(err, idsPlug) {
@@ -278,9 +284,10 @@ module.exports.filterContactsPlug = function(contacts, callback) {
                 callback(err);
             }
             else {
-                console.log('select plug : ' + idsPlug);
+                console.log('select plug : ' + JSON.stringify(idsPlug));
+
                 for(var i=0;i<contacts.length;i++) {
-                    
+
                     if(idsPlug != null && idsPlug.indexOf(contacts[i].id) > -1 ) {
                         console.log(contacts[i].id + " match");
                         filteredContacts.push(contacts[i]);
@@ -293,7 +300,7 @@ module.exports.filterContactsPlug = function(contacts, callback) {
                         }
                     }
                 }
-                 
+
                 //in case we received shared contacts, insert the ids
                 if(idsToInsert!= null) {
                     plug.insert(idsToInsert, function(err) {
@@ -321,6 +328,3 @@ var sharePhotos = function(callback) {
      });
 
 };
-
-
-

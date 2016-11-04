@@ -18,7 +18,7 @@ mapSharedDoc = (doc) ->
 
 do createRequest = ->
     console.log('request creation')
-    Contacts.defineRequest("shared", mapSharedDoc, (err) -> 
+    Contacts.defineRequest("shared", mapSharedDoc, (err) ->
         if err
             console.log(err)
     )
@@ -35,13 +35,15 @@ module.exports.createContacts = (nDocs, baseName, callback) ->
     createSingleContact(baseName, (err, result) ->
         if err
             callback(err)
-        ids.push result.id
-        #this is necessary to return the ids list to plugDB
-        if cpt is nDocs
-            callback(null, ids)
-    ) for i in [0 .. nDocs] 
+        else
+            ids.push result.id
+            cpt++
+            #this is necessary to return the ids list to plugDB
+            if cpt is nDocs
+                return callback(null, ids)
+    ) for i in [0 ... nDocs]
 
-module.exports.createSingleContact = (baseName, callback) ->
+createSingleContact = module.exports.createSingleContact = (baseName, callback) ->
     Contacts.create({fn: baseName}, (err, result) ->
         callback(err, result.id)
     )
@@ -54,7 +56,3 @@ module.exports.getSharedContacts = (callback) ->
         else
             callback(err)
     )
-
-
-
-

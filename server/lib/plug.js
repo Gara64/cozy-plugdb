@@ -24,14 +24,15 @@ var init = function (callback){
 var insert = function(ids, callback){
 	//The js Object needs to be converted into a java String array
 	var array = java.newArray("java.lang.String", ids);
-	plug.plugInsert(array, function(err) {
+	plug.plugInsert(array, function(err, res) {
+		console.log(res + ' docs inserted');
 		callback(err);
 	});
 };
 
 //select start on docs to return the ids
 var select = function(callback){
-	plug.plugSelect(function(err, result) {
+	plug.plugSelectDocs(function(err, result) {
 		callback(err, result);
 	});
 };
@@ -43,7 +44,7 @@ var close = function(callback){
 	});
 };
 
-//Authenticate by fingerprint 
+//Authenticate by fingerprint
 var authFP = function(callback){
 	plug.plugFPAuthentication(function(err, authID) {
 		callback(err, authID);

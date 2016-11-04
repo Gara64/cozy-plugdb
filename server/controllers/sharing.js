@@ -6,10 +6,11 @@ var request = require('request-json');
 var log = require('printit')();
 Sharing = require('../models/sharing');
 
-SOURCE = "http://192.168.90.209"
+SOURCE = "http://192.168.0.1";
+TARGET = "http://192.168.0.2";
 
 var couchClient = Sharing.initClient(SOURCE + ":5984");
-var couchTarget;
+var couchTarget = request.newClient(TARGET + ":5984");
 
 module.exports.replicate = function(req, res) {
 
@@ -130,24 +131,9 @@ module.exports.register = function(req, res) {
 See replicateRemote instead */
 var replicateDocs = function(target, ids, callback) {
 
-    var source;
-    if(target === "192.168.50.5") {
-        source = "http://192.168.50.4:5984/cozy";
-        Sharing.targetURL = "http://pzjWbznBQPtfJ0es6cvHQKX0cGVqNfHW:NPjnFATLxdvzLxsFh9wzyqSYx4CjG30U@192.168.50.5:5984/cozy";
-    }
-    else if(target === "192.168.0.1") {
-        source = "http://192.168.0.2:5985/cozy";
-        Sharing.targetURL = "http://192.168.0.1:5985/cozy";
-    }
-    else if(target === "192.168.0.2") {
-        source = "http://192.168.0.1:5985/cozy";
-        Sharing.targetURL = "http://" + target + ":5985/cozy";
-    }
-    else {
-        source = SOURCE + ":5984/cozy";
-        Sharing.targetURL = "http://" + target + ":5984";
-    }
 
+    var source = SOURCE + ":5984/cozy";
+    Sharing.targetURL = "http://" + target + ":5984";
 
     var repSourceToTarget = {
         source: "cozy",
@@ -169,6 +155,7 @@ var replicateDocs = function(target, ids, callback) {
     couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
         //err is sometimes empty, even if it has failed
         if(err || !body.ok){
+            log.raw(err);
             log.raw(body);
             console.log("Replication from source failed");
             callback("Replication from source failed");
@@ -200,61 +187,49 @@ var replicateDocs = function(target, ids, callback) {
 
 var cancelReplication = function(callback) {
 
-     var cancelCouchRep = function(tasks, cb) {
-
-        async.each(tasks, function (task, _cb) {
-            options = {
-                replication_id:  task.replication_id,
-                cancel:true
-            };
-
-            client.post("_replicate", options, function(err, res, body){
-                if(err || !body.ok){
-                    console.log("Cancel replication failed");
-                    _cb(err);
-                }
-                else{
-                    log.raw('Cancel replication ok');
-                    _cb();
-                }
-            });
-        }, function(err) {
-            cb(err);
-        });
-
-     };
-
-     //get local active tasks
-    getActiveTasks(couchClient, function(err, tasks) {
+    stopReplications(couchClient, function(err) {
         if(err)
             callback(err);
         else {
-            cancelCouchRep(tasks, function(err) {
+            stopReplications(couchTarget, function(err) {
                 callback(err);
             });
         }
     });
-
-    /*
-    if(couchTarget != null) {
-        getActiveTasks(couchTarget, function(err, repIds) {
-            if(err)
-                callback(err);
-            else if(repIds) {
-                cancelCouchRep(couchTarget, repIds, function(err) {
-                    callback(err);
-                });
-            }
-        });
-    }
-    else {
-        callback(null);
-    }
-    */
-
-};
+}
 
 
+
+ var stopReplications = function(client, tasks, callback) {
+
+     getActiveTasks(client, function(err, tasks) {
+         if(err)
+             callback(err);
+         else {
+
+             async.each(tasks, function (task, cb) {
+                 options = {
+                     replication_id:  task.replication_id,
+                     cancel:true
+                 };
+
+                 client.post("_replicate", options, function(err, res, body){
+                     if(err || !body.ok){
+                         console.log("Cancel replication failed");
+                         cb(err);
+                     }
+                     else {
+                         log.raw('Cancel replication ok');
+                         cb();
+                     }
+                 });
+             }, function(err) {
+                 callback(err);
+             });
+         }
+
+     });
+ }
 
 
 var getActiveTasks = function(client, callback) {

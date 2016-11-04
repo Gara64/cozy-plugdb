@@ -1,42 +1,59 @@
-(function(/*! Brunch !*/) {
+(function() {
   'use strict';
 
-  var globals = typeof window !== 'undefined' ? window : global;
+  var globals = typeof window === 'undefined' ? global : window;
   if (typeof globals.require === 'function') return;
 
   var modules = {};
   var cache = {};
+  var has = ({}).hasOwnProperty;
 
-  var has = function(object, name) {
-    return ({}).hasOwnProperty.call(object, name);
+  var aliases = {};
+
+  var endsWith = function(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
   };
 
-  var expand = function(root, name) {
-    var results = [], parts, part;
-    if (/^\.\.?(\/|$)/.test(name)) {
-      parts = [root, name].join('/').split('/');
-    } else {
-      parts = name.split('/');
-    }
-    for (var i = 0, length = parts.length; i < length; i++) {
-      part = parts[i];
-      if (part === '..') {
-        results.pop();
-      } else if (part !== '.' && part !== '') {
-        results.push(part);
+  var unalias = function(alias, loaderPath) {
+    var start = 0;
+    if (loaderPath) {
+      if (loaderPath.indexOf('components/' === 0)) {
+        start = 'components/'.length;
+      }
+      if (loaderPath.indexOf('/', start) > 0) {
+        loaderPath = loaderPath.substring(start, loaderPath.indexOf('/', start));
       }
     }
-    return results.join('/');
+    var result = aliases[alias + '/index.js'] || aliases[loaderPath + '/deps/' + alias + '/index.js'];
+    if (result) {
+      return 'components/' + result.substring(0, result.length - '.js'.length);
+    }
+    return alias;
   };
 
+  var expand = (function() {
+    var reg = /^\.\.?(\/|$)/;
+    return function(root, name) {
+      var results = [], parts, part;
+      parts = (reg.test(name) ? root + '/' + name : name).split('/');
+      for (var i = 0, length = parts.length; i < length; i++) {
+        part = parts[i];
+        if (part === '..') {
+          results.pop();
+        } else if (part !== '.' && part !== '') {
+          results.push(part);
+        }
+      }
+      return results.join('/');
+    };
+  })();
   var dirname = function(path) {
     return path.split('/').slice(0, -1).join('/');
   };
 
   var localRequire = function(path) {
     return function(name) {
-      var dir = dirname(path);
-      var absolute = expand(dir, name);
+      var absolute = expand(dirname(path), name);
       return globals.require(absolute, path);
     };
   };
@@ -51,21 +68,26 @@
   var require = function(name, loaderPath) {
     var path = expand(name, '.');
     if (loaderPath == null) loaderPath = '/';
+    path = unalias(name, loaderPath);
 
-    if (has(cache, path)) return cache[path].exports;
-    if (has(modules, path)) return initModule(path, modules[path]);
+    if (has.call(cache, path)) return cache[path].exports;
+    if (has.call(modules, path)) return initModule(path, modules[path]);
 
     var dirIndex = expand(path, './index');
-    if (has(cache, dirIndex)) return cache[dirIndex].exports;
-    if (has(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
+    if (has.call(cache, dirIndex)) return cache[dirIndex].exports;
+    if (has.call(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
 
     throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
   };
 
-  var define = function(bundle, fn) {
+  require.alias = function(from, to) {
+    aliases[to] = from;
+  };
+
+  require.register = require.define = function(bundle, fn) {
     if (typeof bundle === 'object') {
       for (var key in bundle) {
-        if (has(bundle, key)) {
+        if (has.call(bundle, key)) {
           modules[key] = bundle[key];
         }
       }
@@ -74,21 +96,18 @@
     }
   };
 
-  var list = function() {
+  require.list = function() {
     var result = [];
     for (var item in modules) {
-      if (has(modules, item)) {
+      if (has.call(modules, item)) {
         result.push(item);
       }
     }
     return result;
   };
 
+  require.brunch = true;
   globals.require = require;
-  globals.require.define = define;
-  globals.require.register = define;
-  globals.require.list = list;
-  globals.require.brunch = true;
 })();
 require.register("application", function(exports, require, module) {
 module.exports = {
@@ -171,7 +190,9 @@ module.exports = Plug = Backbone.Model.extend({
                 callback("Cancel replication successful !");
             },
             error: function(result, response) {
-                callback("Cancel failed !");
+                //callback("Cancel failed !");
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, false);
             }
         });
     },
@@ -356,12 +377,13 @@ module.exports = Router = Backbone.Router.extend({
 });
 
 ;require.register("templates/home", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge
+/**/) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="imgplugdb" src="./images/plugdb.png" class="superpose"/><img id="imglock" src="./images/lock.png" height="50" width="50" class="superpose"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form><label>3/ Share my contacts with (URL) :</label><input id="targetURL" type="text" name="targetURL"/></form><p class="formRow">4/ Start sharing&nbsp;<a href=""><img id="replicateContacts" data-datatype="contact" src="./images/share.jpg" height="30" width="30"/></a></p></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><br/><form class="formRow"><label>Add 1 contact named </label><input type="text" name="singleBaseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertSingleDoc" type="image" src="./images/add.png" alt="submit" height="25" width="25"/></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts : --><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
+buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="imgplugdb" src="./images/plugdb.png" class="superpose"/><img id="imglock" src="./images/lock.png" height="50" width="50" class="superpose"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form autocomplete="on"><label>3/ Share my contacts with (URL) :</label><input id="targetURL" type="textfield" name="targetURL" value=""/><input id="replicateContacts" type="image" data-datatype="contact" src="./images/share.jpg" height="40" width="40"/></form><!--p.formRow 4/ Start sharing&nbsp;--><!--	a(href="" )--><!--img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="30", width="30")--><br/></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><br/><form class="formRow"><label>Add 1 contact named</label><input type="text" name="singleBaseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertSingleDoc" type="image" src="./images/add.png" alt="submit" height="25" width="25"/></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts :--><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
 }
 return buf.join("");
 };

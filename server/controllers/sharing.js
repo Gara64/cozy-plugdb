@@ -1,13 +1,15 @@
 Contact = require('../models/contacts');
 Device = require('../models/device.js');
 var request_new = require('request');
+var async = require('async');
 var request = require('request-json');
 var log = require('printit')();
 Sharing = require('../models/sharing');
 
-var couchClient = Sharing.initClient("http://localhost:5985");
-var couchTarget;
+SOURCE = "http://192.168.90.209"
 
+var couchClient = Sharing.initClient(SOURCE + ":5984");
+var couchTarget;
 
 module.exports.replicate = function(req, res) {
 
@@ -25,7 +27,7 @@ module.exports.replicate = function(req, res) {
 
     //create replication request
     if(req.params.bool === 'true'){
-        
+
         var dataType = req.body.dataType;
         var target = req.body.target;
         var getIdsMode;
@@ -141,15 +143,21 @@ var replicateDocs = function(target, ids, callback) {
         source = "http://192.168.0.1:5985/cozy";
         Sharing.targetURL = "http://" + target + ":5985/cozy";
     }
+    else {
+        source = SOURCE + ":5984/cozy";
+        Sharing.targetURL = "http://" + target + ":5984";
+    }
 
-    var repSourceToTarget = { 
-        source: "cozy", 
-        target: Sharing.targetURL,
+
+    var repSourceToTarget = {
+        source: "cozy",
+        target: Sharing.targetURL + "/cozy",
         continuous: true,
         //cancel: true,
         doc_ids: ids
     };
     couchTarget = Sharing.initClient(Sharing.targetURL);
+
     var repTargetToSource = {
         source: "cozy",
         target: source,
@@ -157,21 +165,25 @@ var replicateDocs = function(target, ids, callback) {
         doc_ids: ids
     };
     console.log("replication on ids " + ids + " to " + repSourceToTarget.target);
+
     couchClient.post("_replicate", repSourceToTarget, function(err, res, body){
         //err is sometimes empty, even if it has failed
         if(err || !body.ok){
             log.raw(body);
             console.log("Replication from source failed");
-            callback("Replication from source failed"); 
+            callback("Replication from source failed");
         }
         else{
             log.raw('Replication from source suceeded \o/');
             log.raw(body);
+
+            console.log("replication target :  "  + JSON.stringify(repTargetToSource));
+
             couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
                 if(err || !body.ok){
                     log.raw(body);
                     console.log("Replication from target failed");
-                    callback("Replication from target failed"); 
+                    callback("Replication from target failed");
 
                 }
                 else{
@@ -182,38 +194,48 @@ var replicateDocs = function(target, ids, callback) {
             });
         }
     });
-    
+
 
 };
 
 var cancelReplication = function(callback) {
- 
-     var cancelCouchRep = function(client, ids, _callback) {
-        for(var i=0;i<ids.length;i++) {
 
-            client.post("_replicate", {replication_id: ids[i], cancel:true}, function(err, res, body){
+     var cancelCouchRep = function(tasks, cb) {
+
+        async.each(tasks, function (task, _cb) {
+            options = {
+                replication_id:  task.replication_id,
+                cancel:true
+            };
+
+            client.post("_replicate", options, function(err, res, body){
                 if(err || !body.ok){
                     console.log("Cancel replication failed");
-                    callback(err);
+                    _cb(err);
                 }
                 else{
                     log.raw('Cancel replication ok');
-                    _callback();
+                    _cb();
                 }
             });
-        }
+        }, function(err) {
+            cb(err);
+        });
+
      };
 
-    getActiveTasks(couchClient, function(err, repIds) {
+     //get local active tasks
+    getActiveTasks(couchClient, function(err, tasks) {
         if(err)
             callback(err);
-        else if(repIds) {
-            cancelCouchRep(couchClient, repIds, function(err) {
-                //callback(err);
+        else {
+            cancelCouchRep(tasks, function(err) {
+                callback(err);
             });
         }
     });
 
+    /*
     if(couchTarget != null) {
         getActiveTasks(couchTarget, function(err, repIds) {
             if(err)
@@ -228,7 +250,8 @@ var cancelReplication = function(callback) {
     else {
         callback(null);
     }
-    
+    */
+
 };
 
 
@@ -236,19 +259,8 @@ var cancelReplication = function(callback) {
 
 var getActiveTasks = function(client, callback) {
     client.get("_active_tasks", function(err, res, body){
-        var repIds;
-        if(err){
-            console.error('Cannot get active tasks');
-        }
-        else if(body.length) {
-            repIds = [];
-            for (var i=0;i<body.length; i++) {
-                var rep = body[i];
-                repIds.push(rep.replication_id);
-            }
-        }
-        callback(err, repIds);
-        
+        callback(err, body);
+
     });
 };
 
@@ -286,8 +298,8 @@ var replicateRemote = function(ids, cancel, callback) {
     var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
     var localURL = "http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104/cozy";
     console.log(remoteURL);
-    
-var sourceToTarget = { 
+
+var sourceToTarget = {
         source: "cozy",
         target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulSharing.2.cozycloud.cc/cozy/",
         continuous: true,
@@ -297,7 +309,7 @@ var sourceToTarget = {
 
     var targetToSource = {
         source: "http://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@localhost:5984/cozy",
-        target:  localURL, 
+        target:  localURL,
         continuous: true,
         doc_ids: ids
     };
@@ -307,7 +319,7 @@ var sourceToTarget = {
             console.log(err);
         else{
             replicateWithProxy(targetToSource, "https://paulSharing.1.cozycloud.cc", "Sharing.1", function(err) {
-                if(err) 
+                if(err)
                     console.log(err);
                 else
                     callback(err);
@@ -334,7 +346,7 @@ var replicateWithProxy = function(data, target, password, callback) {
 
             req.post({url: replicateURL, json:true, body: data}, function(err, res, body) {
                 if(res.statusCode == 302)
-                    console.log("You are not authenticated"); 
+                    console.log("You are not authenticated");
                 else if(err)  //|| (res.statusCode != 202))
                     console.log(err);
                 else{
@@ -426,7 +438,7 @@ var uploadFiles = function(file, callback) {
             return console.error(err);
         }
         else {
-           // var data 
+           // var data
             req.post({url: "https://paulSharing.2.cozycloud.cc/apps/files/files", body: file}, function(err, res, body) {
                 if(err)
                     return console.error(err);

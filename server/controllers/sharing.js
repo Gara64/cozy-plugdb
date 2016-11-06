@@ -168,6 +168,7 @@ var replicateDocs = function(target, ids, callback) {
 
             couchTarget.post("_replicate", repTargetToSource, function(err, res, body){
                 if(err || !body.ok){
+                    log.raw(err);
                     log.raw(body);
                     console.log("Replication from target failed");
                     callback("Replication from target failed");
@@ -176,7 +177,7 @@ var replicateDocs = function(target, ids, callback) {
                 else{
                     log.raw('Replication from target suceeded \o/');
                     log.raw(body);
-                    callback(err);
+                    callback();
                 }
             });
         }
@@ -200,11 +201,16 @@ var cancelReplication = function(callback) {
 
 
 
- var stopReplications = function(client, tasks, callback) {
+ var stopReplications = function(client, callback) {
 
      getActiveTasks(client, function(err, tasks) {
+         console.log('tasks : ' + JSON.stringify(tasks));
+
          if(err)
              callback(err);
+         else if(!tasks || tasks.length === 0){
+             callback();
+         }
          else {
 
              async.each(tasks, function (task, cb) {

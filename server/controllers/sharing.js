@@ -23,54 +23,57 @@ module.exports.replicate = function(req, res) {
         msg = "Not authenticated";
         res.send(500, {error: msg});
     }
+    else {
 
-    console.log(req.params.bool);
+        console.log(req.params.bool);
 
-    //create replication request
-    if(req.params.bool === 'true'){
+        //create replication request
+        if(req.params.bool === 'true'){
 
-        var dataType = req.body.dataType;
-        var target = req.body.target;
-        var getIdsMode;
+            var dataType = req.body.dataType;
+            var target = req.body.target;
+            var getIdsMode;
 
-        if(dataType === "contact"){
-            Contact.getSharedContacts(function(err, docs) {
-                if(err)
-                    res.send(500, {error: err});
-                else {
-                    //replicateRemote(ids, false, function(err) {
-                     replicateDocs(target, docs, function(err) {
-                        if(err)
-                            res.send(500, {error: err});
-                        else
-                            res.send(200, req.body);
-                    });
-                }
-            });
+            if(dataType === "contact"){
+                Contact.getSharedContacts(function(err, docs) {
+                    if(err)
+                        res.send(500, {error: err});
+                    else {
+                        //replicateRemote(ids, false, function(err) {
+                         replicateDocs(target, docs, function(err) {
+                            if(err)
+                                res.send(500, {error: err});
+                            else
+                                res.send(200, req.body);
+                        });
+                    }
+                });
+            }
+            else if(dataType === "album"){
+                sharePhotos(function(err) {
+                    if(err)
+                        res.send(500, {error: err});
+                    else
+                        res.send(200, req.body);
+                });
+            }
         }
-        else if(dataType === "album"){
-            sharePhotos(function(err) {
+
+        //cancel replication request
+        else if(req.params.bool === 'false') {
+
+            cancelReplication(function(err) {
+
                 if(err)
                     res.send(500, {error: err});
                 else
-                    res.send(200, req.body);
+                    res.send(200, "Replication successfully cancelled");
             });
         }
+        else
+            res.redirect('back');
+
     }
-
-    //cancel replication request
-    else if(req.params.bool === 'false') {
-
-        cancelReplication(function(err) {
-            if(err)
-                res.send(500, {error: err});
-            else
-                res.send(200, "Replication successfully cancelled");
-        });
-    }
-    else
-        res.redirect('back');
-
 
 
 };

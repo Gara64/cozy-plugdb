@@ -1,4 +1,6 @@
 Plug = require('../models/plug')
+Rule = require ('../models/rule')
+rule = new Rule()
 
 #var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend(
@@ -15,16 +17,15 @@ module.exports = AppView = Backbone.View.extend(
         'click #close'             : 'closePlug'
         'click #reset'             : 'resetPlug'
         'click #insertSingleDoc'   : 'insertSingleDoc'
-
-
+        'click #createRule'        : 'createRule'
 
 
     render: ->
         model = @model
-        
+
         # render the template
         @$el.html @template()
-       
+
         @renderStatus()
         @renderPlug()
 
@@ -43,7 +44,7 @@ module.exports = AppView = Backbone.View.extend(
 
     renderStatus: ->
         model = @model
-        @$el.html @template(status: model.get('status')) 
+        @$el.html @template(status: model.get('status'))
 
 
     renderPlug: ->
@@ -58,7 +59,7 @@ module.exports = AppView = Backbone.View.extend(
             @render
         else
             $('#myList').css('display', 'none')
-        
+
         this
 
     updateStatus: ->
@@ -86,7 +87,7 @@ module.exports = AppView = Backbone.View.extend(
         if not plug.get 'auth'
             alert 'Please authenticate first'
             return
-        
+
         plug.set dataType: dataType
         plug.set target: target
         plug.replicate (res) ->
@@ -181,10 +182,21 @@ module.exports = AppView = Backbone.View.extend(
             return
         return
 
+    createRule: (event) ->
+        event.preventDefault()
+        rule.set docType   : @$el.find('input[name="doctype"]').val()
+        rule.set docAttr: @$el.find('input[name="docattr"]').val()
+        rule.set docVal: @$el.find('input[name="docval"]').val()
+        rule.set subAttr: @$el.find('input[name="subattr"]').val()
+        rule.set subVal: @$el.find('input[name="subval"]').val()
+        rule.create (res) ->
+            console.log 'res : ', res
+
 
     # initialize is automatically called once after the view is constructed
     initialize: ->
         _this = this
+
         @getPlugStatus () ->
             _this.renderPlug _this
         #@renderPlug this

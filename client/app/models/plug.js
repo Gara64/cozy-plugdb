@@ -43,7 +43,7 @@ module.exports = Plug = Backbone.Model.extend({
                 callback(txt.error, false);
             }
         });
-    }
+    },
 
 
     generate: function(callback) {

@@ -3,6 +3,7 @@
 var plug     = require('./plug');
 var contacts = require('./contacts');
 var sharing = require('./sharing');
+var rule = require('./rule');
 
 module.exports = {
   '': {
@@ -47,5 +48,7 @@ module.exports = {
   'plug/status' : {
     get: plug.status
   },
+  'rule' : {
+      post: rule.create
+  }
 };
-

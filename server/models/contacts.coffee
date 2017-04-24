@@ -1,7 +1,7 @@
 
-americano = require "americano"
+cozydb = require "cozydb"
 
-module.exports = Contacts = americano.getModel('Contact', {
+module.exports = Contacts = cozydb.getModel('Contact', {
       "id"         : String,
       "fn"         : String,
       "n"          : String,

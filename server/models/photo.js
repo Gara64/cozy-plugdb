@@ -1,7 +1,7 @@
-var americano = require('americano-cozy');
+var cozydb = require('cozydb');
 var Binary = require('./binary');
 
-module.exports = Photo = americano.getModel('Photo', {
+module.exports = Photo = cozydb.getModel('Photo', {
     id : String,
     title : String,
     description : String,
@@ -13,4 +13,3 @@ module.exports = Photo = americano.getModel('Photo', {
     albumid : String,
     date : String
 });
-   

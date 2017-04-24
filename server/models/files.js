@@ -1,6 +1,6 @@
-var americano = require('americano');
+var cozydb = require('cozydb');
 
-module.exports = File = americano.getModel('file', {
+module.exports = File = cozydb.getModel('file', {
       "id": String,
       "name": String,
       "tags": [String]

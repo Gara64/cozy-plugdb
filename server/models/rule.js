@@ -1,6 +1,7 @@
-var americano = require('americano');
+//var americano = require('americano');
+cozydb = require('cozydb');
 
-module.exports = Rule = americano.getModel('rule', {
+module.exports = Rule = cozydb.getModel('rule', {
       "id": String,
       "docType": String,
       "docAttr": String,

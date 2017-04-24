@@ -1,6 +1,6 @@
-var americano = require('americano-cozy');
+var cozydb = require('cozydb');
 
-module.exports = Binary = americano.getModel('Binary', {});
+module.exports = Binary = cozydb.getModel('Binary', {});
 
 Binary.getBinary = function(id, callback) {
     Binary.find(id, function(err, ret) {

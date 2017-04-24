@@ -1,7 +1,7 @@
-var americano = require('americano-cozy');
+var cozydb = require('cozydb');
 var Photo = require('./photo');
 
-  module.exports = Album = americano.getModel('Album', {
+  module.exports = Album = cozydb.getModel('Album', {
     id: String,
     title: String,
     description: String,
@@ -13,4 +13,3 @@ var Photo = require('./photo');
     },
     folderid: String
   });
-

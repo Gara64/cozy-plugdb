@@ -120,6 +120,15 @@ module.exports = {
 };
 });
 
+require.register("collections/acls", function(exports, require, module) {
+acl = require('../models/acl');
+module.exports = ACLs = Backbone.Collection.extend({
+    model: acl,
+    url: 'acls',
+});
+
+});
+
 require.register("collections/plugs", function(exports, require, module) {
 Plug = require('../models/plug');
 module.exports = Plugs = Backbone.Collection.extend({
@@ -137,16 +146,13 @@ $(document).ready(function() {
 
 });
 
-require.register("models/device", function(exports, require, module) {
-module.exports = Device = Backbone.Model.extend({
-	url: '',
-	defaults: {
-		password: null,
-		target: null,
-		devicename: null, 
-		status: null
-	}
+require.register("models/acl", function(exports, require, module) {
+module.exports = ACL = Backbone.Model.extend({
+    urlRoot: 'acl',
+    defaults: {
+    }
 });
+
 });
 
 require.register("models/plug", function(exports, require, module) {
@@ -159,8 +165,8 @@ module.exports = Plug = Backbone.Model.extend({
         devicename: null,
         target: null,
         password: null,
-        dataType: null, 
-        auth: false, 
+        dataType: null,
+        auth: false,
         init: false,
         ids: null
     },
@@ -193,22 +199,6 @@ module.exports = Plug = Backbone.Model.extend({
                 //callback("Cancel failed !");
                 var txt = JSON.parse(result.responseText);
                 callback(txt.error, false);
-            }
-        });
-    },
-
-    register: function(callback) {
-        $.ajax({
-            url: 'plug/register/true',
-            type: 'POST',
-            data: {
-                target: this.get('target')
-            },
-            success:function(result){
-                callback("Ready to share !");
-            },
-            error: function(result, response) {
-                callback("Not ready :/");
             }
         });
     },
@@ -278,7 +268,7 @@ module.exports = Plug = Backbone.Model.extend({
     authenticateFP: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/authFP', 
+            url: 'plug/authFP',
             type: 'POST',
             success: function(result){
                 callback(result, true);
@@ -293,7 +283,7 @@ module.exports = Plug = Backbone.Model.extend({
     select: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/select', 
+            url: 'plug/select',
             type: 'GET',
             success: function(result){
                 callback(result);
@@ -303,12 +293,12 @@ module.exports = Plug = Backbone.Model.extend({
                 callback(txt.error);
             }
         });
-    }, 
+    },
 
     insert: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/insert', 
+            url: 'plug/insert',
             type: 'POST',
             data: {
                 baseName: this.get('baseName')
@@ -321,12 +311,12 @@ module.exports = Plug = Backbone.Model.extend({
                 callback(txt.error);
             }
         });
-    }, 
+    },
 
     status: function(callback) {
         _this = this;
         $.ajax({
-            url: 'plug/status', 
+            url: 'plug/status',
             type: 'GET',
             success: function(result){
                 callback(result);
@@ -343,20 +333,52 @@ module.exports = Plug = Backbone.Model.extend({
 
 });
 
+require.register("models/rule", function(exports, require, module) {
+module.exports = Rule = Backbone.Model.extend({
+    urlRoot: 'rule',
+    defaults: {
+        docType: null,
+        docAttr: null,
+        docVal: null,
+        subAttr: null,
+        subVal: null,
+    },
+
+    create: function(callback) {
+        $.ajax({
+            url: 'rule',
+            type: 'POST',
+            data: {
+                docType: this.get('docType'),
+                docAttr: this.get('docAttr'),
+                docVal: this.get('docVal'),
+                subAttr: this.get('subAttr'),
+                subVal: this.get('subVal')
+            },
+
+            success:function(result){
+                callback("Create rule ok !");
+            },
+            error: function(result, response) {
+                callback("Create rule failed !");
+            }
+        });
+    },
+
+});
+
+});
+
 require.register("router", function(exports, require, module) {
-var AppView, DeviceModel, PlugCollection, PlugModel, Router, device, plug, plugs;
+var AppView, PlugCollection, PlugModel, Router, plug, plugs;
 
 AppView = require('views/app_view');
 
 PlugCollection = require('collections/plugs');
 
-DeviceModel = require('models/device');
-
 PlugModel = require('models/plug');
 
 plugs = new PlugCollection;
-
-device = new DeviceModel;
 
 plug = new PlugModel;
 
@@ -376,26 +398,78 @@ module.exports = Router = Backbone.Router.extend({
 });
 });
 
-;require.register("templates/home", function(exports, require, module) {
-module.exports = function anonymous(locals, attrs, escape, rethrow, merge
-/**/) {
+;require.register("templates/acl", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="imgplugdb" src="./images/plugdb.png" class="superpose"/><img id="imglock" src="./images/lock.png" height="50" width="50" class="superpose"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a><!--label Device name :--><!--input(type="text", name="devicename", size=10)--><!--label Password :--><!--input(type="password", name="pwd", size=10)--></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form autocomplete="on"><label>3/ Share my contacts with (URL) :</label><input id="targetURL" type="textfield" name="targetURL" value=""/><input id="replicateContacts" type="image" data-datatype="contact" src="./images/share.jpg" height="40" width="40"/></form><!--p.formRow 4/ Start sharing&nbsp;--><!--	a(href="" )--><!--img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="30", width="30")--><br/></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><br/><form class="formRow"><label>Add 1 contact named</label><input type="text" name="singleBaseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertSingleDoc" type="image" src="./images/add.png" alt="submit" height="25" width="25"/></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts :--><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
+buf.push('<div><h3>Suspicious ACL</h3><table><thead><tr class="titles"><th>Doc</th><th>Subject</th></tr></thead></table></div>');
 }
 return buf.join("");
 };
 });
 
-require.register("views/app_view", function(exports, require, module) {
-var AppView, Contact, ContactCollection, ContactListView, ContactListener, Plug,
+require.register("templates/home", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<h1>Sharing control panel</h1><p>of my personal decentralized service system</p><p>Status :<strong id="status">' + escape((interp = status) == null ? '' : interp) + '</strong></p><hr/><br/><div id="plugBlock"><img id="imgplugdb" src="./images/plugdb.png" class="superpose"/><img id="imglock" src="./images/lock.png" height="50" width="50" class="superpose"/><br/><a href=""><input type="button" id="init" value="Init"/><input type="button" id="close" value="Close"/><input type="button" id="reset" value="Reset"/></a></div><div id="sharingBlock"><p class="formRow">1/ Authenticate on your PlugDB&nbsp;<a href=""><img id="authenticate" src="./images/authenticate.png" height="30" width="30"/></a></p><!--span Show contacts--><!--input#show-list(type=\'checkbox\')--><p>2/ Select shared contact</p><div id="myList"></div><br/><form autocomplete="on"><label>3/ Share my contacts with (URL) :</label><input id="targetURL" type="textfield" name="targetURL" value=""/><input id="replicateContacts" type="image" data-datatype="contact" src="./images/share.jpg" height="40" width="40"/></form><!--p.formRow 4/ Start sharing&nbsp;--><!--	a(href="" )--><!--img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="30", width="30")--><br/></div><div><h3>Create sharing rule</h3><form><div><label>What docs?</label><input type="text" name="doctype"/><label>Attr</label><input type="text" name="docattr"/><label>Value</label><input type="text" name="docval"/></div><div><label>With who?</label><label>Attr</label><input type="text" name="subattr"/><label>Value</label><input type="text" name="subval"/></div><input id="createRule" type="button" value="Ok"/></form></div><div id="acl"></div><hr/><br/><span>More tools</span><input id="toggle-more-tools" type="checkbox"/><!-- , checked=\'checked\'--><br/><br/><div id="more-tools"><form class="formRow"><label>Reset contacts & create&nbsp;</label><input type="text" name="nDocs" size="1" value="4"/><span>&nbsp;new ones called&nbsp;</span><input type="text" name="baseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertDocs" type="image" src="./images/generate.png" alt="submit" height="25" width="25"/><!--input(id="insertDocs", type="submit", value="Generate")--><!--img(src="./images/generate.png", height="50", width="50")--></form><br/><form class="formRow"><label>Add 1 contact named</label><input type="text" name="singleBaseName" size="5" value="Alice"/><span>&nbsp;</span><input id="insertSingleDoc" type="image" src="./images/add.png" alt="submit" height="25" width="25"/></form><p class="formRow">Cancel all current replications :<a href=""><img id="cancel" src="./images/cancel.png" height="25" width="25"/></a></p><!--p Extra :--><!--form--><!--	label Target URL :--><!--	input(type="text", name="targetURL", size=10)--><!--	input(id="registerDevice", type="submit", value="Unregister device")--><!----></div><!--p Share the selected contacts :--><!--	a(href="" )--><!--		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")--><!--p Share all my photos !--><!--	a(href="" )--><!--		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")<ul></ul><li><a href="https://github.com/Gara64/cozy-plugdb">Github</a></li>-->');
+}
+return buf.join("");
+};
+});
+
+require.register("views/acl_view", function(exports, require, module) {
+var ACLView, ContactListener, acl,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+acl = require('../models/acl');
+
+ContactListener = (function(_super) {
+  __extends(ContactListener, _super);
+
+  function ContactListener() {
+    return ContactListener.__super__.constructor.apply(this, arguments);
+  }
+
+  ContactListener.prototype.models = {
+    'acl': acl
+  };
+
+  return ContactListener;
+
+})(CozySocketListener);
+
+module.exports = ACLView = Backbone.View.extend({
+  el: '#acl',
+  template: require('../templates/acl'),
+  initialize: function() {
+    this.render();
+  },
+  render: function() {
+    console.log('render acl view');
+    this.$el.html(this.template());
+  }
+});
+});
+
+;require.register("views/app_view", function(exports, require, module) {
+var AppView, Contact, ContactCollection, ContactListView, ContactListener, Plug, Rule, aclView, rule,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Plug = require('../models/plug');
+
+Rule = require('../models/rule');
+
+rule = new Rule();
+
+aclView = require('./acl_view');
 
 module.exports = AppView = Backbone.View.extend({
   el: 'body',
@@ -410,7 +484,8 @@ module.exports = AppView = Backbone.View.extend({
     'click #init': 'initPlug',
     'click #close': 'closePlug',
     'click #reset': 'resetPlug',
-    'click #insertSingleDoc': 'insertSingleDoc'
+    'click #insertSingleDoc': 'insertSingleDoc',
+    'click #createRule': 'createRule'
   },
   render: function() {
     var model, myCollection, realtimer, view;
@@ -428,6 +503,7 @@ module.exports = AppView = Backbone.View.extend({
       el: '#myList',
       collection: myCollection
     });
+    aclView = new aclView();
     return this;
   },
   renderStatus: function() {
@@ -631,6 +707,27 @@ module.exports = AppView = Backbone.View.extend({
       });
     });
   },
+  createRule: function(event) {
+    event.preventDefault();
+    rule.set({
+      docType: this.$el.find('input[name="doctype"]').val()
+    });
+    rule.set({
+      docAttr: this.$el.find('input[name="docattr"]').val()
+    });
+    rule.set({
+      docVal: this.$el.find('input[name="docval"]').val()
+    });
+    rule.set({
+      subAttr: this.$el.find('input[name="subattr"]').val()
+    });
+    rule.set({
+      subVal: this.$el.find('input[name="subval"]').val()
+    });
+    return rule.create(function(res) {
+      return console.log('res : ', res);
+    });
+  },
   initialize: function() {
     var _this;
     _this = this;
@@ -780,10 +877,6 @@ ContactListView = (function(_super) {
   return ContactListView;
 
 })(Backbone.View);
-});
-
-;require.register("views/contact-list", function(exports, require, module) {
-
 });
 
 ;

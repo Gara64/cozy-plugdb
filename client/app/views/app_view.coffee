@@ -1,6 +1,7 @@
 Plug = require('../models/plug')
 Rule = require ('../models/rule')
 rule = new Rule()
+aclView = require './acl_view'
 
 #var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend(
@@ -39,6 +40,9 @@ module.exports = AppView = Backbone.View.extend(
         view = new ContactListView
            el         : '#myList'
            collection : myCollection
+
+        aclView = new aclView()
+
 
         this
 
@@ -312,114 +316,3 @@ class ContactListView extends Backbone.View
 
         html += '</table>'
         @$el.html(html)
-
-
-
-
-
-
-
-# /*
-#         event.preventDefault();
-#         var model = this.model;
-#         model.urlRoot = 'plug/replicate/true';
-#         model.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Sharing ok !"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     cancelReplications: function(event) {
-#         event.preventDefault();
-#         var model = this.model;
-#         model.urlRoot = 'plug/replicate/false';
-#         model.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Cancel replications ok"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     registerDevice: function(event) {
-#         event.preventDefault();
-#         _this = this;
-#         var plug = new Plug({
-#             target: this.$el.find('input[name="targetURL"]').val(),
-#             password: this.$el.find('input[name="pwd"]').val(),
-#             devicename: this.$el.find('input[name="devicename"]').val()
-#         })
-#         plug.urlRoot = 'plug/register/true';
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Device correctly registered"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-
-#     },
-
-#     unregisterDevice: function(event) {
-#         event.preventDefault();
-#         _this = this;
-#         var plug = new Plug({
-#             target: this.$el.find('input[name="targetURL"]').val(),
-#             password: this.$el.find('input[name="pwd"]').val(),
-#             devicename: this.$el.find('input[name="devicename"]').val()
-#         })
-#         plug.urlRoot = 'plug/register/false';
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Device correctly unregistered"});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-
-#     createDocs: function(event) {
-#         // submit button reload the page, we don't want that
-#        event.preventDefault();
-#        _this = this;
-#         // create a new model
-#         var plug = this.model;
-#         plug.set({nDocs: this.$el.find('input[name="nDocs"]').val()});
-#         plug.urlRoot = 'plug/insert';
-
-#         // add it to the collection
-#        //his.collection.add(plug);
-
-#         plug.save({}, {
-#             success: function(model, response) {
-#                 _this.model.set({status: "Insert " + plug.get('nDocs') + ' docs ok !'});
-#                 _this.render();
-#             },
-#             error: function(model, response) {
-#                 var rep = JSON.parse(response.responseText);
-#                 _this.model.set({status: rep.error});
-#                 _this.render();
-#             }
-#         });
-#     },
-# */

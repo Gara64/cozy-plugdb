@@ -1,8 +1,10 @@
 //var americano = require('americano');
 cozydb = require('cozydb');
 
-module.exports = Rule = cozydb.getModel('rule', {
+module.exports = Rule = cozydb.getModel('sharingrule', {
       "id": String,
+      "filterDoc": Object,
+      "filterUser": Object,
       "docType": String,
       "docAttr": String,
       "docVal" :String,

@@ -38,6 +38,15 @@
     },
     "Device": {
       "description": "share as a device"
+    },
+    "Rule": {
+        "description": "sharing rule"
+    },
+    "File": {
+        "description": "files"
+    },
+    "Tag": {
+        "description": "tag sensitive docs"
     }
   },
   "cozy-displayname": "Shary"

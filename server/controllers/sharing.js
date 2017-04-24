@@ -1,5 +1,4 @@
 Contact = require('../models/contacts');
-Device = require('../models/device.js');
 var request_new = require('request');
 var async = require('async');
 var request = require('request-json');
@@ -77,58 +76,6 @@ module.exports.replicate = function(req, res) {
 
 
 };
-
-module.exports.register = function(req, res) {
-    if(!plugInit){
-        console.log("PlugDB is not initialized");
-        //res.redirect('back');
-    }
-
-    console.log("body : " + JSON.stringify(req.body));
-    console.log("body2 : " + req.body);
-    var target = req.body.target;
-
-    console.log('cozyUrl : ' + target);
-
-    if(req.params.bool === 'true') {
-        console.log('go register');
-
-        var config;
-        //paulSharing.1 device : paul - kuzqgv069xz2gldie0yobrn18vbzkt9w
-        if(target.indexOf("paulSharing.1") > -1) {
-            config = {
-                cozyURL: target,
-                login: "paul",
-                password: "kuzqgv069xz2gldie0yobrn18vbzkt9w"
-            };
-        }
-        //paulSharing.2 device : test - hqthj9ggjnqoxbt9pl1sgja0mv5f80k9
-        else if(target.indexOf("paulSharing.2") > -1) {
-            config = {
-                cozyURL: target,
-                login: "test",
-                password: "hqthj9ggjnqoxbt9pl1sgja0mv5f80k9"
-            };
-        }
-        else{
-            var err = target + " not handled";
-            console.log(err);
-            res.send(500, {error: err});
-        }
-
-
-        console.log('replication ready !');
-        Device = new Device({url: config.cozyURL, login: config.login, password: config.password });
-        res.send(200, req.body);
-
-
-    }
-
-    else
-        res.redirect('back');
-
-};
-
 
 /* !!! DEPRECATED (PASS THROUGH 5984 PORT) !!!
 See replicateRemote instead */
@@ -248,114 +195,6 @@ var getActiveTasks = function(client, callback) {
     });
 };
 
-
-var registerRemote = function(config, callback) {
-
-    var remoteProxyClient = request.newClient("https://" + config.cozyURL);
-    remoteProxyClient.setBasicAuth('owner', config.password);
-
-    console.log('register ' + config.deviceName);
-    console.log('mdp : ' + config.password)
-    remoteProxyClient.post("device/", {login: config.deviceName}, function(err, response, body) {
-        if (err) {
-          callback(err);
-        } else if (response.statusCode === 401 && response.reason) {
-          callback('cozy need patch');
-        } else if (response.statusCode === 401) {
-          callback('wrong password');
-        } else if (response.statusCode === 400) {
-          callback('device name already exist');
-        } else {
-            console.log(body.id + " - " + body.password);
-            //var fullURL = "https://" + config.cozyURL;
-            Device = new Device({id:body.id, password: body.password, login: config.deviceName, url: config.cozyURL});
-            callback();
-
-        }
-      });
-  };
-
-var replicateRemote = function(ids, cancel, callback) {
-
-    console.log("ids to replicate : " + ids);
-    //var replicateRemoteURL = "https://toto:l9xvu7xpo1935wmidnoou9pvo893sorb@" + remoteConfig.cozyURL + "/cozy";
-    var remoteURL = "https://" + Device.login + ":" + Device.password + "@" + Device.url + "/cozy";
-    var localURL = "http://mondevicelocal:lsa9fix56uipy14ipf4n1yueut6jq0k9@localhost:9104/cozy";
-    console.log(remoteURL);
-
-var sourceToTarget = {
-        source: "cozy",
-        target:  remoteURL, //"https://test:hqthj9ggjnqoxbt9pl1sgja0mv5f80k9@paulSharing.2.cozycloud.cc/cozy/",
-        continuous: true,
-        doc_ids: ids,
-        cancel: cancel
-    };
-
-    var targetToSource = {
-        source: "http://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@localhost:5984/cozy",
-        target:  localURL,
-        continuous: true,
-        doc_ids: ids
-    };
-
-    replicateWithProxy(sourceToTarget, "http://localhost:9104", "cozycloud", function(err) {
-        if(err)
-            console.log(err);
-        else{
-            replicateWithProxy(targetToSource, "https://paulSharing.1.cozycloud.cc", "Sharing.1", function(err) {
-                if(err)
-                    console.log(err);
-                else
-                    callback(err);
-            });
-        callback(err);
-        }
-    });
-};
-
-var replicateWithProxy = function(data, target, password, callback) {
-
-    var req = request_new.defaults({jar: true});
-    var loginURL = target + "/login";
-    var replicateURL = target + "/_replicate";
-
-    if(target.indexOf("paulSharing.1") > -1)
-        replicateURL = "https://xK6HiaweKzoF29VAmD39pgExldbPpc3d:x6O0bthwzDJlT91hyWZwJegM01NnQgtk@paulSharing.1.cozycloud.cc/_replicate";
-
-    var localClient = req.post({url: loginURL, qs: {username: "owner", password: password}}, function(err, res, body) {
-        if(err) {
-            return console.error(err);
-        }
-        else {
-
-            req.post({url: replicateURL, json:true, body: data}, function(err, res, body) {
-                if(res.statusCode == 302)
-                    console.log("You are not authenticated");
-                else if(err)  //|| (res.statusCode != 202))
-                    console.log(err);
-                else{
-                    console.log("code : " + res.statusCode);
-                    console.log("body : " + JSON.stringify(body));
-                }
-                callback(err);
-            });
-        }
-    });
-};
-
-var unregisterDevice = function (config, callback) {
-    var remoteProxyClient = request.newClient("https://" + config.cozyURL);
-    remoteProxyClient.setBasicAuth('owner', config.password);
-    remoteProxyClient.del("device/#{Device.id}", function(err, res) {
-        if(err) {
-            callback(err)
-        }
-        else if(res.statusCode != 200)
-            callback('Impossible to unregister the device');
-        else
-            callback();
-    });
-};
 
 /*share an album  =>
     album id

@@ -23,9 +23,6 @@ module.exports = {
   'plug/replicate/:bool' : {
       post: sharing.replicate
   },
-  'plug/register/:bool' : {
-      post: sharing.register
-  },
    'contacts': {
       get: contacts.list
    },

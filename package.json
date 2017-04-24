@@ -12,7 +12,7 @@
     "americano-cozy": "^0.2.11",
     "async": "^0.9.0",
     "brunch": "^1.7.20",
-    "cozydb": "0.0.8",
+    "cozydb": "0.1.10",
     "cozy-realtime-adapter": "1.0.0",
     "express": "~3.4.0",
     "jade": "~0.35.0",
@@ -45,7 +45,7 @@
     "File": {
         "description": "files"
     },
-    "Tag": {
+    "Tags": {
         "description": "tag sensitive docs"
     }
   },

@@ -3,7 +3,17 @@ Tags = require('../models/tags')
 request = require('request-json')
 cozydb = require('cozydb');
 
-module.exports.create = function(req, res) {
+module.exports.list = function(req, res, next) {
+    Rule.request('all', function(err, rules) {
+        if(err) {
+            return next(err)
+        }
+        console.log('list rules', JSON.stringify(rules))
+        res.send(rules)
+    });
+}
+
+module.exports.create = function(req, res, next) {
     //TODO add auth pludb check
 
     var body = req.body;
@@ -40,5 +50,6 @@ module.exports.create = function(req, res) {
             res.send(200, "Ok");
         }
     });
+    next()
 
 }

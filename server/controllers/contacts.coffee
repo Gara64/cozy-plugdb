@@ -6,11 +6,16 @@ module.exports.list = (req, res, next) ->
     contacts.request('all', (error, contacts) ->
         if error
             return next(error)
+        # TODO remove comments when done with tests
+        ###
         plug.filterContactsPlug(contacts, (err, filteredContacts) ->
             if err
                 return next(error)
-            res.send(filteredContacts)    
+            res.send(filteredContacts)
         )
+        ###
+        console.log('list contacts', JSON.stringify(contacts))
+        res.send(contacts)
     )
 
 module.exports.get = (req, res, next) ->
@@ -75,7 +80,7 @@ var getIdsContacts = function(callback) {
         });
     }
     };
-    
+
 
 
 

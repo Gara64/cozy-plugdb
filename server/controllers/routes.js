@@ -30,6 +30,9 @@ module.exports = {
       get: contacts.get,
       put: contacts.change
    },
+   'sharingrule': {
+      get: rule.list
+   },
    'plug/init' : {
       post: plug.init
   },

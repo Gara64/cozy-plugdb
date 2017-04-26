@@ -1,0 +1,20 @@
+div
+    h3 Sharing rules
+    
+    table
+        thead
+            tr(class="titles")
+                th What to share
+                th With who
+                th Action
+        tbody
+            each rule, i in rules
+                tr
+                    td #{rule.fDoc}
+                    td #{rule.fSub}
+                    td
+                        input(value="show_#{rule.id}", name="show", type="image", src="./images/vizualise.svg", alt="show ACL", height="25", width="25")
+                        input(value="remove_#{rule.id}", name="remove", type="image", src="./images/cancel.png", alt="remove rule", height="20", width="20")
+                        
+                        //label Remove Rule
+                        //input(type="checkbox", id="remove_#{rule.id}")

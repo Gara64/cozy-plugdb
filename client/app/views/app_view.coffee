@@ -281,7 +281,7 @@ class ContactListView extends Backbone.View
 
         # @el.addEventListener('blur',@onBlur)
 
-    renderOne: (model) =>
+    renderOne: (model) ->
         #console.log  model.get('shared')
         checked = if model.get('shared') then "checked='checked'" else ''
         n = model.get('n')

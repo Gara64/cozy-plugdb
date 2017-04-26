@@ -1,7 +1,10 @@
 Plug = require('../models/plug')
 Rule = require ('../models/rule')
+Rules = require ('../collections/rules')
 rule = new Rule()
+rules = new Rules()
 aclView = require './acl_view'
+ruleView = require './rules_view'
 
 #var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend(
@@ -41,8 +44,9 @@ module.exports = AppView = Backbone.View.extend(
            el         : '#myList'
            collection : myCollection
 
-        aclView = new aclView()
-
+        #srCollection  = new SharingRuleCollection()
+        rules.fetch(reset:true)
+        ruleView = new ruleView(collection: rules)
 
         this
 
@@ -246,7 +250,7 @@ class ContactListView extends Backbone.View
 
 
     onChange : (e) ->
-        console.log e.target
+        console.log 'target : ', e.target
         e.preventDefault()
         if e.target.type == "checkbox"
             model = @collection.get(e.target.id)
@@ -274,7 +278,7 @@ class ContactListView extends Backbone.View
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
-        console.log @el
+
         # @el.addEventListener('blur',@onBlur)
 
     renderOne: (model) =>

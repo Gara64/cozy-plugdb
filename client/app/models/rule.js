@@ -1,11 +1,11 @@
 module.exports = Rule = Backbone.Model.extend({
-    urlRoot: 'rule',
+    urlRoot: 'sharingrule',
     defaults: {
         docType: null,
         docAttr: null,
         docVal: null,
         subAttr: null,
-        subVal: null,
+        subVal: null
     },
 
     create: function(callback) {

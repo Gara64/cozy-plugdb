@@ -17,28 +17,9 @@ module.exports.create = function(req, res, next) {
     //TODO add auth pludb check
 
     var body = req.body;
-    var docTypeDocPred = 'doc.docType == "'+body.docType+'"';
-    var docAttrPred ='', subAttrPred = '';
-    if(body.docAttr) {
-         docAttrPred = ' && doc.'+body.docAttr+'.indexOf("'+body.docVal+'") > -1';
-    }
-    var docTypeSubPred = 'doc.docType == "contacts"';
-    if(body.subAttr) {
-         subAttrPred = ' && doc.'+body.subAttr+'.indexOf("'+body.subVal+'") > -1';
-    }
-
-    var docPred = docTypeDocPred + docAttrPred;
-    var subPred = docTypeSubPred + subAttrPred;
-
-    var docRule = {
-        rule: docPred
-    };
-    var subRule = {
-        rule: subPred
-    }
     params = {
-        filterDoc: docRule,
-        filterUser: subRule
+        filterDoc: body.filterDoc,
+        filterUser: body.filterUser
     }
     console.log('create rule ', params)
     Rule.create(params, function(err, rule) {
@@ -47,9 +28,30 @@ module.exports.create = function(req, res, next) {
         }
         else {
             console.log("rule : ", rule);
-            res.send(200, "Ok");
+            res.send(rule);
         }
     });
-    next()
+}
 
+module.exports.remove = function(req, res, next) {
+    id = req.params.id
+    Rule.destroy(id, function(err) {
+        if(err) {
+            res.send(500, err)
+        }
+        else {
+            res.send(200, "Ok")
+        }
+    });
+}
+
+module.exports.get = function(req, res, next) {
+    Rule.find(req.params.id, function(err, rule){
+        if(err) {
+            res.send(500, err)
+        }
+        else {
+            res.send(200, "Ok")
+        }
+    });
 }

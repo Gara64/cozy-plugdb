@@ -5,11 +5,8 @@ module.exports = Rule = cozydb.getModel('sharingrule', {
       "id": String,
       "filterDoc": Object,
       "filterUser": Object,
-      "docType": String,
-      "docAttr": String,
-      "docVal" :String,
-      "subAttr": String,
-      "subVal": String,
+      "docIDs": [String],
+      "userIDs": [String]
 });
 
 var createRule = module.exports.createRule = function(params, callback) {

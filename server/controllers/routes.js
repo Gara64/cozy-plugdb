@@ -31,7 +31,12 @@ module.exports = {
       put: contacts.change
    },
    'sharingrule': {
-      get: rule.list
+      get: rule.list,
+      post: rule.create
+   },
+   'sharingrule/:id': {
+       get: rule.get,
+       delete: rule.remove
    },
    'plug/init' : {
       post: plug.init
@@ -47,8 +52,5 @@ module.exports = {
   },
   'plug/status' : {
     get: plug.status
-  },
-  'rule' : {
-      post: rule.create
   }
 };

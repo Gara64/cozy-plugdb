@@ -1,5 +1,6 @@
 Rule = require '../models/rule'
 Rules = require '../collections/rules'
+ACLView = require './acl_view'
 
 class RuleListener extends CozySocketListener
     models:
@@ -10,12 +11,12 @@ class RuleListener extends CozySocketListener
         'sharingrule.delete'
     ]
     onRemoteCreate: (model) ->
-        console.log 'remote create : ', model
+        console.log 'remote rule create : ', model
         @collection.add model
     onRemoteUpdate: (model) ->
-        console.log 'update rule'
+        console.log 'remote update rule'
     onRemoteDelete: (model) ->
-        console.log 'remote delete : ', model
+        console.log 'remote rule delete : ', model
         @collection.remove model
 
 module.exports = RuleView = Backbone.View.extend(
@@ -51,19 +52,24 @@ module.exports = RuleView = Backbone.View.extend(
         rules = []
         @collection.forEach (model) ->
             id = model.get("id")
-            console.log 'model : ', JSON.stringify model
+            #console.log 'model : ', JSON.stringify model
 
             if model.get('filterDoc') != null
                 filterDoc = model.get('filterDoc').rule
                 filterSub = model.get('filterUser').rule
                 docIDs = model.get('docIDs')
-                rules.push {id: id, fDoc: filterDoc, fSub: filterSub, docIDs: docIDs}
-
+                userIDs = model.get('userIDs')
+                rules.push {
+                    id: id,
+                    fDoc: filterDoc,
+                    fSub: filterSub,
+                    docIDs: docIDs,
+                    userIDs: userIDs
+                }
 
         console.log 'rules : ', JSON.stringify(rules)
 
         # render the template
-
         @$el.html @template({rules: rules})
 
         return
@@ -71,11 +77,9 @@ module.exports = RuleView = Backbone.View.extend(
     showACL: (event) ->
         event.preventDefault()
         id = $(event.currentTarget).data("id")
-        status =  $('#'+id).css('display')
-        if status is 'none'
-            $('#'+id).css('display', 'block')
-        else
-            $('#'+id).css('display', 'none')
+        rule = @collection.get(id)
+        aclview = new ACLView(rule.toJSON())
+
 
     createRule: (event) ->
         event.preventDefault()
@@ -90,7 +94,7 @@ module.exports = RuleView = Backbone.View.extend(
         if docAttr
             docAttrPred = ' && doc.'+docAttr+'.indexOf("'+docVal+'") > -1'
 
-        docTypeSubPred = 'doc.docType === "contacts"'
+        docTypeSubPred = 'doc.docType === "contact"'
         subAttrPred = ''
         if subAttr
             subAttrPred = ' && doc.'+subAttr+'.indexOf("'+subVal+'") > -1'
@@ -109,18 +113,7 @@ module.exports = RuleView = Backbone.View.extend(
             filterDoc: filterDoc,
             filterUser: filterUser
         )
-        console.log 'create rule : ', JSON.stringify rule
-        console.log 'rule exist? : ', rule.isNew()
-        console.log 'rule id : ', rule.id
-        console.log 'rule id : ', rule.get('id')
         rule.save()
-        ###
-        rule.save(wait: true)
-        .success(data) ->
-            console.log('data : ', data)
-        .error(err) ->
-            console.log('err : ', err)
-        ###
         @collection.add rule
 
     removeRule: (event) ->

@@ -33,13 +33,5 @@ div
                     td
                         input(data-id="#{rule.id}", name="show", type="image", src="./images/visualize.svg", alt="show ACL", height="25", width="25")
                         input(data-id="#{rule.id}", name="remove", type="image", src="./images/cancel.png", alt="remove rule", height="20", width="20")
-                    
-                table(id="#{rule.id}", style="display:none;")
-                    thead
-                        tr(class="titles")
-                            th Doc
-                            th Subject
-                    tbody
-                        each docid, i in rule.docIDs
-                            tr
-                                td #{docid}
+                
+#acl

@@ -40,7 +40,7 @@ module.exports.remove = function(req, res, next) {
             res.send(500, err)
         }
         else {
-            res.send(200, "Ok")
+            res.send({success: true})
         }
     });
 }
@@ -51,7 +51,7 @@ module.exports.get = function(req, res, next) {
             res.send(500, err)
         }
         else {
-            res.send(200, "Ok")
+            res.send(rule)
         }
     });
 }

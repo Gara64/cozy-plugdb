@@ -10,4 +10,12 @@ americano.start {name: 'plug', port: port}, (app, server) ->
     # start contact watch to upadte UI when new contact are added
     # or modified
     realtime = Realtimer server, ['contact.*', 'sharingrule.*']
+    realtime.on 'contact.*', (event, msg) ->
+        console.log 'contact event : ', event
+        console.log 'msg : ', msg
+
+    realtime.on 'sharingrule.*', (event, msg) ->
+        console.log 'sharingrule event : ', event
+        console.log 'msg : ', msg
+
     # callback? null, app, server

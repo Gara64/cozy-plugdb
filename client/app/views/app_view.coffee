@@ -21,7 +21,6 @@ module.exports = AppView = Backbone.View.extend(
         'click #close'             : 'closePlug'
         'click #reset'             : 'resetPlug'
         'click #insertSingleDoc'   : 'insertSingleDoc'
-        'click #createRule'        : 'createRule'
 
 
     render: ->
@@ -39,12 +38,10 @@ module.exports = AppView = Backbone.View.extend(
         realtimer = new ContactListener()
         realtimer.watch myCollection
 
-        # en supposant qu'il y ait un element d'id myList dans le html
         view = new ContactListView
            el         : '#myList'
            collection : myCollection
 
-        #srCollection  = new SharingRuleCollection()
         rules.fetch(reset:true)
         ruleView = new ruleView(collection: rules)
 
@@ -62,12 +59,16 @@ module.exports = AppView = Backbone.View.extend(
         $('#plugBlock').css('border-color', if isInit then 'green' else 'red')
 
         isAuth = model.get('auth')
+        ###
+        TODO: COMMENT ONLY FOR DEV
         if(isAuth)
             $('#myList').css('display', 'block')
             @render
         else
             $('#myList').css('display', 'none')
-
+        ###
+        $('#myList').css('display', 'block')
+        @render
         this
 
     updateStatus: ->
@@ -190,16 +191,6 @@ module.exports = AppView = Backbone.View.extend(
             return
         return
 
-    createRule: (event) ->
-        event.preventDefault()
-        rule.set docType   : @$el.find('input[name="doctype"]').val()
-        rule.set docAttr: @$el.find('input[name="docattr"]').val()
-        rule.set docVal: @$el.find('input[name="docval"]').val()
-        rule.set subAttr: @$el.find('input[name="subattr"]').val()
-        rule.set subVal: @$el.find('input[name="subval"]').val()
-        rule.create (res) ->
-            console.log 'res : ', res
-
 
     # initialize is automatically called once after the view is constructed
     initialize: ->
@@ -231,15 +222,20 @@ class ContactCollection extends Backbone.Collection
 
 class ContactListener extends CozySocketListener
     models:
-        'contact': Contact
+        'contact': Contact,
     events: [
         'contact.create'
         'contact.update'
         'contact.delete'
     ]
     onRemoteCreate: (model) ->
+        console.log 'create contact'
         @collection.add model
+    onRemoteUpdate: (model) ->
+        console.log 'update contact'
+        console.log 'collection listened : ', @collection
     onRemoteDelete: (model) ->
+        console.log 'remove contact'
         @collection.remove model
 
 

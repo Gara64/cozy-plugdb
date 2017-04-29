@@ -1,5 +1,23 @@
 div
-    h3 Sharing rules
+    h3 Create sharing rule
+    form
+        div
+            label What docs?
+            input(type='text', name='doctype')
+            label Attr
+            input(type='text', name='docattr')
+            label Value
+            input(type='text', name='docval')
+        div
+            label With who?
+            label Attr
+            input(type='text', name='subattr')
+            label Value
+            input(type='text', name='subval')
+        input(id='createRule', type='button', value='Ok')
+        
+div
+    h3 See sharing rules
     
     table
         thead
@@ -13,8 +31,15 @@ div
                     td #{rule.fDoc}
                     td #{rule.fSub}
                     td
-                        input(value="show_#{rule.id}", name="show", type="image", src="./images/vizualise.svg", alt="show ACL", height="25", width="25")
-                        input(value="remove_#{rule.id}", name="remove", type="image", src="./images/cancel.png", alt="remove rule", height="20", width="20")
-                        
-                        //label Remove Rule
-                        //input(type="checkbox", id="remove_#{rule.id}")
+                        input(data-id="#{rule.id}", name="show", type="image", src="./images/visualize.svg", alt="show ACL", height="25", width="25")
+                        input(data-id="#{rule.id}", name="remove", type="image", src="./images/cancel.png", alt="remove rule", height="20", width="20")
+                    
+                table(id="#{rule.id}", style="display:none;")
+                    thead
+                        tr(class="titles")
+                            th Doc
+                            th Subject
+                    tbody
+                        each docid, i in rule.docIDs
+                            tr
+                                td #{docid}

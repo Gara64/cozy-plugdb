@@ -1,7 +1,12 @@
 div
-    h3 Suspicious ACL
+    h3 ACL
     table
         thead
             tr(class="titles")
                 th Doc
                 th Subject
+        tbody
+            each acl, i in acl
+                tr
+                    td #{acl.docid}
+                    td #{acl.subid}

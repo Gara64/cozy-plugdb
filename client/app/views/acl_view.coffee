@@ -1,5 +1,5 @@
+###
 acl = require '../models/acl'
-
 
 class ACLListener extends CozySocketListener
     models:
@@ -23,7 +23,6 @@ module.exports = ACLView = Backbone.View.extend(
         "change" : "onChange"
 
     onChange : (e) ->
-        console.log "target : ", e.target
         e.preventDefault()
 
 
@@ -34,7 +33,7 @@ module.exports = ACLView = Backbone.View.extend(
 
     render: ->
         console.log 'render acl view'
-        # render the template
         @$el.html @template()
         return
 )
+###

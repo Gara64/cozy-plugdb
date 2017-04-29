@@ -47,6 +47,9 @@
     },
     "Tags": {
         "description": "tag sensitive docs"
+    },
+    "Sharingrule": {
+        "description": "sharing rules"
     }
   },
   "cozy-displayname": "Shary"

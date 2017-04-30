@@ -67,10 +67,13 @@ module.exports = RuleView = Backbone.View.extend(
                     userIDs: userIDs
                 }
 
+
         console.log 'rules : ', JSON.stringify(rules)
 
         # render the template
         @$el.html @template({rules: rules})
+
+
 
         return
 
@@ -78,6 +81,7 @@ module.exports = RuleView = Backbone.View.extend(
         event.preventDefault()
         id = $(event.currentTarget).data("id")
         rule = @collection.get(id)
+        console.log 'status : ', $(event.currentTarget).data("status")
         aclview = new ACLView(rule.toJSON())
 
 

@@ -3,12 +3,30 @@ h3 ACL
 table
     thead
         tr(class="titles")
-            th Subjects
             th Docs
+    tbody
+        each docid, i in rule.docIDs
+            tr
+                td
+                    div(id="#{docid}")
+                        a(href="")
+                        p
+                
+table
+    thead
+        tr(class="titles")
+            th Subjects
     tbody
         each userid, i in rule.userIDs
             tr
-                td #{userid}
-        each docid, i in rule.docIDs
-            tr
-                td #{docid}
+                td
+                    div(id="#{userid}")
+                        img(
+                            class="avatar", 
+                            data-src="contacts/#{userid}/picture.png", 
+                            src="contacts/#{userid}/picture.png",
+                            height="50", 
+                            width="50"
+                        )
+                        p
+                    

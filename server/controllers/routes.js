@@ -4,6 +4,7 @@ var plug     = require('./plug');
 var contacts = require('./contacts');
 var sharing = require('./sharing');
 var rule = require('./rule');
+var files = require('./files');
 
 module.exports = {
   '': {
@@ -30,6 +31,9 @@ module.exports = {
       get: contacts.get,
       put: contacts.change
    },
+   'contacts/:id/picture.png':{
+        get: contacts.picture
+    },
    'sharingrule': {
       get: rule.list,
       post: rule.create
@@ -38,6 +42,12 @@ module.exports = {
        get: rule.get,
        delete: rule.remove
    },
+   'files/:fileid': {
+        get: files.find
+    },
+   'files/:fileid/attach/:name': {
+        get: files.getAttachment
+    },
    'plug/init' : {
       post: plug.init
   },

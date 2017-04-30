@@ -2,6 +2,11 @@ contacts = require '../models/contacts'
 request = require 'request-json'
 plug = require './plug'
 
+baseController = new cozydb.SimpleController
+    model      : contacts
+    reqParamID : 'id'
+    reqProp : 'contact'
+
 module.exports.list = (req, res, next) ->
     contacts.request('all', (error, contacts) ->
         if error
@@ -40,6 +45,14 @@ module.exports.change = (req, res, next) ->
     )
 
 
+# Perform download as an inline attachment.
+sendBinary = baseController.sendAttachment
+    filename: 'picture'
+
+module.exports.picture = (req, res, next) ->
+    sendBinary req, res, next
+
+
 ###
 var getIdsContacts = function(callback) {
     // Getting request results
@@ -60,40 +73,3 @@ var getIdsContacts = function(callback) {
     });
 };
 ###
-
-
-
-
-
-###  function(nDocs, baseName, callback) {
-    var ids = [];
-    var cpt = 0;
-    for(var i=0; i<nDocs; i++) {
-        createCozyContact(baseName, function(id) {
-            ids.push(id);
-            cpt++;
-            console.log('id' + id + ' in array - cpt = ' + cpt + ' (ndocs = ' + nDocs);
-            if(cpt == nDocs ){
-                console.log('done');
-                callback(ids);
-            }
-        });
-    }
-    };
-
-
-
-
-var createCozyContact = function(baseName, callback) {
-    var datapoint = new Array();
-    Contact.create({fn: baseName, datapoints: datapoint }, function(err, contact) {
-        if(err)
-            callback(err);
-
-        else{
-            log.raw('contact created : ' + contact.id);
-            callback(contact.id);
-        }
-    });
-    };
-    ###

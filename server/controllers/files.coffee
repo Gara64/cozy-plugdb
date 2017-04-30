@@ -25,12 +25,21 @@ module.exports.fetch = (req, res, next, id) ->
             next()
 
 
+module.exports.find = (req, res, next) ->
+    File.find req.params.fileid, (error, file)->
+        if error
+            return next(error)
+        console.log 'file : ', file
+
+        res.send(file)
+
+module.exports.all = baseController.listAll
+
 # Perform download as an inline attachment.
 sendBinary = baseController.sendBinary
     filename: 'file'
 
 module.exports.getAttachment = (req, res, next) ->
-
     # Prevent server from stopping if the download is very slow.
     isDownloading = true
     do keepAlive = ->
@@ -39,7 +48,7 @@ module.exports.getAttachment = (req, res, next) ->
             setTimeout keepAlive, 60 * 1000
 
     # Configure headers so clients know they should read and not download.
-    encodedFileName = encodeURIComponent req.file.name
+    encodedFileName = encodeURIComponent req.name
     res.setHeader 'Content-Disposition', """
         inline; filename*=UTF8''#{encodedFileName}
     """

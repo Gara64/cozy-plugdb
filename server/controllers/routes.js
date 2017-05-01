@@ -40,6 +40,7 @@ module.exports = {
    },
    'sharingrule/:id': {
        get: rule.get,
+       put: rule.change,
        delete: rule.remove
    },
    'files/:fileid': {

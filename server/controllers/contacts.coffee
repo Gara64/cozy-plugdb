@@ -31,13 +31,10 @@ module.exports.get = (req, res, next) ->
     )
 
 module.exports.change = (req, res, next) ->
-    console.log 'log1'
     contacts.find(req.params.id, (error, contact)->
-        console.log 'log2', req.body, error
         if error
             return next(error)
         contact.updateAttributes(req.body,(error,contact) ->
-            console.log 'log3', contact
             if error
                 return next(error)
             res.send contact

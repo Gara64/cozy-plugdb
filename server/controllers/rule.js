@@ -33,6 +33,21 @@ module.exports.create = function(req, res, next) {
     });
 }
 
+module.exports.change = function(req, res, next) {
+    Rule.find(req.params.id, function(err, rule) {
+        if(err) {
+            return next(err)
+        }
+        Rule.updateAttributes(req.body, function(err, newRule) {
+            if(err) {
+                return next(err)
+            }
+            res.send(newRule)
+        });
+    });
+}
+
+
 module.exports.remove = function(req, res, next) {
     id = req.params.id
     Rule.destroy(id, function(err) {

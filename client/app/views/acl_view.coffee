@@ -6,10 +6,14 @@ module.exports = ACLView = Backbone.View.extend(
     el: '#acl'
     template: require('../templates/acl')
 
-    initialize: (rule)->
-        @render(rule)
+    initialize: ->
+        console.log 'model : ', @model.get('id')
+        @listenTo @model, 'change', @killView
+        @model.on "change:aclStatus", @killView
+        @render()
 
-    render: (rule) ->
+    render: () ->
+        rule = @model.toJSON()
         domain = window.location.origin
         @$el.html @template({rule: rule, domain: domain})
 
@@ -40,4 +44,8 @@ module.exports = ACLView = Backbone.View.extend(
                 error: (err) ->
                     $("#"+userid+" p").text("deleted")
             })
+
+    killView: ()->
+        console.log 'harakiri!!'
+        #this.remove()
 )

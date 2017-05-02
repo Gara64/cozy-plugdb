@@ -19,6 +19,8 @@ class RuleListener extends CozySocketListener
         console.log 'remote rule delete : ', model
         @collection.remove model
 
+curACLView = null
+
 module.exports = RuleView = Backbone.View.extend(
     el: '#rule'
     template: require('../templates/rules')
@@ -39,6 +41,7 @@ module.exports = RuleView = Backbone.View.extend(
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
+
 
         @render()
 
@@ -73,16 +76,22 @@ module.exports = RuleView = Backbone.View.extend(
         # render the template
         @$el.html @template({rules: rules})
 
-
-
         return
 
     showACL: (event) ->
         event.preventDefault()
         id = $(event.currentTarget).data("id")
         rule = @collection.get(id)
-        console.log 'status : ', $(event.currentTarget).data("status")
-        aclview = new ACLView(rule.toJSON())
+        #console.log 'status : ', $(event.currentTarget).data("status")
+        status = $(event.currentTarget).data("status")
+
+        aclView = new ACLView({model: rule})
+
+        console.log 'status : ',rule.aclStatus
+        console.log 'id : ',rule.id
+
+        #curACLView = aclView
+        #console.log 'model id saved : ', curACLView.model.get('id')
 
 
     createRule: (event) ->

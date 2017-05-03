@@ -5,6 +5,7 @@ var contacts = require('./contacts');
 var sharing = require('./sharing');
 var rule = require('./rule');
 var files = require('./files');
+var tags = require('./tags')
 
 module.exports = {
   '': {
@@ -48,6 +49,9 @@ module.exports = {
     },
    'files/:fileid/attach/:name': {
         get: files.getAttachment
+    },
+    'tags': {
+        get: tags.listSensitiveTags
     },
    'plug/init' : {
       post: plug.init

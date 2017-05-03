@@ -1,6 +1,7 @@
 Rule = require '../models/rule'
 Rules = require '../collections/rules'
 ACLView = require './acl_view'
+Tags = require '../collections/tags'
 
 class RuleListener extends CozySocketListener
     models:
@@ -42,12 +43,15 @@ module.exports = RuleView = Backbone.View.extend(
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
 
-
         @render()
 
         realtimerRule = new RuleListener()
         realtimerRule.watch @collection
         console.log 'watch rules : ', JSON.stringify @collection
+
+        @collection.getSensitiveTags (err, tags) ->
+            console.log 'tags : ' + JSON.stringify tags
+
 
         return
 

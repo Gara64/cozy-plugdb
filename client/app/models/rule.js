@@ -7,4 +7,6 @@ module.exports = Rule = Backbone.Model.extend({
         docIDs: [String],
         userIDs: [String]
     },
+
+
 });

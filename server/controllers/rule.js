@@ -8,11 +8,6 @@ module.exports.list = function(req, res, next) {
             return next(err)
         }
         console.log('list rules', JSON.stringify(rules))
-
-        Tags.getSensitiveDocs(function(err, tags) {
-            console.log("\n\ntags : " + JSON.stringify(tags))
-        });
-
         res.send(rules)
     });
 }

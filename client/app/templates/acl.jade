@@ -7,10 +7,9 @@ table(class="inline")
     tbody
         each docid, i in rule.docIDs
             tr
-                td
-                    div(id="#{docid}")
-                        a(href="")
-                        p
+                td(id="#{docid}", class="acl_accept")
+                    a(href="")
+                    p
                 
 table(class="inline")
     thead
@@ -19,14 +18,13 @@ table(class="inline")
     tbody
         each userid, i in rule.userIDs
             tr
-                td
-                    div(id="#{userid}")
-                        img(
-                            class="avatar", 
-                            data-src="contacts/#{userid}/picture.png", 
-                            src="contacts/#{userid}/picture.png",
-                            height="50", 
-                            width="50"
-                        )
-                        p
+                td(id="#{userid}", class="acl_accept")
+                    img(
+                        class="avatar", 
+                        data-src="contacts/#{userid}/picture.png", 
+                        src="contacts/#{userid}/picture.png",
+                        height="50", 
+                        width="50"
+                    )
+                    p
                     

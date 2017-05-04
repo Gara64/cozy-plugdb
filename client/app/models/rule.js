@@ -5,8 +5,24 @@ module.exports = Rule = Backbone.Model.extend({
         filterDoc: Object,
         filterUser: Object,
         docIDs: [String],
-        userIDs: [String]
+        userIDs: [String],
+        tags: [String]
     },
 
+    getSensitiveTags: function(callback) {
+        _this = this
+        $.ajax({
+            url: 'tags',
+            type: 'GET',
+            success:function(result){
+                _this.tags = result
+                callback(null, result);
+            },
+            error: function(result, response) {
+                var txt = JSON.parse(result.responseText);
+                callback(txt.error, null);
+            }
+        });
+    }
 
 });

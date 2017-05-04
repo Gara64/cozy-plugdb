@@ -20,7 +20,6 @@ class RuleListener extends CozySocketListener
         console.log 'remote rule delete : ', model
         @collection.remove model
 
-curACLView = null
 
 module.exports = RuleView = Backbone.View.extend(
     el: '#rule'
@@ -49,10 +48,6 @@ module.exports = RuleView = Backbone.View.extend(
         realtimerRule.watch @collection
         console.log 'watch rules : ', JSON.stringify @collection
 
-        @collection.getSensitiveTags (err, tags) ->
-            console.log 'tags : ' + JSON.stringify tags
-
-
         return
 
     render: ->
@@ -74,8 +69,12 @@ module.exports = RuleView = Backbone.View.extend(
                     userIDs: userIDs
                 }
 
+            model.getSensitiveTags (err, tags) ->
+                model.set({"tags": tags})
+                console.log 'model : ' + JSON.stringify model
 
-        console.log 'rules : ', JSON.stringify(rules)
+
+        #console.log 'rules : ', JSON.stringify(rules)
 
         # render the template
         @$el.html @template({rules: rules})

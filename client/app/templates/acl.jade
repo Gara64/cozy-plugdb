@@ -1,30 +1,32 @@
-div(id="#{rule.id}", style="display:none;")
-h3 ACL
-table(class="inline")
-    thead
-        tr(class="titles")
-            th Docs
-    tbody
-        each docid, i in rule.docIDs
-            tr
-                td(id="#{docid}", class="acl_accept")
-                    a(href="")
-                    p
-                
-table(class="inline")
-    thead
-        tr(class="titles")
-            th Subjects
-    tbody
-        each userid, i in rule.userIDs
-            tr
-                td(id="#{userid}", class="acl_accept")
-                    img(
-                        class="avatar", 
-                        data-src="contacts/#{userid}/picture.png", 
-                        src="contacts/#{userid}/picture.png",
-                        height="50", 
-                        width="50"
-                    )
-                    p
+//div(id="#{rule.id}", style="display:none;")
+
+div(id="#{rule.id}", class="container", style="display:block")
+    h3 ACL
+    table(class="table table-inline")
+        thead
+            tr(class="titles")
+                th Docs
+        tbody
+            each docid, i in rule.docIDs
+                tr
+                    td(id="#{docid}", class="success")
+                        a(href="")
+                        p
+                    
+    table(class="table table-inline")
+        thead
+            tr(class="titles")
+                th Subjects
+        tbody
+            each userid, i in rule.userIDs
+                tr
+                    td(id="#{userid}", class="success")
+                        img(
+                            class="avatar", 
+                            data-src="contacts/#{userid}/picture.png", 
+                            src="contacts/#{userid}/picture.png",
+                            height="50", 
+                            width="50"
+                        )
+                        p
                     

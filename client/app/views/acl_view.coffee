@@ -31,9 +31,9 @@ module.exports = ACLView = Backbone.View.extend(
                     sensitive = _this.checkTags(docid)
                     if sensitive is true
                         console.log 'TRUE DAT'
-                        $("#"+docid).attr('class', 'acl_suspect')
+                        $("#"+docid).attr('class', 'danger')
                     else
-                        $("#"+docid).attr('class', 'acl_accept')
+                        $("#"+docid).attr('class', 'success')
 
 
                 error: (err) ->
@@ -52,9 +52,9 @@ module.exports = ACLView = Backbone.View.extend(
 
                     sensitive = _this.checkTags(userid)
                     if sensitive is true
-                        $("#"+userid).attr('class', 'acl_suspect')
+                        $("#"+userid).attr('class', 'danger')
                     else
-                        $("#"+userid).attr('class', 'acl_accept')
+                        $("#"+userid).attr('class', 'success')
                 error: (err) ->
                     $("#"+userid+" p").text("deleted")
             })

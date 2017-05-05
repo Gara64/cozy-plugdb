@@ -1,14 +1,14 @@
-div
+div(class="container")
     h3 Create sharing rule
     form
-        div
+        div(class="form-group")
             label What docs?
             input(type='text', name='doctype')
             label Attr
             input(type='text', name='docattr')
             label Value
             input(type='text', name='docval')
-        div
+        div(class="form-group")
             label With who?
             label Attr
             input(type='text', name='subattr')
@@ -16,10 +16,10 @@ div
             input(type='text', name='subval')
         input(id='createRule', type='button', value='Ok')
         
-div
+div(class="container")
     h3 See sharing rules
     
-    table
+    table(class="table table-bordered")
         thead
             tr(class="titles")
                 th What to share

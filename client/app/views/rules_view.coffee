@@ -88,9 +88,23 @@ module.exports = RuleView = Backbone.View.extend(
         #console.log 'status : ', $(event.currentTarget).data("status")
         status = $(event.currentTarget).data("status")
 
-        aclView = new ACLView({model: rule})
+        console.log('display : ' + $("#"+rule.id).attr('style'))
+        style = $("#"+rule.id).attr('style')
+        console.log 'style : ' + style
+        if style == undefined
+            aclView = new ACLView({model: rule})
+        else if style == 'display:block'
+            $("#"+rule.id).attr('style', 'display:none')
+        else
+            $("#"+rule.id).attr('style', 'display:block')
 
-        console.log 'status : ',rule.aclStatus
+        ###
+        if style?
+            $("#"+rule.id).attr('style', 'display:none')
+        else
+            aclView = new ACLView({model: rule})
+        ###
+        console.log 'status : ', rule.aclStatus
         console.log 'id : ',rule.id
 
         #curACLView = aclView

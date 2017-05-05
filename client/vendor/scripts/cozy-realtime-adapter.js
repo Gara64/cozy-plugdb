@@ -178,6 +178,9 @@
     CozySocketListener.prototype.process = function(event) {
       var doctype, id, model, operation;
       doctype = event.doctype, operation = event.operation, id = event.id;
+      console.log('doctype : ', doctype)
+      console.log('operation : ', operation)
+      console.log('id : ', id)
       switch (operation) {
         case 'create':
           if (!this.shouldFetchCreated(id)) {
@@ -221,13 +224,22 @@
           })(this));
         case 'delete':
           if (model = this.singlemodels.get(id)) {
+            console.log('model equal!')
             this.onRemoteDelete(model, this.singlemodels);
           }
           return this.collections.forEach((function(_this) {
             return function(collection) {
+                console.log('coll : ', JSON.stringify(collection))
+
               if (!(model = collection.get(id))) {
+                  console.log('model NOT equal!')
+                  console.log('model : ', JSON.stringify(model))
+                  console.log('coll : ', collection.get(id))
+
                 return;
               }
+              console.log('call remote')
+
               return _this.onRemoteDelete(model, collection);
             };
           })(this));

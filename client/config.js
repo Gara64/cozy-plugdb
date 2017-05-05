@@ -18,9 +18,14 @@ exports.config = {
         },
 
         "stylesheets":{
-          "defaultExtension": "styl",
-          "joinTo":
-            {"stylesheets/app.css": /^(app|vendor)/}
+            "defaultExtension": "styl",
+            "joinTo":
+            {"stylesheets/app.css": /^(app|vendor)/},
+            "order":{
+                "before": [
+                    "vendor/styles/bootswatch.css"
+                ]
+            }
         },
 
         "templates": {

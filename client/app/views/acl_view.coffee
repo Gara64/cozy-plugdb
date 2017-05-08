@@ -26,8 +26,8 @@ module.exports = ACLView = Backbone.View.extend(
                 success: () ->
                     filename = file.get('name')
                     href = domain+"/files/"+docid+"/attach/"+filename
-                    $("#"+docid+" a").attr('href', href)
-                    $("#"+docid+" a").text(filename)
+                    $("#"+docid+" td:first a").attr('href', href)
+                    $("#"+docid+" td:first a").text(filename)
                     sensitive = _this.checkTags(docid)
                     if sensitive is true
                         console.log 'TRUE DAT'
@@ -48,7 +48,7 @@ module.exports = ACLView = Backbone.View.extend(
                 success: () ->
                     href = domain+"/contacts/"+userid+"/picture.png"
                     fn = contact.get('fn')
-                    $("#"+userid+" p").text("#{fn}")
+                    $("#"+userid+" td:first p").text("#{fn}")
 
                     sensitive = _this.checkTags(userid)
                     if sensitive is true

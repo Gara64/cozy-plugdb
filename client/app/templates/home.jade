@@ -2,6 +2,21 @@
 center
 	h1 Sharing Control Administration
 
+div(id="plug", style="display:none")
+	div(id="plugBlock")
+		img(id="imgplugdb", class="superpose", src="./images/plugdb.png")
+		img(id="imglock", class="superpose", src="./images/lock.png", height="50", width="50")
+		br
+		a(href="")
+			input(type="button", id="init", value="Init")
+			input(type="button", id="close", value="Close")
+			input(type="button", id="reset", value="Reset")
+
+	div(id="sharingBlock")
+		p.formRow Authenticate to your PlugDB&nbsp;
+		a(href="")
+		img(id="authenticate", src="./images/authenticate.png", height="50", width="50")
+
 #rule
 #acl
 

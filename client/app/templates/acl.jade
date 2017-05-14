@@ -7,35 +7,35 @@ div(id="#{rule.id}", class="container", style="display:block")
             tr(class="titles")
                 th Docs
         tbody
-            each docid, i in rule.docIDs
-                tr(id="#{docid}", class="success")
+            each acl, i in rule.docIDs
+                tr(id="#{acl.id}", class="success")
                     td
                         a(href="")
                         p
                     td
                         a(href="")
-                            img(src="./images/validate.png", height="25", width="25")
+                            img(data-type= "doc", data-id="#{acl.id}", class="validate", src="./images/validate.png", height="25", width="25")
                         a(href="")
-                            img(src="./images/cancel.png", height="25", width="25")
+                            img(data-type= "doc", data-id="#{acl.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
                     
     table(class="table table-inline", style="width:50%;float:right")
         thead
             tr(class="titles")
                 th Subjects
         tbody
-            each userid, i in rule.userIDs
-                tr(id="#{userid}", class="success")
+            each acl, i in rule.userIDs
+                tr(id="#{acl.id}", class="success")
                     td
                         img(
                             class="avatar", 
-                            data-src="contacts/#{userid}/picture.png", 
-                            src="contacts/#{userid}/picture.png",
+                            data-src="contacts/#{acl.id}/picture.png", 
+                            src="contacts/#{acl.id}/picture.png",
                             height="50", 
                             width="50"
                         )
                         p
                     td
                         a(href="")
-                            img(src="./images/validate.png", height="25", width="25")
+                            img(data-type= "user", data-id="#{acl.id}", class="validate", src="./images/validate.png", height="25", width="25")
                         a(href="")
-                            img(src="./images/cancel.png", height="25", width="25")
+                            img(data-type= "user", data-id="#{acl.id}", class="cancel", src="./images/cancel.png", height="25", width="25")

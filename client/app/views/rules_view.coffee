@@ -85,12 +85,10 @@ module.exports = RuleView = Backbone.View.extend(
         event.preventDefault()
         id = $(event.currentTarget).data("id")
         rule = @collection.get(id)
-        #console.log 'status : ', $(event.currentTarget).data("status")
         status = $(event.currentTarget).data("status")
 
         console.log('display : ' + $("#"+rule.id).attr('style'))
         style = $("#"+rule.id).attr('style')
-        console.log 'style : ' + style
         if style == undefined
             aclView = new ACLView({model: rule})
         else if style == 'display:block'
@@ -104,9 +102,6 @@ module.exports = RuleView = Backbone.View.extend(
         else
             aclView = new ACLView({model: rule})
         ###
-        console.log 'status : ', rule.aclStatus
-        console.log 'id : ',rule.id
-
         #curACLView = aclView
         #console.log 'model id saved : ', curACLView.model.get('id')
 

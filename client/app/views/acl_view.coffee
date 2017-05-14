@@ -6,10 +6,14 @@ module.exports = ACLView = Backbone.View.extend(
     el: '#acl'
     template: require('../templates/acl')
 
+    events :
+        'click .validate'             : 'acceptACL'
+        'click .cancel'               : 'rejectACL'
+
     initialize: ->
-        console.log 'model : ', @model.get('id')
         @listenTo @model, 'change', @killView
-        @model.on "change:aclStatus", @killView
+        @listenTo @model, 'change:docIDs', @changeACL
+        @listenTo @model, 'change:userIDs', @changeACL
         @render()
 
     render: () ->
@@ -19,42 +23,43 @@ module.exports = ACLView = Backbone.View.extend(
         _this = @
 
         # Fetch files
-        rule.docIDs.forEach (docid) ->
-
+        rule.docIDs.forEach (acl) ->
+            docid = acl.id
+            status = acl.status
             file = new File(id: docid)
             file.fetch({
                 success: () ->
+                    console.log 'file : ' + JSON.stringify file
                     filename = file.get('name')
                     href = domain+"/files/"+docid+"/attach/"+filename
                     $("#"+docid+" td:first a").attr('href', href)
                     $("#"+docid+" td:first a").text(filename)
-                    sensitive = _this.checkTags(docid)
-                    if sensitive is true
-                        console.log 'TRUE DAT'
-                        $("#"+docid).attr('class', 'danger')
-                    else
-                        $("#"+docid).attr('class', 'success')
 
+                    # Set acl status
+                    _this.checkACL(acl)
+                    _this.setACLVisualization(acl)
 
                 error: (err) ->
                     $("#"+docid+" p").text("deleted")
             })
 
         # Fetch contacts
-        rule.userIDs.forEach (userid) ->
+        rule.userIDs.forEach (acl) ->
+            userid = acl.id
+            status = acl.status
             contact = new Contact(id: userid)
 
             contact.fetch({
                 success: () ->
+                    console.log 'contact : ' + JSON.stringify contact
                     href = domain+"/contacts/"+userid+"/picture.png"
                     fn = contact.get('fn')
                     $("#"+userid+" td:first p").text("#{fn}")
 
-                    sensitive = _this.checkTags(userid)
-                    if sensitive is true
-                        $("#"+userid).attr('class', 'danger')
-                    else
-                        $("#"+userid).attr('class', 'success')
+                    # Set acl status
+                    _this.checkACL(acl)
+                    _this.setACLVisualization(acl)
+
                 error: (err) ->
                     $("#"+userid+" p").text("deleted")
             })
@@ -64,12 +69,63 @@ module.exports = ACLView = Backbone.View.extend(
         console.log 'harakiri!!'
         #this.remove()
 
-    checkTags: (docid) ->
+    checkACL: (acl) ->
         for tag in @model.tags
-            if tag == docid
-                console.log 'SENSITIVE TAG'
-                return true
+            if tag == acl.id
+                # Set acl to suspect is undetermined
+                if acl.status is "*"
+                    acl.status = "?"
+                    console.log 'SENSITIVE TAG'
+        # If not sensitive, it is accepted
+        if acl.status is "*"
+            acl.status = "+"
 
-        return false
 
+    setACLVisualization: (acl) ->
+        id = acl.id
+        # See https://bootswatch.com/cerulean/ for css themes
+        if acl.status is "?"
+            $("#"+id).attr('class', 'warning')
+        else if acl.status is "-"
+            $("#"+id).attr('class', 'danger')
+        else if acl.status is "+"
+            $("#"+id).attr('class', 'success')
+
+
+    acceptACL: (event) ->
+        event.preventDefault()
+        # Get id of the acl and its type
+        id = $(event.currentTarget).data("id")
+        type = $(event.currentTarget).data("type")
+        console.log 'accept ' + id
+        @changeACLStatus(id, type, true)
+
+    rejectACL: (event) ->
+        event.preventDefault()
+        # Get id of the acl and its type
+        id = $(event.currentTarget).data("id")
+        type = $(event.currentTarget).data("type")
+        console.log 'reject ' + id
+        @changeACLStatus(id, type, false)
+
+    changeACLStatus: (id, type, isAccept) ->
+        if type is "doc"
+            docIDs = @model.get('docIDs')
+            for acl in docIDs
+                if acl.id is id
+                    if isAccept then acl.status = "+"  else acl.status = "-"
+                    @model.save()
+                    @setACLVisualization(acl)
+        if type is "user"
+            userIDs = @model.get('userIDs')
+            for acl in userIDs
+                if acl.id is id
+                    if isAccept then acl.status = "+"  else acl.status = "-"
+                    @model.save()
+                    @setACLVisualization(acl)
+
+    changeACL: (model, values, options) ->
+        console.log 'model : ' + JSON.stringify model
+        console.log 'values : ' + JSON.stringify model
+        console.log 'options : ' + JSON.stringify options
 )

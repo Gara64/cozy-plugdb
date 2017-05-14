@@ -1,6 +1,8 @@
 Rule = require '../models/rule'
 File = require '../models/file'
 Contact = require '../models/contact'
+Triggers = require '../collections/triggers'
+triggers = new Triggers()
 
 module.exports = ACLView = Backbone.View.extend(
     el: '#acl'
@@ -10,12 +12,12 @@ module.exports = ACLView = Backbone.View.extend(
         'click .validate'             : 'acceptACL'
         'click .cancel'               : 'rejectACL'
 
-
     initialize: ->
         @render()
 
     render: () ->
         rule = @model.toJSON()
+        console.log 'triggers : ', triggers
         domain = window.location.origin
         rule.docIDs.forEach (acl) ->
             if acl is null
@@ -25,6 +27,10 @@ module.exports = ACLView = Backbone.View.extend(
                 rule.userIDs.splice(rule.userIDs.indexOf(acl), 1)
         @$el.html @template({rule: rule, domain: domain})
         _this = @
+
+        # Store the files and contacts to be later evaluated on triggers
+        files = []
+        contacts = []
 
         # Fetch files
         rule.docIDs.forEach (acl) ->
@@ -42,6 +48,7 @@ module.exports = ACLView = Backbone.View.extend(
                     # Set acl status
                     _this.checkACL(acl)
                     _this.setACLVisualization(acl)
+                    files.push file
 
                 error: (err) ->
                     $("#"+docid+" p").text("deleted")
@@ -63,6 +70,7 @@ module.exports = ACLView = Backbone.View.extend(
                     # Set acl status
                     _this.checkACL(acl)
                     _this.setACLVisualization(acl)
+                    contacts.push contact
 
                 error: (err) ->
                     $("#"+userid+" p").text("deleted")
@@ -128,5 +136,24 @@ module.exports = ACLView = Backbone.View.extend(
                     @model.save()
                     @setACLVisualization(acl)
 
+    checkTriggers: (users, docs) ->
+        triggers.forEach (trigger) ->
+            if trigger.type is "what"
+                evalTrigger(trigger, docs)
+            else if trigger.type is "who"
+                evalTrigger(trigger, users)
+            else if trigger.type is "which"
+                evalTrigger(trigger, docs)
+                evalTrigger(trigger, users)
 
+
+    evalTrigger: (trigger, docs) ->
+        if trigger.type is "who"
+            triggerRule = trigger.who
+        else if trigger.type is "what"
+            triggerRule = trigger.what
+        docs.forEach (doc) ->
+            if doc[triggerRule.attribute] = triggerRule.value
+                return true
+        return false
 )

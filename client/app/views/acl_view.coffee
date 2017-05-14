@@ -19,6 +19,12 @@ module.exports = ACLView = Backbone.View.extend(
     render: () ->
         rule = @model.toJSON()
         domain = window.location.origin
+        rule.docIDs.forEach (acl) ->
+            if acl is null
+                rule.docIDs.splice(rule.docIDs.indexOf(acl), 1)
+        rule.userIDs.forEach (acl) ->
+            if acl is null
+                rule.userIDs.splice(rule.userIDs.indexOf(acl), 1)
         @$el.html @template({rule: rule, domain: domain})
         _this = @
 

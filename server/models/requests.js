@@ -8,4 +8,7 @@ module.exports = {
     rule = {
         all: cozydb.defaultRequests.all
     }
+    triggers = {
+        all: cozydb.defaultRequests.all
+    }
 };

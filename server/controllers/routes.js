@@ -5,7 +5,8 @@ var contacts = require('./contacts');
 var sharing = require('./sharing');
 var rule = require('./rule');
 var files = require('./files');
-var tags = require('./tags')
+var tags = require('./tags');
+var triggers = require('./triggers')
 
 module.exports = {
   '': {
@@ -43,6 +44,15 @@ module.exports = {
        get: rule.get,
        put: rule.change,
        delete: rule.remove
+   },
+   'triggers': {
+      get: triggers.list,
+      post: triggers.create
+   },
+   'triggers/:id': {
+       get: triggers.get,
+       put: triggers.change,
+       delete: triggers.remove
    },
    'files/:fileid': {
         get: files.find

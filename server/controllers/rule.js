@@ -20,8 +20,8 @@ module.exports.create = function(req, res, next) {
         filterDoc: body.filterDoc,
         filterUser: body.filterUser
     }
-    console.log('create rule ', params)
-    Rule.create(params, function(err, rule) {
+    console.log('create rule ', body)
+    Rule.create(body, function(err, rule) {
         if(err) {
             res.send(500, err);
         }
@@ -37,7 +37,7 @@ module.exports.change = function(req, res, next) {
         if(err) {
             return next(err)
         }
-        Rule.updateAttributes(req.body, function(err, newRule) {
+        Rule.updateAttributes(req.params.id, req.body, function(err, newRule) {
             if(err) {
                 return next(err)
             }

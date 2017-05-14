@@ -10,7 +10,7 @@ module.exports.listSensitiveTags = function(req, res, next) {
         tags.forEach(function(tag) {
             t.push(tag.id)
         });
-        console.log("\n\ntags : " + JSON.stringify(t));
+        //console.log("\n\ntags : " + JSON.stringify(t));
         res.send(t);
     });
 }

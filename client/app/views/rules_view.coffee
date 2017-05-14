@@ -27,6 +27,8 @@ module.exports = RuleView = Backbone.View.extend(
 
     events :
         "change"                          : "onChange"
+        'click #addsharingrule'           : 'showRuleCreationForm'
+        'click #addtrigger'               : 'showTriggerCreationForm'
         'click #createRule'               : 'createRule'
         'click input[name="show"]'        : 'showACL'
         'click input[name="remove"]'      : 'removeRule'
@@ -142,6 +144,9 @@ module.exports = RuleView = Backbone.View.extend(
         rule.save()
         @collection.add rule
 
+        $("#createrule").attr('style', 'display:none')
+
+
     removeRule: (event) ->
         event.preventDefault()
         id = $(event.currentTarget).data("id")
@@ -152,4 +157,22 @@ module.exports = RuleView = Backbone.View.extend(
         rule.destroy()
         # Destroy from the colleciton: update the render
         @collection.remove rule
+
+    showRuleCreationForm: (event) ->
+        event.preventDefault()
+        $("#createtrigger").attr('style', 'display:none')
+        style = $("#createrule").attr('style')
+        if style == 'display:block'
+            $("#createrule").attr('style', 'display:none')
+        else if style == 'display:none'
+            $("#createrule").attr('style', 'display:block')
+
+    showTriggerCreationForm: (event) ->
+        event.preventDefault()
+        $("#createrule").attr('style', 'display:none')
+        style = $("#createtrigger").attr('style')
+        if style == 'display:block'
+            $("#createtrigger").attr('style', 'display:none')
+        else if style == 'display:none'
+            $("#createtrigger").attr('style', 'display:block')
 )

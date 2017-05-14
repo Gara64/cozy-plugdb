@@ -1,21 +1,41 @@
 div(class="container")
-    h3 Create sharing rule
-    form
-        div(class="form-group")
-            label What docs?
-            input(type='text', name='doctype')
-            label Attr
-            input(type='text', name='docattr')
-            label Value
-            input(type='text', name='docval')
-        div(class="form-group")
-            label With who?
-            label Attr
-            input(type='text', name='subattr')
-            label Value
-            input(type='text', name='subval')
-        input(id='createRule', type='button', value='Ok')
-        
+    a(href="")    
+        img(id="addsharingrule", src="./images/add.png", height="40", width="40")
+    label Add Sharing rule
+    a(href="")    
+        img(id="addtrigger", src="./images/add.png", height="40", width="40")
+    label Add Trigger
+
+div(id="createrule", class="container", style="display:none")
+    div(class="well bs-component")
+        form(class="form-horizontal")
+            fieldset
+                legend Create Sharing rule
+                div(class="form-group")
+                    label(class="col-lg-2") What docs?
+                div(class="form-group")
+                    label(class="col-lg-offset-2 col-lg-1") Type
+                    input(class="col-lg-3", type='text', name='doctype')
+                div(class="form-group")
+                    label(class="col-lg-offset-2 col-lg-1") Attr
+                    input(class="col-lg-3", type='text', name='docattr')
+                div(class="form-group")
+                    label(class="col-lg-offset-2 col-lg-1") Value
+                    input(class="col-lg-3", type='text', name='docval')
+                div(class="form-group")
+                    label(class="col-lg-2") With who?
+                div(class="form-group")
+                    label(class="col-lg-offset-2 col-lg-1") Attr
+                    input(class="col-lg-3", type='text', name='subattr')
+                div(class="form-group")
+                    label(class="col-lg-offset-2 col-lg-1")  Value
+                    input(class="col-lg-3", type='text', name='subval')
+                input(id='createRule', class="btn btn-primary", type='button', value='Ok')
+            
+
+div(id="createtrigger", class="container", style="display:none")
+    h3 Create trigger
+
 div(class="container")
     h3 See sharing rules
     

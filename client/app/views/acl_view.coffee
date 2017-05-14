@@ -74,7 +74,7 @@ module.exports = ACLView = Backbone.View.extend(
         #this.remove()
 
     checkACL: (acl) ->
-        for tag in @model.tags
+        for tag in @model.get('tags')
             if tag == acl.id
                 # Set acl to suspect is undetermined
                 if acl.status is "*"

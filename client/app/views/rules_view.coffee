@@ -36,8 +36,9 @@ module.exports = RuleView = Backbone.View.extend(
         console.log "target : ", event.target
 
     initialize: ->
-
-        @listenTo @collection, 'change', @render
+        # Do not listen the changes to avoid a render each time
+        # an acl is changed
+        #@listenTo @collection, 'change', @render
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render

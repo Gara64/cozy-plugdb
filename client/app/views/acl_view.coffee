@@ -10,10 +10,8 @@ module.exports = ACLView = Backbone.View.extend(
         'click .validate'             : 'acceptACL'
         'click .cancel'               : 'rejectACL'
 
+
     initialize: ->
-        @listenTo @model, 'change', @killView
-        @listenTo @model, 'change:docIDs', @changeACL
-        @listenTo @model, 'change:userIDs', @changeACL
         @render()
 
     render: () ->
@@ -130,8 +128,5 @@ module.exports = ACLView = Backbone.View.extend(
                     @model.save()
                     @setACLVisualization(acl)
 
-    changeACL: (model, values, options) ->
-        console.log 'model : ' + JSON.stringify model
-        console.log 'values : ' + JSON.stringify model
-        console.log 'options : ' + JSON.stringify options
+
 )

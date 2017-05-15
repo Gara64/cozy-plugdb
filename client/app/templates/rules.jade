@@ -17,7 +17,7 @@ div(id="createrule", class="container", style="display:none")
                     label(class="col-lg-offset-2 col-lg-1") Type
                     input(class="col-lg-3", type='text', name='doctype')
                 div(class="form-group")
-                    label(class="col-lg-offset-2 col-lg-1") Attr
+                    label(class="col-lg-offset-2 col-lg-1") Attribute
                     input(class="col-lg-3", type='text', name='docattr')
                 div(class="form-group")
                     label(class="col-lg-offset-2 col-lg-1") Value
@@ -25,16 +25,38 @@ div(id="createrule", class="container", style="display:none")
                 div(class="form-group")
                     label(class="col-lg-2") With who?
                 div(class="form-group")
-                    label(class="col-lg-offset-2 col-lg-1") Attr
+                    label(class="col-lg-offset-2 col-lg-1") Attribute
                     input(class="col-lg-3", type='text', name='subattr')
                 div(class="form-group")
                     label(class="col-lg-offset-2 col-lg-1")  Value
                     input(class="col-lg-3", type='text', name='subval')
-                input(id='createRule', class="btn btn-primary", type='button', value='Ok')
+                input(id='createRule', class="btn btn-primary", type='button', value='Create rule')
             
 
 div(id="createtrigger", class="container", style="display:none")
-    h3 Create trigger
+    div(class="well bs-component")
+        form(class="form-horizontal")
+            fieldset
+                legend Create trigger
+                div(class="form-group")
+                    label(class="col-lg-3", for="select") Trigger type
+                    select(class="col-lg-2", id="triggertype")
+                        option Who
+                        option What
+                        option Which
+                div(class="form-group")
+                    label(id="triggeratt1", class="col-lg-3") Attribute
+                    input(class="col-lg-2", type='text', name='triggerattribute')
+                div(class="form-group")
+                    label(id="triggerval1", class="col-lg-3") Value
+                    input(class="col-lg-2", type='text', name='triggervalue')
+                div(id="triggerattblock", class="form-group", style="display:none")
+                    label(id="triggeratt2", class="col-lg-3") Attribute
+                    input(class="col-lg-2", type='text', name='triggerattribute')
+                div(id="triggervalblock", class="form-group", style="display:none")
+                    label(id="triggerval2", class="col-lg-3") Value
+                    input(class="col-lg-2", type='text', name='triggervalue')
+                input(id='createTrigger', class="btn btn-primary", type='button', value='Create trigger')
 
 div(class="container")
     h3 See sharing rules

@@ -2,6 +2,10 @@ Rule = require '../models/rule'
 Rules = require '../collections/rules'
 ACLView = require './acl_view'
 Tags = require '../collections/tags'
+Triggers = require '../collections/triggers'
+Trigger = require '../models/trigger'
+triggers = new Triggers()
+
 
 class RuleListener extends CozySocketListener
     models:
@@ -30,8 +34,10 @@ module.exports = RuleView = Backbone.View.extend(
         'click #addsharingrule'           : 'showRuleCreationForm'
         'click #addtrigger'               : 'showTriggerCreationForm'
         'click #createRule'               : 'createRule'
+        'click #createTrigger'            : 'createTrigger'
         'click input[name="show"]'        : 'showACL'
         'click input[name="remove"]'      : 'removeRule'
+        'change #triggertype'              : 'triggerForm'
 
     onChange : (event) ->
         event.preventDefault()
@@ -143,12 +149,10 @@ module.exports = RuleView = Backbone.View.extend(
         )
         rule.save()
         @collection.add rule
-
         $("#createrule").attr('style', 'display:none')
 
 
     removeRule: (event) ->
-        event.preventDefault()
         id = $(event.currentTarget).data("id")
         console.log 'id : ', id
         rule = @collection.get(id)
@@ -157,6 +161,38 @@ module.exports = RuleView = Backbone.View.extend(
         rule.destroy()
         # Destroy from the colleciton: update the render
         @collection.remove rule
+
+    createTrigger: (event) ->
+        event.preventDefault()
+        triggerType = @$el.find("#triggertype option:selected" ).text()
+        att = @$el.find('input[name="triggerattribute"]').val()
+        val = @$el.find('input[name="triggervalue"]').val()
+        console.log 'type : ' + triggerType
+        console.log 'att : ' + att
+        console.log 'val : ' + val
+        trigger = new Trigger(
+            id: null,
+            type: triggerType
+        )
+        triggers.add trigger
+
+
+    triggerForm: (event) ->
+        event.preventDefault()
+        triggerType = @$el.find("#triggertype option:selected" ).text()
+        if triggerType == "Who"
+            @$el.find('#triggeratt1').text('Attribute Who')
+            @$el.find('#triggerval1').text('Val Who')
+        else if triggerType == "What"
+            @$el.find('#triggeratt1').text('Attribute What')
+            @$el.find('#triggerval1').text('Val What')
+        else if triggerType == "Which"
+            $("#triggerattblock").attr('style', 'display:block')
+            $("#triggervalblock").attr('style', 'display:block')
+            @$el.find('#triggeratt1').text('Attribute Who')
+            @$el.find('#triggerval1').text('Val Who')
+            @$el.find('#triggeratt2').text('Attribute What')
+            @$el.find('#triggerval2').text('Val What')
 
     showRuleCreationForm: (event) ->
         event.preventDefault()

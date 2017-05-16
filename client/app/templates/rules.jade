@@ -37,7 +37,7 @@ div(id="createtrigger", class="container", style="display:none")
     div(class="well bs-component")
         form(class="form-horizontal")
             fieldset
-                legend Create trigger
+                legend Create trigger on sensitive documents
                 div(class="form-group")
                     label(class="col-lg-3", for="select") Trigger type
                     select(class="col-lg-2", id="triggertype")
@@ -45,10 +45,10 @@ div(id="createtrigger", class="container", style="display:none")
                         option What
                         option Which
                 div(class="form-group")
-                    label(id="triggeratt1", class="col-lg-3") Attribute
+                    label(id="triggeratt1", class="col-lg-3") Attribute Who
                     input(class="col-lg-2", type='text', name='triggerattribute')
                 div(class="form-group")
-                    label(id="triggerval1", class="col-lg-3") Value
+                    label(id="triggerval1", class="col-lg-3") Value Who
                     input(class="col-lg-2", type='text', name='triggervalue')
                 div(id="triggerattblock", class="form-group", style="display:none")
                     label(id="triggeratt2", class="col-lg-3") Attribute

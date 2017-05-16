@@ -165,15 +165,39 @@ module.exports = RuleView = Backbone.View.extend(
     createTrigger: (event) ->
         event.preventDefault()
         triggerType = @$el.find("#triggertype option:selected" ).text()
-        att = @$el.find('input[name="triggerattribute"]').val()
-        val = @$el.find('input[name="triggervalue"]').val()
-        console.log 'type : ' + triggerType
-        console.log 'att : ' + att
-        console.log 'val : ' + val
-        trigger = new Trigger(
-            id: null,
-            type: triggerType
-        )
+        att1 = @$el.find('input[name="triggerattribute1"]').val()
+        val1 = @$el.find('input[name="triggervalue1"]').val()
+        if triggerType is "Which"
+            att2 = @$el.find('input[name="triggerattribute2"]').val()
+            val2 = @$el.find('input[name="triggervalue2"]').val()
+
+            trigger = new Trigger(
+                id: null,
+                type: triggerType,
+                who:
+                    att: att1
+                    val: att1
+                what:
+                    att: att2
+                    val: att2
+            )
+        else if triggerType is "Who"
+            trigger = new Trigger(
+                id: null,
+                type: triggerType,
+                who:
+                    att: att1
+                    val: att1
+            )
+        else if triggerType is "What"
+            trigger = new Trigger(
+                id: null,
+                type: triggerType,
+                what:
+                    att: att1
+                    val: att1
+            )
+            
         triggers.add trigger
 
 
@@ -182,17 +206,17 @@ module.exports = RuleView = Backbone.View.extend(
         triggerType = @$el.find("#triggertype option:selected" ).text()
         if triggerType == "Who"
             @$el.find('#triggeratt1').text('Attribute Who')
-            @$el.find('#triggerval1').text('Val Who')
+            @$el.find('#triggerval1').text('Value Who')
         else if triggerType == "What"
             @$el.find('#triggeratt1').text('Attribute What')
-            @$el.find('#triggerval1').text('Val What')
+            @$el.find('#triggerval1').text('Value What')
         else if triggerType == "Which"
             $("#triggerattblock").attr('style', 'display:block')
             $("#triggervalblock").attr('style', 'display:block')
             @$el.find('#triggeratt1').text('Attribute Who')
-            @$el.find('#triggerval1').text('Val Who')
+            @$el.find('#triggerval1').text('Value Who')
             @$el.find('#triggeratt2').text('Attribute What')
-            @$el.find('#triggerval2').text('Val What')
+            @$el.find('#triggerval2').text('Value What')
 
     showRuleCreationForm: (event) ->
         event.preventDefault()

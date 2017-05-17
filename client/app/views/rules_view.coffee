@@ -36,8 +36,8 @@ module.exports = RuleView = Backbone.View.extend(
         'click #addtrigger'               : 'showTriggerCreationForm'
         'click #createRule'               : 'createRule'
         'click #createTrigger'            : 'createTrigger'
-        'click input[name="show"]'        : 'showACL'
-        'click input[name="remove"]'      : 'removeRule'
+        'click a[name="show"]'        : 'showACL'
+        'click a[name="remove"]'      : 'removeRule'
         'change #triggertype'              : 'triggerForm'
 
     onChange : (event) ->
@@ -197,20 +197,21 @@ module.exports = RuleView = Backbone.View.extend(
                     att: att1
                     val: att1
             )
-            
+
         triggers.add trigger
 
 
     triggerForm: (event) ->
         event.preventDefault()
-        triggerType = @$el.find("#triggertype option:selected" ).text()
-        if triggerType == "Who"
+        triggerType = @$el.find("#triggertype option:selected" ).attr("name")
+        console.log 'trigger type : ' + triggerType
+        if triggerType == "who"
             @$el.find('#triggeratt1').text('Attribute Who')
             @$el.find('#triggerval1').text('Value Who')
-        else if triggerType == "What"
+        else if triggerType == "what"
             @$el.find('#triggeratt1').text('Attribute What')
             @$el.find('#triggerval1').text('Value What')
-        else if triggerType == "Which"
+        else if triggerType == "which"
             $("#triggerattblock").attr('style', 'display:block')
             $("#triggervalblock").attr('style', 'display:block')
             @$el.find('#triggeratt1').text('Attribute Who')

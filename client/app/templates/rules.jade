@@ -1,10 +1,9 @@
 div(class="container")
-    a(href="")    
-        img(id="addsharingrule", src="./images/add.png", height="40", width="40")
-    label Add Sharing rule
-    a(href="")    
-        img(id="addtrigger", src="./images/add.png", height="40", width="40")
-    label Add Trigger
+    a(class="col-lg-3 btn btn-success", id="addsharingrule", href="#")
+        i(class="fa fa-plus-circle fa-lg")  Add Sharing Rule
+    a(class="col-lg-3 btn btn-success", id="addtrigger", href="#")
+        i(class="fa fa-plus-circle fa-lg")  Add Trigger
+
 
 div(id="createrule", class="container", style="display:none")
     div(class="well bs-component")
@@ -12,7 +11,7 @@ div(id="createrule", class="container", style="display:none")
             fieldset
                 legend Create Sharing rule
                 div(class="form-group")
-                    label(class="col-lg-2") What docs?
+                    i(class="fa fa-files-o fa-lg col-lg-2")  What docs?
                 div(class="form-group")
                     label(class="col-lg-offset-2 col-lg-1") Type
                     input(class="col-lg-3", type='text', name='doctype')
@@ -23,7 +22,7 @@ div(id="createrule", class="container", style="display:none")
                     label(class="col-lg-offset-2 col-lg-1") Value
                     input(class="col-lg-3", type='text', name='docval')
                 div(class="form-group")
-                    label(class="col-lg-2") With who?
+                    label(class="fa fa-users fa-lg col-lg-2")  With who?
                 div(class="form-group")
                     label(class="col-lg-offset-2 col-lg-1") Attribute
                     input(class="col-lg-3", type='text', name='subattr')
@@ -41,9 +40,9 @@ div(id="createtrigger", class="container", style="display:none")
                 div(class="form-group")
                     label(class="col-lg-3", for="select") Trigger type
                     select(class="col-lg-2", id="triggertype")
-                        option Who
-                        option What
-                        option Which
+                        option(name="who") &#xf0c0; Who
+                        option(name="what") &#xf0c5;  What
+                        option(name="which") &#xf0c0;&#xf0c5; Which
                 div(class="form-group")
                     label(id="triggeratt1", class="col-lg-3") Attribute Who
                     input(class="col-lg-2", type='text', name='triggerattribute')
@@ -59,13 +58,17 @@ div(id="createtrigger", class="container", style="display:none")
                 input(id='createTrigger', class="btn btn-primary", type='button', value='Create trigger')
 
 div(class="container")
-    h3 See sharing rules
+    h3 Visualize Sharing Rules and ACLs
     
     table(class="table table-bordered")
         thead
             tr(class="titles")
-                th What to share
-                th With who
+                th
+                    p Share what?
+                        i(class="fa fa-files-o fa-lg")
+                th
+                    p With who?
+                        i(class="fa fa-users fa-lg")
                 th Action
         tbody
             each rule, i in rules
@@ -73,7 +76,9 @@ div(class="container")
                     td #{rule.fDoc}
                     td #{rule.fSub}
                     td
-                        input(data-id="#{rule.id}", data-status="blind", name="show", type="image", src="./images/visualize.svg", alt="show ACL", height="25", width="25")
-                        input(data-id="#{rule.id}", name="remove", type="image", src="./images/cancel.png", alt="remove rule", height="25", width="25")
-                
+                        a(class="btn btn-default", data-id="#{rule.id}", name="show", href="#")
+                            i(class="fa fa-eye fa-lg")  See ACL
+                        //input(data-id="#{rule.id}", data-status="blind", name="show", type="image", src="./images/visualize.svg", alt="show ACL", height="25", width="25")
+                        a(class="btn btn-danger", data-id="#{rule.id}", name="remove", href="#")
+                            i(class="fa fa-trash-o fa-lg")  Delete
 #acl

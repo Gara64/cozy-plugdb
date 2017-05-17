@@ -5,7 +5,7 @@ Triggers = require('../collections/triggers')
 aclView = require './acl_view'
 contactView = require './contacts_view'
 ruleView = require './rules_view'
-triggerView = require './triggers_view'
+triggerView = require './trigger_view'
 
 #var Device = require('../models/device');
 module.exports = AppView = Backbone.View.extend(
@@ -33,6 +33,11 @@ module.exports = AppView = Backbone.View.extend(
         @renderStatus()
         @renderPlug()
 
+
+        triggers = new Triggers()
+        triggers.fetch(reset: true)
+        #triggerView = new triggerView(collection: triggers)
+
         rules = new Rules()
         rules.fetch(reset:true)
         ruleView = new ruleView(collection: rules)
@@ -41,9 +46,7 @@ module.exports = AppView = Backbone.View.extend(
         contacts.fetch(reset:true)
         contactView = new contactView(collection: contacts)
 
-        triggers = new Triggers()
-        triggers.fetch(reset: true)
-        triggerView = new triggerView(collection: triggers)
+
 
         this
 

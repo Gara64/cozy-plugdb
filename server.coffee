@@ -18,4 +18,7 @@ americano.start {name: 'plug', port: port}, (app, server) ->
         console.log 'sharingrule event : ', event
         console.log 'msg : ', msg
 
+    realtime.on 'trigger.*', (event, msg) ->
+        console.log 'trigger event : ', event
+        console.log 'msg : ', msg
     # callback? null, app, server

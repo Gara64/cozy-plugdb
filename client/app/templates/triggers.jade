@@ -1,1 +1,13 @@
-h1 trigger form
+div(id="#{trigger.id}", class="container", style="display:block")
+    h3 Sensitive #{docType}s
+    table(class="table table-inline", style="width:50%;float:left")
+        thead
+            tr(class="titles")
+                th #{docType}
+        tbody
+            each tri, i in trigger.docIDs
+                tr(id="#{tri.id}", class="warning")
+                    td
+                        a(href="")
+                        p
+                        img()

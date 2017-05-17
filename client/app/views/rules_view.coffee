@@ -25,6 +25,24 @@ class RuleListener extends CozySocketListener
         console.log 'remote rule delete : ', model
         @collection.remove model
 
+class TriggerListener extends CozySocketListener
+    models:
+        'trigger': Trigger
+    events: [
+        'trigger.create'
+        'trigger.update'
+        'trigger.delete'
+    ]
+    onRemoteCreate: (model) ->
+        console.log 'remote trigger create : ', model
+        @collection.add model, merge: true
+    onRemoteUpdate: (model) ->
+        console.log 'remote trigger rule'
+        #@collection.set model
+    onRemoteDelete: (model) ->
+        console.log 'remote trigger delete : ', model
+        @collection.remove model
+
 
 module.exports = RuleView = Backbone.View.extend(
     el: '#rule'
@@ -53,40 +71,32 @@ module.exports = RuleView = Backbone.View.extend(
         @listenTo @collection, 'reset' , @render
         @listenTo @collection, 'ping', @render
 
+        @listenTo triggers, 'add'   , @render
+        @listenTo triggers, 'remove', @render
+        @listenTo triggers, 'reset' , @render
+
         @render()
 
         realtimerRule = new RuleListener()
         realtimerRule.watch @collection
+        realtimerTrigger = new TriggerListener()
+        realtimerTrigger.watch triggers
 
+        triggers.fetch(reset: true)
         return
 
     render: ->
-        rules = []
+
         @collection.forEach (model) ->
-            id = model.get("id")
-            #console.log 'model : ', JSON.stringify model
-
-            if model.get('filterDoc') != null
-                filterDoc = model.get('filterDoc').rule
-                filterSub = model.get('filterUser').rule
-                docIDs = model.get('docIDs')
-                userIDs = model.get('userIDs')
-                rules.push {
-                    id: id,
-                    fDoc: filterDoc,
-                    fSub: filterSub,
-                    docIDs: docIDs,
-                    userIDs: userIDs
-                }
-
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
 
 
-        #console.log 'rules : ', JSON.stringify(rules)
+        #console.log 'rules : ', JSON.stringify @collection.toJSON()
+        #console.log 'triggers : ', JSON.stringify(triggers)
 
         # render the template
-        @$el.html @template({rules: rules})
+        @$el.html @template({rules: @collection.toJSON(), triggers: triggers.toJSON()})
 
         return
 
@@ -164,10 +174,13 @@ module.exports = RuleView = Backbone.View.extend(
 
     createTrigger: (event) ->
         event.preventDefault()
-        triggerType = @$el.find("#triggertype option:selected" ).text()
-        att1 = @$el.find('input[name="triggerattribute1"]').val()
-        val1 = @$el.find('input[name="triggervalue1"]').val()
-        if triggerType is "Which"
+        triggerType = @$el.find("#triggertype option:selected" ).attr("name")
+        console.log 'trigger type : ' + triggerType
+        att1 = @$el.find('input[name="triggerattribute"]').val()
+        val1 = @$el.find('input[name="triggervalue"]').val()
+        console.log 'att : ' + att1
+        console.log 'val : ' + val1
+        if triggerType is "which"
             att2 = @$el.find('input[name="triggerattribute2"]').val()
             val2 = @$el.find('input[name="triggervalue2"]').val()
 
@@ -176,12 +189,12 @@ module.exports = RuleView = Backbone.View.extend(
                 type: triggerType,
                 who:
                     att: att1
-                    val: att1
+                    val: val1
                 what:
                     att: att2
-                    val: att2
+                    val: val2
             )
-        else if triggerType is "Who"
+        else if triggerType is "who"
             trigger = new Trigger(
                 id: null,
                 type: triggerType,
@@ -189,7 +202,7 @@ module.exports = RuleView = Backbone.View.extend(
                     att: att1
                     val: att1
             )
-        else if triggerType is "What"
+        else if triggerType is "what"
             trigger = new Trigger(
                 id: null,
                 type: triggerType,
@@ -197,14 +210,14 @@ module.exports = RuleView = Backbone.View.extend(
                     att: att1
                     val: att1
             )
-
+        console.log 'trigger : ', JSON.stringify trigger
+        trigger.save()
         triggers.add trigger
 
 
     triggerForm: (event) ->
         event.preventDefault()
         triggerType = @$el.find("#triggertype option:selected" ).attr("name")
-        console.log 'trigger type : ' + triggerType
         if triggerType == "who"
             @$el.find('#triggeratt1').text('Attribute Who')
             @$el.find('#triggerval1').text('Value Who')

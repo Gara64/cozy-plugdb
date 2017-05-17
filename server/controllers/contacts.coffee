@@ -19,7 +19,7 @@ module.exports.list = (req, res, next) ->
             res.send(filteredContacts)
         )
         ###
-        console.log('list contacts', JSON.stringify(contacts))
+        #console.log('list contacts', JSON.stringify(contacts))
         res.send(contacts)
     )
 

@@ -51,10 +51,10 @@ div(id="createtrigger", class="container", style="display:none")
                     input(class="col-lg-2", type='text', name='triggervalue')
                 div(id="triggerattblock", class="form-group", style="display:none")
                     label(id="triggeratt2", class="col-lg-3") Attribute
-                    input(class="col-lg-2", type='text', name='triggerattribute')
+                    input(class="col-lg-2", type='text', name='triggerattribute2')
                 div(id="triggervalblock", class="form-group", style="display:none")
                     label(id="triggerval2", class="col-lg-3") Value
-                    input(class="col-lg-2", type='text', name='triggervalue')
+                    input(class="col-lg-2", type='text', name='triggervalue2')
                 input(id='createTrigger', class="btn btn-primary", type='button', value='Create trigger')
 
 div(class="container")
@@ -73,12 +73,34 @@ div(class="container")
         tbody
             each rule, i in rules
                 tr
-                    td #{rule.fDoc}
-                    td #{rule.fSub}
+                    td #{rule.filterDoc.rule}
+                    td #{rule.filterUser.rule}
                     td
                         a(class="btn btn-default", data-id="#{rule.id}", name="show", href="#")
                             i(class="fa fa-eye fa-lg")  See ACL
-                        //input(data-id="#{rule.id}", data-status="blind", name="show", type="image", src="./images/visualize.svg", alt="show ACL", height="25", width="25")
                         a(class="btn btn-danger", data-id="#{rule.id}", name="remove", href="#")
                             i(class="fa fa-trash-o fa-lg")  Delete
+
+
 #acl
+
+div(class="container")
+    h3 Visualize Watchdog Triggers
+    
+    table(class="table table-bordered")
+        thead
+            tr(class="titles")
+                th Trigger type
+                th Watchdog
+                th Action
+        tbody
+            each trigger, i in triggers
+                tr
+                    td #{trigger.type}
+                    td
+                        p(id="watchdog")
+                    td
+                        a(class="btn btn-default", data-id="#{trigger.id}", name="show", href="#")
+                            i(class="fa fa-eye fa-lg")  See results
+                        a(class="btn btn-danger", data-id="#{trigger.id}", name="remove", href="#")
+                            i(class="fa fa-trash-o fa-lg")  Delete

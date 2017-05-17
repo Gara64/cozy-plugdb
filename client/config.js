@@ -23,7 +23,8 @@ exports.config = {
             {"stylesheets/app.css": /^(app|vendor)/},
             "order":{
                 "before": [
-                    "vendor/styles/bootswatch.css"
+                    "vendor/styles/bootswatch.css",
+                    "vendor/styles/font-awesome.css"
                 ]
             }
         },

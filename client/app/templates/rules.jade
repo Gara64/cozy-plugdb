@@ -76,9 +76,9 @@ div(class="container")
                     td #{rule.filterDoc.rule}
                     td #{rule.filterUser.rule}
                     td
-                        a(class="btn btn-default", data-id="#{rule.id}", name="show", href="#")
+                        a(class="btn btn-default", data-id="#{rule.id}", name="showACL", href="#")
                             i(class="fa fa-eye fa-lg")  See ACL
-                        a(class="btn btn-danger", data-id="#{rule.id}", name="remove", href="#")
+                        a(class="btn btn-danger", data-id="#{rule.id}", name="removeRule", href="#")
                             i(class="fa fa-trash-o fa-lg")  Delete
 
 
@@ -98,9 +98,9 @@ div(class="container")
                 tr
                     td #{trigger.type}
                     td
-                        p(id="watchdog")
+                        p(id="watchdog") #{trigger.watchdog}
                     td
-                        a(class="btn btn-default", data-id="#{trigger.id}", name="show", href="#")
+                        a(class="btn btn-default", data-id="#{trigger.id}", name="showTrigger", href="#")
                             i(class="fa fa-eye fa-lg")  See results
-                        a(class="btn btn-danger", data-id="#{trigger.id}", name="remove", href="#")
+                        a(class="btn btn-danger", data-id="#{trigger.id}", name="removeTrigger", href="#")
                             i(class="fa fa-trash-o fa-lg")  Delete

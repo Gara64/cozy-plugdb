@@ -13,11 +13,15 @@ module.exports = ACLView = Backbone.View.extend(
         'click .cancel'               : 'rejectACL'
 
     initialize: ->
-        @render()
+        @listenTo triggers, 'add'   , @render
+        @listenTo triggers, 'remove', @render
+        @listenTo triggers, 'reset' , @render
+
+        triggers.fetch(reset: true)
 
     render: () ->
+        console.log 'render'
         rule = @model.toJSON()
-        console.log 'triggers : ', triggers
         domain = window.location.origin
         rule.docIDs.forEach (acl) ->
             if acl is null
@@ -38,6 +42,7 @@ module.exports = ACLView = Backbone.View.extend(
             status = acl.status
             file = new File(id: docid)
             file.fetch({
+                async: false,
                 success: () ->
                     console.log 'file : ' + JSON.stringify file
                     filename = file.get('name')
@@ -45,10 +50,9 @@ module.exports = ACLView = Backbone.View.extend(
                     $("#"+docid+" td:first a").attr('href', href)
                     $("#"+docid+" td:first a").text(filename)
 
-                    # Set acl status
-                    _this.checkACL(acl)
-                    _this.setACLVisualization(acl)
-                    files.push file
+                    f = file.toJSON()
+                    f.acl = acl
+                    files.push f
 
                 error: (err) ->
                     $("#"+docid+" p").text("deleted")
@@ -61,36 +65,23 @@ module.exports = ACLView = Backbone.View.extend(
             contact = new Contact(id: userid)
 
             contact.fetch({
+                async: false,
                 success: () ->
                     console.log 'contact : ' + JSON.stringify contact
                     href = domain+"/contacts/"+userid+"/picture.png"
                     fn = contact.get('fn')
                     $("#"+userid+" td:first p").text("#{fn}")
 
-                    # Set acl status
-                    _this.checkACL(acl)
-                    _this.setACLVisualization(acl)
-                    contacts.push contact
+                    c = contact.toJSON()
+                    c.acl = acl
+                    contacts.push c
 
                 error: (err) ->
                     $("#"+userid+" p").text("deleted")
             })
 
-
-    killView: ()->
-        console.log 'harakiri!!'
-        #this.remove()
-
-    checkACL: (acl) ->
-        for tag in @model.get('tags')
-            if tag == acl.id
-                # Set acl to suspect is undetermined
-                if acl.status is "*"
-                    acl.status = "?"
-                    console.log 'SENSITIVE TAG'
-        # If not sensitive, it is accepted
-        if acl.status is "*"
-            acl.status = "+"
+        # Check triggers
+        @checkTriggers(contacts, files)
 
 
     setACLVisualization: (acl) ->
@@ -100,8 +91,16 @@ module.exports = ACLView = Backbone.View.extend(
             $("#"+id).attr('class', 'warning')
         else if acl.status is "-"
             $("#"+id).attr('class', 'danger')
-        else if acl.status is "+"
+        else if acl.status is "+" || acl.status is "*"
             $("#"+id).attr('class', 'success')
+
+
+    setACLSuspect: (trigger, acl) ->
+        # Update only if the acl status hasn't been set yet
+        if acl.status is "*"
+            acl.status = '?'
+            acl.trigger = trigger
+        @setACLVisualization(acl)
 
 
     acceptACL: (event) ->
@@ -120,6 +119,7 @@ module.exports = ACLView = Backbone.View.extend(
         console.log 'reject ' + id
         @changeACLStatus(id, type, false)
 
+
     changeACLStatus: (id, type, isAccept) ->
         if type is "doc"
             docIDs = @model.get('docIDs')
@@ -136,24 +136,69 @@ module.exports = ACLView = Backbone.View.extend(
                     @model.save()
                     @setACLVisualization(acl)
 
+
+    # Triggers are check on all docs and users because of the Which
     checkTriggers: (users, docs) ->
-        triggers.forEach (trigger) ->
-            if trigger.type is "what"
-                evalTrigger(trigger, docs)
-            else if trigger.type is "who"
-                evalTrigger(trigger, users)
-            else if trigger.type is "which"
-                evalTrigger(trigger, docs)
-                evalTrigger(trigger, users)
-
-
-    evalTrigger: (trigger, docs) ->
-        if trigger.type is "who"
-            triggerRule = trigger.who
-        else if trigger.type is "what"
-            triggerRule = trigger.what
+        _this = @
+        console.log 'triggers : ', JSON.stringify triggers
+        users.forEach (user) ->
+            _this.evalTriggers user, null, 'who'
         docs.forEach (doc) ->
-            if doc[triggerRule.attribute] = triggerRule.value
+            _this.evalTriggers null, doc, 'what'
+
+        users.forEach (user) ->
+            docs.forEach (doc) ->
+                _this.evalTriggers user, doc, 'which'
+
+    evalTriggers: (user, doc, triggerType) ->
+        _this = @
+        triggers.forEach (trigger) ->
+            t = trigger.toJSON()
+            if triggerType is t.type
+
+                console.log 'go eval trigger ' + JSON.stringify t
+                if t.type is 'who'
+                    if _this.evalDoc(t.who, user)
+                        console.log 'OK'
+                        _this.setACLSuspect(t.who, user.acl)
+                else if t.type is 'what'
+                    if _this.evalDoc(t.what, doc)
+                        _this.setACLSuspect(t, doc.acl)
+                else if t.type is 'which'
+                    evalWho = _this.evalDoc(t.who, user)
+                    evalWhat = _this.evalDoc(t.what, doc)
+                    evalOk = evalWho && evalWhat
+                    if evalOk
+                        _this.setACLSuspect(t, user.acl)
+                        _this.setACLSuspect(t, doc.acl)
+
+
+    evalDoc: (triggerRule, doc) ->
+        if triggerRule.att is "tag" && doc.tags.length > 0
+            if triggerRule.val in doc.tags
+                console.log 'tag in tags'
+                return true
+        else
+            if doc[triggerRule.att] is triggerRule.val
+                console.log 'att is val'
                 return true
         return false
+
+
+    evalDocs: (docs, triggerRule) ->
+        evalOk = false
+        docs.forEach (doc) ->
+            # Special case for tags array
+            if triggerRule.att is "tag" && doc.tags.length > 0
+                if triggerRule.val in doc.tags
+                    evalOk = true
+                    return
+            else
+                if doc[triggerRule.att] is triggerRule.val
+                    evalOk = true
+                    return
+        return evalOk
+
+
+
 )

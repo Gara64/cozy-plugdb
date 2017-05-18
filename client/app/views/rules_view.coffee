@@ -7,6 +7,7 @@ Trigger = require '../models/trigger'
 triggers = new Triggers()
 
 
+
 class RuleListener extends CozySocketListener
     models:
         'sharingrule': Rule
@@ -24,6 +25,7 @@ class RuleListener extends CozySocketListener
     onRemoteDelete: (model) ->
         console.log 'remote rule delete : ', model
         @collection.remove model
+
 
 class TriggerListener extends CozySocketListener
     models:
@@ -54,8 +56,9 @@ module.exports = RuleView = Backbone.View.extend(
         'click #addtrigger'               : 'showTriggerCreationForm'
         'click #createRule'               : 'createRule'
         'click #createTrigger'            : 'createTrigger'
-        'click a[name="show"]'        : 'showACL'
-        'click a[name="remove"]'      : 'removeRule'
+        'click a[name="showACL"]'        : 'showACL'
+        'click a[name="removeRule"]'      : 'removeRule'
+        'click a[name="removeTrigger"]'      : 'removeTrigger'
         'change #triggertype'              : 'triggerForm'
 
     onChange : (event) ->
@@ -91,12 +94,33 @@ module.exports = RuleView = Backbone.View.extend(
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
 
+        tri = []
+        triggers.forEach (trigger) ->
+            type = trigger.get('type')
+            if type is "who"
+                who = trigger.get('who')
+                watchdog = who.att + ' == ' + who.val
+            else if type is "what"
+                what = trigger.get('what')
+                watchdog = what.att + ' == ' + what.val
+            else if type is "which"
+                who = trigger.get('who')
+                what = trigger.get('what')
+                watchdog = who.att + ' == ' + who.val +
+                ' && ' +
+                watchdog = what.att + ' == ' + what.val
+            tri.push {
+                id: trigger.get('id')
+                watchdog: watchdog
+                type: type
+            }
 
         #console.log 'rules : ', JSON.stringify @collection.toJSON()
         #console.log 'triggers : ', JSON.stringify(triggers)
 
         # render the template
-        @$el.html @template({rules: @collection.toJSON(), triggers: triggers.toJSON()})
+        @$el.html @template({rules: @collection.toJSON(), triggers: tri})
+
 
         return
 
@@ -115,15 +139,6 @@ module.exports = RuleView = Backbone.View.extend(
         else
             $("#"+rule.id).attr('style', 'display:block')
 
-        ###
-        if style?
-            $("#"+rule.id).attr('style', 'display:none')
-        else
-            aclView = new ACLView({model: rule})
-        ###
-        #curACLView = aclView
-        #console.log 'model id saved : ', curACLView.model.get('id')
-
 
     createRule: (event) ->
         event.preventDefault()
@@ -133,30 +148,7 @@ module.exports = RuleView = Backbone.View.extend(
         subAttr = @$el.find('input[name="subattr"]').val()
         subVal = @$el.find('input[name="subval"]').val()
 
-        docTypeDocPred = 'doc.docType === "'+docType+'"'
-        docAttrPred = ''
-        if docAttr
-            docAttrPred = ' && doc.'+docAttr+'.indexOf("'+docVal+'") > -1'
-
-        docTypeSubPred = 'doc.docType === "contact"'
-        subAttrPred = ''
-        if subAttr
-            subAttrPred = ' && doc.'+subAttr+'.indexOf("'+subVal+'") > -1'
-
-        docPred = docTypeDocPred + docAttrPred
-        subPred = docTypeSubPred + subAttrPred
-
-        filterDoc = {
-            rule: docPred
-        }
-        filterUser = {
-            rule: subPred
-        }
-        rule = new Rule(
-            id: null,
-            filterDoc: filterDoc,
-            filterUser: filterUser
-        )
+        rule = @convertRule(docType, docAttr, docVal, subAttr, subVal)
         rule.save()
         @collection.add rule
         $("#createrule").attr('style', 'display:none')
@@ -164,7 +156,6 @@ module.exports = RuleView = Backbone.View.extend(
 
     removeRule: (event) ->
         id = $(event.currentTarget).data("id")
-        console.log 'id : ', id
         rule = @collection.get(id)
 
         # Destroy the model: sends delete to the server
@@ -172,14 +163,20 @@ module.exports = RuleView = Backbone.View.extend(
         # Destroy from the colleciton: update the render
         @collection.remove rule
 
+    removeTrigger: (event) ->
+        id = $(event.currentTarget).data("id")
+        trigger = triggers.get(id)
+        # Destroy the model: sends delete to the server
+        trigger.destroy()
+        # Destroy from the colleciton: update the render
+        triggers.remove trigger
+
     createTrigger: (event) ->
         event.preventDefault()
         triggerType = @$el.find("#triggertype option:selected" ).attr("name")
         console.log 'trigger type : ' + triggerType
         att1 = @$el.find('input[name="triggerattribute"]').val()
         val1 = @$el.find('input[name="triggervalue"]').val()
-        console.log 'att : ' + att1
-        console.log 'val : ' + val1
         if triggerType is "which"
             att2 = @$el.find('input[name="triggerattribute2"]').val()
             val2 = @$el.find('input[name="triggervalue2"]').val()
@@ -200,7 +197,7 @@ module.exports = RuleView = Backbone.View.extend(
                 type: triggerType,
                 who:
                     att: att1
-                    val: att1
+                    val: val1
             )
         else if triggerType is "what"
             trigger = new Trigger(
@@ -208,7 +205,7 @@ module.exports = RuleView = Backbone.View.extend(
                 type: triggerType,
                 what:
                     att: att1
-                    val: att1
+                    val: val1
             )
         console.log 'trigger : ', JSON.stringify trigger
         trigger.save()
@@ -249,4 +246,33 @@ module.exports = RuleView = Backbone.View.extend(
             $("#createtrigger").attr('style', 'display:none')
         else if style == 'display:none'
             $("#createtrigger").attr('style', 'display:block')
+
+
+    convertRule:(docType, docAttr, docVal, subAttr, subVal) ->
+        docTypeDocPred = 'doc.docType === "'+docType+'"'
+        docAttrPred = ''
+        if docAttr
+            docAttrPred = ' && doc.'+docAttr+'.indexOf("'+docVal+'") > -1'
+
+        docTypeSubPred = 'doc.docType === "contact"'
+        subAttrPred = ''
+        if subAttr
+            subAttrPred = ' && doc.'+subAttr+'.indexOf("'+subVal+'") > -1'
+
+        docPred = docTypeDocPred + docAttrPred
+        subPred = docTypeSubPred + subAttrPred
+
+        filterDoc = {
+            rule: docPred
+        }
+        filterUser = {
+            rule: subPred
+        }
+        rule = new Rule(
+            id: null,
+            filterDoc: filterDoc,
+            filterUser: filterUser
+            triggerType: triggerType
+        )
+        return rule
 )

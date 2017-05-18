@@ -12,7 +12,8 @@
       return x;
     },
     "note": String,
-    "shared": Boolean
+    "shared": Boolean,
+    "tags": [String]
   });
 
   mapSharedDoc = function(doc) {

@@ -5,7 +5,7 @@ Tags = require '../collections/tags'
 Triggers = require '../collections/triggers'
 Trigger = require '../models/trigger'
 triggers = new Triggers()
-
+TriggerView = require './trigger_view'
 
 
 class RuleListener extends CozySocketListener
@@ -57,6 +57,7 @@ module.exports = RuleView = Backbone.View.extend(
         'click #createRule'               : 'createRule'
         'click #createTrigger'            : 'createTrigger'
         'click a[name="showACL"]'        : 'showACL'
+        'click a[name="showTrigger"]'        : 'showTrigger'
         'click a[name="removeRule"]'      : 'removeRule'
         'click a[name="removeTrigger"]'      : 'removeTrigger'
         'change #triggertype'              : 'triggerForm'
@@ -137,6 +138,22 @@ module.exports = RuleView = Backbone.View.extend(
             $("#"+rule.id).attr('style', 'display:none')
         else
             $("#"+rule.id).attr('style', 'display:block')
+
+
+    showTrigger: (event) ->
+        event.preventDefault()
+        id = $(event.currentTarget).data("id")
+        trigger = triggers.get(id)
+        console.log 'trigger : ', trigger
+
+        style = $("#"+trigger.id).attr('style')
+        if style == undefined
+            triggerView = new TriggerView({model: trigger})
+        else if style == 'display:block'
+            $("#"+trigger.id).attr('style', 'display:none')
+        else
+            $("#"+trigger.id).attr('style', 'display:block')
+
 
 
     createRule: (event) ->

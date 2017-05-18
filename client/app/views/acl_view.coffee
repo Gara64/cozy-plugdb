@@ -97,10 +97,38 @@ module.exports = ACLView = Backbone.View.extend(
 
     setACLSuspect: (trigger, acl) ->
         # Update only if the acl status hasn't been set yet
-        if acl.status is "*"
-            acl.status = '?'
-            acl.trigger = trigger
+        # TODO: don't forget to uncomment this
+        #if acl.status is "*"
+        if trigger.type is 'who'
+            userIDs = @model.get 'userIDs'
+            userIDs = @setACL(userIDs, trigger, acl)
+            @model.set userIDs: userIDs
+            console.log 'updated model : ', JSON.stringify @model
+            @model.save()
+
+        else if trigger.type is 'what'
+            docIDs = @model.get 'docIDs'
+            docIDs = @setACL(docIDs, trigger, acl)
+            @model.set docIDs: docIDs
+            @model.save()
+        else if trigger.type is 'which'
+            userIDs = @model.get 'userIDs'
+            docIDs = @model.get 'docIDs'
+            userIDs = @setACL(userIDs, trigger, acl)
+            docIDs = @setACL(docIDs, trigger, acl)
+            @model.set userIDs: userIDs
+            @model.set docIDs: docIDs
+            @model.save()
+
         @setACLVisualization(acl)
+
+
+    setACL: (list, trigger, acl) ->
+        list.forEach (el) ->
+            if el.id is acl.id
+                el.status = '?'
+                el.trigger = trigger
+        return list
 
 
     acceptACL: (event) ->
@@ -160,7 +188,7 @@ module.exports = ACLView = Backbone.View.extend(
                 if t.type is 'who'
                     if _this.evalDoc(t.who, user)
                         console.log 'OK'
-                        _this.setACLSuspect(t.who, user.acl)
+                        _this.setACLSuspect(t, user.acl)
                 else if t.type is 'what'
                     if _this.evalDoc(t.what, doc)
                         _this.setACLSuspect(t, doc.acl)
@@ -176,11 +204,9 @@ module.exports = ACLView = Backbone.View.extend(
     evalDoc: (triggerRule, doc) ->
         if triggerRule.att is "tag" && doc.tags.length > 0
             if triggerRule.val in doc.tags
-                console.log 'tag in tags'
                 return true
         else
             if doc[triggerRule.att] is triggerRule.val
-                console.log 'att is val'
                 return true
         return false
 

@@ -68,7 +68,7 @@ module.exports = RuleView = Backbone.View.extend(
     initialize: ->
         # Do not listen the changes to avoid a render each time
         # an acl is changed
-        #@listenTo @collection, 'change', @render
+        @listenTo @collection, 'change:id', @render
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
@@ -89,7 +89,6 @@ module.exports = RuleView = Backbone.View.extend(
         return
 
     render: ->
-
         @collection.forEach (model) ->
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
@@ -272,7 +271,6 @@ module.exports = RuleView = Backbone.View.extend(
             id: null,
             filterDoc: filterDoc,
             filterUser: filterUser
-            triggerType: triggerType
         )
         return rule
 )

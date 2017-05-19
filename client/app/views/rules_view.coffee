@@ -133,6 +133,7 @@ module.exports = RuleView = Backbone.View.extend(
         console.log('display : ' + $("#"+rule.id).attr('style'))
         style = $("#"+rule.id).attr('style')
         if style == undefined
+            console.log 'create view'
             aclView = new ACLView({model: rule})
         else if style == 'display:block'
             $("#"+rule.id).attr('style', 'display:none')

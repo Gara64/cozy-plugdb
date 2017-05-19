@@ -20,7 +20,7 @@ module.exports = ACLView = Backbone.View.extend(
         triggers.fetch(reset: true)
 
     render: () ->
-        console.log 'render'
+        console.log 'render trigger model', JSON.stringify @model
         rule = @model.toJSON()
         domain = window.location.origin
         rule.docIDs.forEach (acl) ->
@@ -44,12 +44,13 @@ module.exports = ACLView = Backbone.View.extend(
             file.fetch({
                 async: false,
                 success: () ->
-                    console.log 'file : ' + JSON.stringify file
                     filename = file.get('name')
                     href = domain+"/files/"+docid+"/attach/"+filename
                     $("#"+docid+" td:first a").attr('href', href)
                     $("#"+docid+" td:first a").text(filename)
 
+                    _this.setACLVisualization(acl)
+                    
                     f = file.toJSON()
                     f.acl = acl
                     files.push f
@@ -67,10 +68,11 @@ module.exports = ACLView = Backbone.View.extend(
             contact.fetch({
                 async: false,
                 success: () ->
-                    console.log 'contact : ' + JSON.stringify contact
                     href = domain+"/contacts/"+userid+"/picture.png"
                     fn = contact.get('fn')
                     $("#"+userid+" td:first p").text("#{fn}")
+
+                    _this.setACLVisualization(acl)
 
                     c = contact.toJSON()
                     c.acl = acl
@@ -81,7 +83,7 @@ module.exports = ACLView = Backbone.View.extend(
             })
 
         # Check triggers
-        @checkTriggers(contacts, files)
+        @resolve(contacts, files)
 
 
     setACLVisualization: (acl) ->
@@ -98,32 +100,32 @@ module.exports = ACLView = Backbone.View.extend(
     setACLSuspect: (trigger, acl) ->
         # Update only if the acl status hasn't been set yet
         # TODO: don't forget to uncomment this
-        #if acl.status is "*"
-        console.log 'model : ', JSON.stringify @model
+        console.log 'acl : ', JSON.stringify acl
+        if acl.status is "*"
 
-        if trigger.type is 'who'
-            userIDs = @model.get 'userIDs'
-            console.log 'user ids : ' + JSON.stringify userIDs
-            userIDs = @setACL(userIDs, trigger, acl)
-            @model.set userIDs: userIDs
-            console.log 'updated model : ', JSON.stringify @model
-            @model.save()
+            if trigger.type is 'who'
+                userIDs = @model.get 'userIDs'
+                console.log 'user ids : ' + JSON.stringify userIDs
+                userIDs = @setACL(userIDs, trigger, acl)
+                @model.set userIDs: userIDs
+                #console.log 'updated model : ', JSON.stringify @model
+                @model.save()
 
-        else if trigger.type is 'what'
-            docIDs = @model.get 'docIDs'
-            docIDs = @setACL(docIDs, trigger, acl)
-            @model.set docIDs: docIDs
-            @model.save()
-        else if trigger.type is 'which'
-            userIDs = @model.get 'userIDs'
-            docIDs = @model.get 'docIDs'
-            userIDs = @setACL(userIDs, trigger, acl)
-            docIDs = @setACL(docIDs, trigger, acl)
-            @model.set userIDs: userIDs
-            @model.set docIDs: docIDs
-            @model.save()
+            else if trigger.type is 'what'
+                docIDs = @model.get 'docIDs'
+                docIDs = @setACL(docIDs, trigger, acl)
+                @model.set docIDs: docIDs
+                @model.save()
+            else if trigger.type is 'which'
+                userIDs = @model.get 'userIDs'
+                docIDs = @model.get 'docIDs'
+                userIDs = @setACL(userIDs, trigger, acl)
+                docIDs = @setACL(docIDs, trigger, acl)
+                @model.set userIDs: userIDs
+                @model.set docIDs: docIDs
+                @model.save()
 
-        @setACLVisualization(acl)
+            @setACLVisualization(acl)
 
 
     setACL: (list, trigger, acl) ->
@@ -168,18 +170,22 @@ module.exports = ACLView = Backbone.View.extend(
                     @setACLVisualization(acl)
 
 
-    # Triggers are check on all docs and users because of the Which
-    checkTriggers: (users, docs) ->
+    # resolve the undetermined acls
+    resolve: (users, docs) ->
         _this = @
         console.log 'triggers : ', JSON.stringify triggers
         users.forEach (user) ->
-            _this.evalTriggers user, null, 'who'
+            if user.status is "*"
+                _this.evalTriggers user, null, 'who'
         docs.forEach (doc) ->
-            _this.evalTriggers null, doc, 'what'
+            if doc.status is "*"
+                _this.evalTriggers null, doc, 'what'
 
         users.forEach (user) ->
-            docs.forEach (doc) ->
-                _this.evalTriggers user, doc, 'which'
+            if user.status is "*"
+                docs.forEach (doc) ->
+                    if doc.status is "*"
+                        _this.evalTriggers user, doc, 'which'
 
     evalTriggers: (user, doc, triggerType) ->
         _this = @
@@ -187,10 +193,8 @@ module.exports = ACLView = Backbone.View.extend(
             t = trigger.toJSON()
             if triggerType is t.type
 
-                console.log 'go eval trigger ' + JSON.stringify t
                 if t.type is 'who'
                     if _this.evalDoc(t.who, user)
-                        console.log 'OK'
                         _this.setACLSuspect(t, user.acl)
                 else if t.type is 'what'
                     if _this.evalDoc(t.what, doc)

@@ -56,7 +56,6 @@ module.exports = TriggerView = Backbone.View.extend(
 
 
     findTrigger: (triggerID, acls) ->
-        acls = []
         console.log 'acls : ', JSON.stringify acls
         acls.forEach (acl) ->
             if acl?.trigger?.id is triggerID

@@ -37,6 +37,7 @@ module.exports.change = function(req, res, next) {
         if(err) {
             return next(err)
         }
+        console.log('update rule with ', JSON.stringify(req.body))
         Rule.updateAttributes(req.params.id, req.body, function(err, newRule) {
             if(err) {
                 return next(err)

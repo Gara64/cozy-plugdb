@@ -99,8 +99,11 @@ module.exports = ACLView = Backbone.View.extend(
         # Update only if the acl status hasn't been set yet
         # TODO: don't forget to uncomment this
         #if acl.status is "*"
+        console.log 'model : ', JSON.stringify @model
+
         if trigger.type is 'who'
             userIDs = @model.get 'userIDs'
+            console.log 'user ids : ' + JSON.stringify userIDs
             userIDs = @setACL(userIDs, trigger, acl)
             @model.set userIDs: userIDs
             console.log 'updated model : ', JSON.stringify @model

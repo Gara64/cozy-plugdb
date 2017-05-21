@@ -2,76 +2,15 @@
 center
 	h1 Sharing Control Administration
 
-div(id="plug", style="display:none")
-	div(id="plugBlock")
-		img(id="imgplugdb", class="superpose", src="./images/plugdb.png")
-		img(id="imglock", class="superpose", src="./images/lock.png", height="50", width="50")
-		br
-		a(href="")
-			input(type="button", id="init", value="Init")
-			input(type="button", id="close", value="Close")
-			input(type="button", id="reset", value="Reset")
 
-	div(id="sharingBlock")
-		p.formRow Authenticate to your PlugDB&nbsp;
-		a(href="")
-		img(id="authenticate", src="./images/authenticate.png", height="50", width="50")
-
-#rule
-#acl
-
-hr
-br
-span More tools
-input#toggle-more-tools(type='checkbox') // , checked='checked'
-br
-br
-#more-tools
-	form.formRow
-		label Reset contacts & create&nbsp;
-		input(type="text",name="nDocs",size=1, value=4)
-		span &nbsp;new ones called&nbsp;
-		input(type="text",name="baseName", size=5, value="Alice" )
-		span &nbsp;
-		input(id="insertDocs", type="image", src="./images/generate.png", alt="submit", height="25", width="25")
-		//input(id="insertDocs", type="submit", value="Generate")
-		//img(src="./images/generate.png", height="50", width="50")
-
-	br
-	form.formRow
-		label Add 1 contact named
-		input(type="text",name="singleBaseName", size=5, value="Alice")
-		span &nbsp;
-		input(id="insertSingleDoc", type="image", src="./images/add.png", alt="submit", height="25", width="25")
-
-
-	p.formRow Cancel all current replications :
-		a(href="")
-			img(id="cancel", src="./images/cancel.png", height="25", width="25")
-
-
-
-
-	//- p Share all my photos !
-	//- 	a(href="" )
-	//- 		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")
-
-
-	//p Extra :
-	//form
-	//	label Target URL :
-	//	input(type="text", name="targetURL", size=10)
-	//	input(id="registerDevice", type="submit", value="Unregister device")
-	//
-
-//p Share the selected contacts :
-//	a(href="" )
-//		img(id="replicateContacts", data-datatype="contact", src="./images/share.jpg", height="60", width="60")
-
-//p Share all my photos !
-//	a(href="" )
-//		img(id="replicatePhotos", data-datatype="album", src="./images/share.jpg", height="60", width="60")
-
-	ul
-	li
-		a(href="https://github.com/Gara64/cozy-plugdb") Github
+div(id="sharingBlock", class="center-block")
+	p Authenticate to your PlugDB&nbsp;
+	a(href="")
+		img(id="authenticate", src="./images/authenticate.png", height="100", width="100")
+	div(id="authStatus", style="display:none")
+		i(class="fa fa-spinner fa-spin fa-3x fa-fw")
+		span(class="sr-only") 
+			
+div(id="auth", style="display:block")
+	#rule
+	#acl

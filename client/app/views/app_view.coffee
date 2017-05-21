@@ -46,8 +46,6 @@ module.exports = AppView = Backbone.View.extend(
         contacts.fetch(reset:true)
         contactView = new contactView(collection: contacts)
 
-
-
         this
 
     renderStatus: ->
@@ -171,16 +169,22 @@ module.exports = AppView = Backbone.View.extend(
         event.preventDefault()
         _this = this
         plug = @model
-        plug.set status: 'Authentication...'
+        
+        @$el.find('#authStatus').attr('style', 'display:block')
+
+        #plug.set status: 'Authentication...'
         plug.authenticateFP (res, authenticated) ->
-            plug.set status: res
-            plug.set auth: authenticated
+            _this.$el.find('#authStatus').attr('style', 'display:none')
+            #plug.set auth: authenticated
             #check if the authentication failed but not the initialization
             if(not authenticated)
-                _this.getPlugStatus()
+                console.log 'not auth !'
+                #_this.getPlugStatus()
             else
-                plug.set init: true
-            return
+                console.log 'auth !'
+                _this.$el.find('#auth').attr('style', 'display:block')
+                #plug.set init: true
+
         return
 
     insertSingleDoc: (event) ->

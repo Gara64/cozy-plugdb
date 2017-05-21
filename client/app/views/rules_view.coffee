@@ -1,6 +1,7 @@
 Rule = require '../models/rule'
 Rules = require '../collections/rules'
 ACLView = require './acl_view'
+Contact = require '../models/contact'
 Tags = require '../collections/tags'
 Triggers = require '../collections/triggers'
 Trigger = require '../models/trigger'
@@ -8,7 +9,7 @@ triggers = new Triggers()
 TriggerView = require './trigger_view'
 templateAdvisor = require('../templates/advisor')
 
-thresholdAdvisor = 2
+thresholdAdvisor = 1
 contactHistory = {}
 
 class RuleListener extends CozySocketListener
@@ -107,12 +108,33 @@ module.exports = RuleView = Backbone.View.extend(
         console.log 'untrusted : ', JSON.stringify untrusted
         # render the templates
         @$el.html @template({rules: @collection.toJSON(), triggers: tri})
-        $("#advisor").html templateAdvisor({trusted: [], untrusted: []})
+        $("#advisor").html templateAdvisor({trusted: trusted, untrusted: untrusted})
 
+        @renderAdvisor(trusted, untrusted)
         return
 
-    updateHistory: (param) ->
-        console.log 'param : ', param
+    renderAdvisor: (trusted, untrusted) ->
+        _this = @
+        domain = window.location.origin
+        trusted.forEach (user) ->
+            _this.renderContact user.id, domain
+        untrusted.forEach (user) ->
+            _this.renderContact user.id, domain
+
+    renderContact: (userid, domain) ->
+        contact = new Contact(id: userid)
+
+        contact.fetch({
+            success: () ->
+                href = domain+"/contacts/"+userid+"/picture.png"
+                console.log 'contact  : ' + JSON.stringify contact
+                fn = contact.get('fn')
+                $("#"+userid+" td:first p").text("#{fn}")
+
+            error: (err) ->
+                $("#"+userid).remove()
+        })
+
 
     buildHistory: () ->
         contactHistory = {}
@@ -131,9 +153,9 @@ module.exports = RuleView = Backbone.View.extend(
         untrusted = []
         for k,v of contactHistory
             if v >= thresholdAdvisor
-                trusted.push k
+                trusted.push {id: k}
             else
-                untrusted.push k
+                untrusted.push {id: k}
         return [trusted, untrusted]
 
 

@@ -78,7 +78,7 @@ module.exports = TriggerView = Backbone.View.extend(
                         $("#"+acl.id+" td:first a").text(filename)
 
                     error: (err) ->
-                        $("#"+acl.id+" p").text("deleted")
+                        $("#"+acl.id).remove()
                 })
         else if docType is 'subjects'
             acls.forEach (acl) ->
@@ -91,7 +91,7 @@ module.exports = TriggerView = Backbone.View.extend(
                         $("#"+acl.id+" td:first p").text("#{fn}")
 
                     error: (err) ->
-                        $("#"+acl.id+" p").text("deleted")
+                        $("#"+acl.id).remove()
                 })
 
 

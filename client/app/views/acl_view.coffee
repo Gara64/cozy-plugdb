@@ -50,13 +50,13 @@ module.exports = ACLView = Backbone.View.extend(
                     $("#"+docid+" td:first a").text(filename)
 
                     _this.setACLVisualization(acl)
-                    
+
                     f = file.toJSON()
                     f.acl = acl
                     files.push f
 
                 error: (err) ->
-                    $("#"+docid+" p").text("deleted")
+                    $("#"+docid).remove()
             })
 
         # Fetch contacts
@@ -79,7 +79,7 @@ module.exports = ACLView = Backbone.View.extend(
                     contacts.push c
 
                 error: (err) ->
-                    $("#"+userid+" p").text("deleted")
+                    $("#"+userid).remove()
             })
 
         # Check triggers

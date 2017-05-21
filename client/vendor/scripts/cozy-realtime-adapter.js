@@ -178,9 +178,9 @@
     CozySocketListener.prototype.process = function(event) {
       var doctype, id, model, operation;
       doctype = event.doctype, operation = event.operation, id = event.id;
-      console.log('doctype : ', doctype)
-      console.log('operation : ', operation)
-      console.log('id : ', id)
+      //console.log('doctype : ', doctype)
+      //console.log('operation : ', operation)
+      //console.log('id : ', id)
       switch (operation) {
         case 'create':
           if (!this.shouldFetchCreated(id)) {
@@ -229,12 +229,12 @@
           }
           return this.collections.forEach((function(_this) {
             return function(collection) {
-                console.log('coll : ', JSON.stringify(collection))
+                //console.log('coll : ', JSON.stringify(collection))
 
               if (!(model = collection.get(id))) {
-                  console.log('model NOT equal!')
-                  console.log('model : ', JSON.stringify(model))
-                  console.log('coll : ', collection.get(id))
+                  //console.log('model NOT equal!')
+                  //console.log('model : ', JSON.stringify(model))
+                  //console.log('coll : ', collection.get(id))
 
                 return;
               }

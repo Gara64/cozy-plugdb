@@ -6,7 +6,10 @@ Triggers = require '../collections/triggers'
 Trigger = require '../models/trigger'
 triggers = new Triggers()
 TriggerView = require './trigger_view'
+templateAdvisor = require('../templates/advisor')
 
+thresholdAdvisor = 2
+contactHistory = {}
 
 class RuleListener extends CozySocketListener
     models:
@@ -66,10 +69,12 @@ module.exports = RuleView = Backbone.View.extend(
         event.preventDefault()
         console.log "target : ", event.target
 
+
     initialize: ->
         # Do not listen the changes to avoid a render each time
         # an acl is changed
         @listenTo @collection, 'change:id', @render
+        @listenTo @collection, 'change:userIDs', @updateHistory
         @listenTo @collection, 'add'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
@@ -94,6 +99,45 @@ module.exports = RuleView = Backbone.View.extend(
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
 
+        tri = @renderTrigger()
+
+        @buildHistory()
+        [trusted, untrusted] = @adviseOnHistory()
+        console.log 'trusted : ', JSON.stringify trusted
+        console.log 'untrusted : ', JSON.stringify untrusted
+        # render the templates
+        @$el.html @template({rules: @collection.toJSON(), triggers: tri})
+        $("#advisor").html templateAdvisor({trusted: [], untrusted: []})
+
+        return
+
+    updateHistory: (param) ->
+        console.log 'param : ', param
+
+    buildHistory: () ->
+        contactHistory = {}
+        @collection.forEach (model) ->
+            userIDs = model.get('userIDs')
+            userIDs.forEach (userID) ->
+                if contactHistory[userID.id]?
+                    contactHistory[userID.id]++
+                else
+                    contactHistory[userID.id] = 1
+        console.log 'history : ' + JSON.stringify contactHistory
+
+
+    adviseOnHistory: () ->
+        trusted = []
+        untrusted = []
+        for k,v of contactHistory
+            if v >= thresholdAdvisor
+                trusted.push k
+            else
+                untrusted.push k
+        return [trusted, untrusted]
+
+
+    renderTrigger:() ->
         tri = []
         triggers.forEach (trigger) ->
             type = trigger.get('type')
@@ -114,15 +158,8 @@ module.exports = RuleView = Backbone.View.extend(
                 watchdog: watchdog
                 type: type
             }
+        return tri
 
-        #console.log 'rules : ', JSON.stringify @collection.toJSON()
-        #console.log 'triggers : ', JSON.stringify(triggers)
-
-        # render the template
-        @$el.html @template({rules: @collection.toJSON(), triggers: tri})
-
-
-        return
 
     showACL: (event) ->
         event.preventDefault()

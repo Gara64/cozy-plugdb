@@ -1,39 +1,70 @@
 div(id="#{rule.id}", class="container", style="display:block")
-    h3 ACL
-    table(class="table table-inline", style="width:50%;float:left")
-        thead
-            tr(class="titles")
-                th Docs
-        tbody
-            each acl, i in rule.docIDs
-                tr(id="#{acl.id}", class="success")
-                    td
-                        a(href="")
-                        p
-                    td
-                        a(href="")
-                            img(data-type= "doc", data-id="#{acl.id}", class="validate", src="./images/validate.png", height="25", width="25")
-                        a(href="")
-                            img(data-type= "doc", data-id="#{acl.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+    h3
+        i(class="fa fa-eye")  ACL (read permission)
+    div(class="list-group", style="border: thin solid black; display: inline-block;")
+        b Legend
+        ul(class="fa-ul")
+            li
+                i(class="fa-li fa fa-square", style="color:#dff0d8")
+                p ACL+ (accepted)
+            li
+                i(class="fa-li fa fa-square warning", style="color:#fcf8e3")
+                p ACL? (quarantine)
+            li
+                i(class="fa-li fa fa-square danger", style="color:#f2dede")
+                p ACL- (rejected)
+    div
+        table(class="table table-inline", style="width:50%;float:left")
+            thead
+                tr(class="titles")
+                    th Docs
+                    th Subjects
+                    th Action
+            tbody
+                each acl, i in rule.docIDs
+                    each aclUser, j in rule.userIDs
                     
-    table(class="table table-inline", style="width:50%;float:right")
-        thead
-            tr(class="titles")
-                th Subjects
-        tbody
-            each acl, i in rule.userIDs
-                tr(id="#{acl.id}", class="success")
-                    td
-                        img(
-                            class="avatar", 
-                            data-src="contacts/#{acl.id}/picture.png", 
-                            src="contacts/#{acl.id}/picture.png",
-                            height="50", 
-                            width="50"
-                        )
-                        p
-                    td
-                        a(href="")
-                            img(data-type= "user", data-id="#{acl.id}", class="validate", src="./images/validate.png", height="25", width="25")
-                        a(href="")
-                            img(data-type= "user", data-id="#{acl.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+                        tr(id="#{acl.id}#{aclUser.id}", data-idACLUser="#{aclUser.id}", data-idACLDoc="#{acl.id}", class="success")
+                            td(class="#{acl.id}")
+                                a(href="")
+                                    p()
+                            td(class="#{aclUser.id}")
+                                img(
+                                    class="avatar", 
+                                    data-src="contacts/#{aclUser.id}/picture.png", 
+                                    src="contacts/#{aclUser.id}/picture.png",
+                                    height="50", 
+                                    width="50"
+                                )
+                                p
+                            td
+                                a(href="")
+                                    img(data-type= "doc", data-idacl="#{acl.id}#{aclUser.id}", data-iddoc="#{acl.id}", data-iduser="#{aclUser.id}", class="validate", src="./images/validate.png", height="25", width="25")
+                                a(href="")
+                                    img(data-type= "doc",  data-idacl="#{acl.id}#{aclUser.id}", data-iddoc="#{acl.id}", data-iduser="#{aclUser.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+                    //tr
+                    //    td
+                    //        p 
+        
+        //-            
+            table(class="table table-inline", style="width:50%;float:right")
+                thead
+                    tr(class="titles")
+                        th Subjects
+                tbody
+                    each acl, i in rule.userIDs
+                        tr(id="#{acl.id}", class="success")
+                            td
+                                img(
+                                    class="avatar", 
+                                    data-src="contacts/#{acl.id}/picture.png", 
+                                    src="contacts/#{acl.id}/picture.png",
+                                    height="50", 
+                                    width="50"
+                                )
+                                p
+                            td
+                                a(href="")
+                                    img(data-type= "user", data-id="#{acl.id}", class="validate", src="./images/validate.png", height="25", width="25")
+                                a(href="")
+                                    img(data-type= "user", data-id="#{acl.id}", class="cancel", src="./images/cancel.png", height="25", width="25")

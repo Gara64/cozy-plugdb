@@ -2,43 +2,38 @@ div(class="container", style="display:block")
     table(class="table table-inline", style="width:50%;float:left")
         thead
             tr(class="titles")
-                th Trusted contacts
+                    th ACLs
         tbody
-            each contact, i in trusted
-                tr(id="#{contact.id}", class="success")
-                    td
-                        img(
-                            class="avatar", 
-                            data-src="contacts/#{contact.id}/picture.png", 
-                            src="contacts/#{contact.id}/picture.png",
-                            height="50", 
-                            width="50"
-                        )
-                        p
-                    td
-                        a(href="")
-                            img(data-type= "user", data-id="#{contact.id}", class="validate", src="./images/validate.png", height="25", width="25")
-                        a(href="")
-                            img(data-type= "user", data-id="#{contact.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+            each acl, i in acls.docIDs
+                each aclUser, j in acls.userIDs
+                    tr(id="#{acl.id}#{aclUser.id}", data-idACLUser="#{aclUser.id}", data-idACLDoc="#{acl.id}", class="warning")
+                        td(class="#{acl.id}")
+                            a(href="")
+                                p()
+                        td(class="#{aclUser.id}")
+                            img(
+                                class="avatar", 
+                                data-src="contacts/#{aclUser.id}/picture.png", 
+                                src="contacts/#{aclUser.id}/picture.png",
+                                height="50", 
+                                width="50"
+                            )
+                            p
 
-    table(class="table table-inline", style="width:50%;float:right")
-        thead
-            tr(class="titles")
-                th Suspicious contacts
-        tbody
-            each contact, i in untrusted
-                tr(id="#{contact.id}", class="success")
-                    td
-                        img(
-                            class="avatar", 
-                            data-src="contacts/#{contact.id}/picture.png", 
-                            src="contacts/#{contact.id}/picture.png",
-                            height="50", 
-                            width="50"
-                        )
-                        p
-                    td
-                        a(href="")
-                            img(data-type= "user", data-id="#{contact.id}", class="validate", src="./images/validate.png", height="25", width="25")
-                        a(href="")
-                            img(data-type= "user", data-id="#{contact.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+    //-
+        table(class="table table-inline", style="width:50%;float:right")
+            thead
+                tr(class="titles")
+                    th Suspicious contacts
+            tbody
+                each contact, i in untrusted
+                    tr(id="#{contact.id}", class="success")
+                        td
+                            img(
+                                class="avatar", 
+                                data-src="contacts/#{contact.id}/picture.png", 
+                                src="contacts/#{contact.id}/picture.png",
+                                height="50", 
+                                width="50"
+                            )
+                            p

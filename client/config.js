@@ -12,7 +12,8 @@ exports.config = {
                   'vendor/scripts/jquery-2.0.3.min.js',
                   'vendor/scripts/underscore-1.5.2.min.js',
                   'vendor/scripts/backbone-1.0.0.min.js',
-                  'vendor/scripts/cozy-realtime-adapter.js'
+                  'vendor/scripts/cozy-realtime-adapter.js',
+                  'vendor/scripts/plotly-latest.min.js'
                 ]
             }
         },

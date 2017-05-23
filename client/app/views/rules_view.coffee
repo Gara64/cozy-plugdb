@@ -8,6 +8,7 @@ Trigger = require '../models/trigger'
 triggers = new Triggers()
 TriggerView = require './trigger_view'
 templateAdvisor = require('../templates/advisor')
+templateStats = require('../templates/stats')
 
 thresholdAdvisor = 1
 contactHistory = {}
@@ -65,6 +66,7 @@ module.exports = RuleView = Backbone.View.extend(
         'click a[name="removeRule"]'      : 'removeRule'
         'click a[name="removeTrigger"]'      : 'removeTrigger'
         'change #triggertype'              : 'triggerForm'
+        'click a[name="showStats"]'         : 'showStats'
 
     onChange : (event) ->
         event.preventDefault()
@@ -100,26 +102,76 @@ module.exports = RuleView = Backbone.View.extend(
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
 
-        tri = @renderTrigger()
+        tri = @transformTrigger()
 
         @buildHistory()
-        [trusted, untrusted] = @adviseOnHistory()
-        console.log 'trusted : ', JSON.stringify trusted
-        console.log 'untrusted : ', JSON.stringify untrusted
+        #[trusted, untrusted] = @adviseOnHistory()
+        acls = @generateHistory()
+        #console.log 'trusted : ', JSON.stringify trusted
+        #console.log 'untrusted : ', JSON.stringify untrusted
         # render the templates
         @$el.html @template({rules: @collection.toJSON(), triggers: tri})
-        $("#advisor").html templateAdvisor({trusted: trusted, untrusted: untrusted})
+        $("#advisor").html templateAdvisor({acls: acls})
 
-        @renderAdvisor(trusted, untrusted)
+        @renderAdvisor(acls)
+        @renderTriggers(tri)
+        @renderHack()
         return
 
-    renderAdvisor: (trusted, untrusted) ->
+
+    # TODO: FOR DEMO USE ONLY!!
+    # Change doc rule
+    renderHack: () ->
+        btn = @$el.find('[data-id=0a127ad5493b54992ea501a80f051fa8]')
+        console.log 'change id btn : ' + JSON.stringify btn
+        btn.attr('data-id', '0a127ad5493b54992ea501a80f01bd09')
+
+        td = @$el.find('[data-docruleid=0a127ad5493b54992ea501a80f051fa8]')
+        fDoc = td.text()
+        console.log 'fdoc rule : ' + fDoc
+        td.text(fDoc + ' && rule.options.recursivity === true && rule.options.depth < 5')
+        return
+
+    renderTriggers: (triggers) ->
+        _this = @
+        triggers.forEach (trigger) ->
+            if trigger.type is "what"
+                $('#'+trigger.id+' .triggerType').attr('class', 'fa fa-files-o')
+            else if trigger.type is "who"
+                $('#'+trigger.id+' .triggerType').attr('class', 'fa fa-users')
+            else if trigger.type is "which"
+                $('#'+trigger.id+' .triggerType').attr('class', 'fa fa-files-o')
+                $('#'+trigger.id+' .triggerType2').attr('class', 'fa fa-users')
+
+
+    # TODO: FOR DEMO USE ONLY
+    generateHistory: () ->
+        acls = {}
+        userIDs =  [{id: "96d4a96428a3859b6ae49b445500b332"}]
+        docIDs = [{id: "96d4a96428a3859b6ae49b4455007b1f"}, {id:"96d4a96428a3859b6ae49b445500fc40"}]
+        acls.userIDs = userIDs
+        acls.docIDs = docIDs
+        return acls
+
+    renderAdvisor: (acls) ->
         _this = @
         domain = window.location.origin
-        trusted.forEach (user) ->
+        acls.docIDs.forEach (doc) ->
+            _this.renderFiles doc.id, domain
+        acls.userIDs.forEach (user) ->
             _this.renderContact user.id, domain
-        untrusted.forEach (user) ->
-            _this.renderContact user.id, domain
+
+    renderFiles: (docid, domain) ->
+        file = new File(id: docid)
+        file.fetch({
+            success: () ->
+                filename = file.get('name')
+                href = domain+"/files/"+docid+"/attach/"+filename
+                $("."+docid+" a").attr('href', href)
+                $("."+docid+" p").text(filename)
+            error: (err) ->
+                $("#"+docid).remove()
+        })
 
     renderContact: (userid, domain) ->
         contact = new Contact(id: userid)
@@ -129,7 +181,7 @@ module.exports = RuleView = Backbone.View.extend(
                 href = domain+"/contacts/"+userid+"/picture.png"
                 console.log 'contact  : ' + JSON.stringify contact
                 fn = contact.get('fn')
-                $("#"+userid+" td:first p").text("#{fn}")
+                $("."+userid+" p").text("#{fn}")
 
             error: (err) ->
                 $("#"+userid).remove()
@@ -141,10 +193,11 @@ module.exports = RuleView = Backbone.View.extend(
         @collection.forEach (model) ->
             userIDs = model.get('userIDs')
             userIDs.forEach (userID) ->
-                if contactHistory[userID.id]?
-                    contactHistory[userID.id]++
-                else
-                    contactHistory[userID.id] = 1
+                if userID?
+                    if contactHistory[userID.id]?
+                        contactHistory[userID.id]++
+                    else
+                        contactHistory[userID.id] = 1
         console.log 'history : ' + JSON.stringify contactHistory
 
 
@@ -159,22 +212,22 @@ module.exports = RuleView = Backbone.View.extend(
         return [trusted, untrusted]
 
 
-    renderTrigger:() ->
+    transformTrigger:() ->
         tri = []
         triggers.forEach (trigger) ->
             type = trigger.get('type')
             if type is "who"
                 who = trigger.get('who')
-                watchdog = who.att + ' == ' + who.val
+                watchdog = who.att + ' : ' + who.val
             else if type is "what"
                 what = trigger.get('what')
-                watchdog = what.att + ' == ' + what.val
+                watchdog = what.att + ' : ' + what.val
             else if type is "which"
                 who = trigger.get('who')
                 what = trigger.get('what')
-                watchdog = who.att + ' == ' + who.val +
+                watchdog = who.att + ' : ' + who.val +
                 ' && ' +
-                watchdog = what.att + ' == ' + what.val
+                watchdog = what.att + ' : ' + what.val
             tri.push {
                 id: trigger.get('id')
                 watchdog: watchdog
@@ -198,6 +251,20 @@ module.exports = RuleView = Backbone.View.extend(
             $("#"+rule.id).attr('style', 'display:none')
         else
             $("#"+rule.id).attr('style', 'display:block')
+
+    showStats: (event) ->
+        event.preventDefault()
+        id = $(event.currentTarget).data("id")
+        rule = @collection.get(id)
+
+        $("#stats").html templateStats({rule: rule.toJSON()})
+        console.log 'looking for ' + "stats"+rule.id
+        style = $("#stats"+rule.id).attr('style')
+        if style == 'display:block'
+            $("#stats"+rule.id).attr('style', 'display:none')
+        else
+            $("#stats"+rule.id).attr('style', 'display:block')
+
 
 
     showTrigger: (event) ->

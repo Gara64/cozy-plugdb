@@ -6,7 +6,7 @@ var sharing = require('./sharing');
 var rule = require('./rule');
 var files = require('./files');
 var tags = require('./tags');
-var triggers = require('./triggers')
+var triggers = require('./triggers');
 
 module.exports = {
   '': {

@@ -30,15 +30,24 @@ module.exports = TriggerView = Backbone.View.extend(
             docType.type = "associations"
 
         acls = @checkTrigger trigger
+        console.log 'render acls : ' + JSON.stringify acls
+        console.log 'triggerid : ' + trigger.id
         @$el.html @template({triggerID: trigger.id, acls: acls, docType: docType})
         @renderACL(docType, acls)
 
     checkTrigger: (trigger) ->
         acls = []
         _this = @
+
+        # TODO: FOR DEMO USE ONLY!!
+        if trigger.id is "0a127ad5493b54992ea501a80f06d089"
+            console.log 'particular id found'
+            acls.push {id: "0a127ad5493b54992ea501a80f0565a6"}
+            return acls
+
         rules.forEach (r) ->
             rule = r.toJSON()
-            console.log 'check rule ' + JSON.stringify rule
+            #console.log 'check rule ' + JSON.stringify rule
             if trigger.type is 'who'
                 acls = _this.findTrigger trigger.id, rule.userIDs
             else if trigger.type is 'what'
@@ -57,11 +66,12 @@ module.exports = TriggerView = Backbone.View.extend(
 
     findTrigger: (triggerID, acls) ->
         console.log 'acls : ', JSON.stringify acls
+        trigACLs = []
         acls.forEach (acl) ->
             if acl?.trigger?.id is triggerID
-                acls.push acl
-                console.log 'trigger match !'
-        return acls
+                trigACLs.push acl
+                console.log 'trigger ' + triggerID + ' match !'
+        return trigACLs
 
 
     renderACL: (docType, acls) ->
@@ -71,7 +81,7 @@ module.exports = TriggerView = Backbone.View.extend(
                 file = new File(id: acl.id)
                 file.fetch({
                     success: () ->
-                        console.log 'file : ' + JSON.stringify file
+                        #console.log 'file : ' + JSON.stringify file
                         filename = file.get('name')
                         href = domain+"/files/"+acl.id+"/attach/"+filename
                         $("#"+acl.id+" td:first a").attr('href', href)
@@ -85,10 +95,14 @@ module.exports = TriggerView = Backbone.View.extend(
                 contact = new Contact(id: acl.id)
                 contact.fetch({
                     success: () ->
-                        console.log 'contact : ' + JSON.stringify contact
-                        href = domain+"/contacts/"+acl.id+"/picture.png"
+                        #console.log 'contact : ' + JSON.stringify contact
+                        href = "/contacts/"+acl.id+"/picture.png"
                         fn = contact.get('fn')
                         $("#"+acl.id+" td:first p").text("#{fn}")
+                        $("#"+acl.id+" td:first img").attr('class', 'avatar')
+                        $("#"+acl.id+" td:first img").attr('src', href)
+                        $("#"+acl.id+" td:first img").attr('height', '50')
+                        $("#"+acl.id+" td:first img").attr('width', '50')
 
                     error: (err) ->
                         $("#"+acl.id).remove()

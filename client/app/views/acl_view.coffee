@@ -21,8 +21,12 @@ module.exports = ACLView = Backbone.View.extend(
 
     render: () ->
         console.log 'render trigger model', JSON.stringify @model
+
+        _this = @
         rule = @model.toJSON()
         domain = window.location.origin
+
+        # Remove the null ACL
         rule.docIDs.forEach (acl) ->
             if acl is null
                 rule.docIDs.splice(rule.docIDs.indexOf(acl), 1)
@@ -31,6 +35,7 @@ module.exports = ACLView = Backbone.View.extend(
                 rule.userIDs.splice(rule.userIDs.indexOf(acl), 1)
 
         # TODO: DEMO ONLY
+        ###
         if rule.id is "0a127ad5493b54992ea501a80f054972"
             console.log 'holidays rule'
             rule.docIDs = [{id: "96d4a96428a3859b6ae49b4455007b1f"}, {id:"96d4a96428a3859b6ae49b445500fc40"}]
@@ -43,17 +48,14 @@ module.exports = ACLView = Backbone.View.extend(
                 {id: "96d4a96428a3859b6ae49b445501dddf"},
                 {id: "96d4a96428a3859b6ae49b445501edcc"}
             ]
-
+        ###
 
         @$el.html @template({rule: rule, domain: domain})
-        _this = @
 
-        # Store the files and contacts to be later evaluated on triggers
+        # Store the unresolved files and contacts to be later evaluated
         files = []
         contacts = []
-
         errors = []
-
 
         # Fetch files
         rule.docIDs.forEach (acl) ->
@@ -67,21 +69,22 @@ module.exports = ACLView = Backbone.View.extend(
                     href = domain+"/files/"+docid+"/attach/"+filename
                     #$("."+docid+" td:first a").attr('href', href)
                     #$("."+docid+" td:first p").text(filename)
-                    $("."+docid+" a").attr('href', href)
-                    $("."+docid+" p").text(filename)
+                    $("td."+docid+" a").attr('href', href)
+                    $("td."+docid+" p").text(filename)
 
-                    _this.setACLVisualization(acl)
+                    #_this.setACLColor(acl)
 
-                    f = file.toJSON()
-                    f.acl = acl
-                    files.push f
+
+                    if status is "*"
+                        f = file.toJSON()
+                        f.acl = acl
+                        files.push f
 
                 error: (err) ->
                     #$("#"+docid).remove()
                     errors.push {id: docid, type: 'doc'}
                     #_this.$el.find('[data-idACLDoc='+docid+']').remove()
                     #console.log ('remove tr line doc')
-
             })
 
         # Fetch contacts
@@ -95,13 +98,14 @@ module.exports = ACLView = Backbone.View.extend(
                 success: () ->
                     href = domain+"/contacts/"+userid+"/picture.png"
                     fn = contact.get('fn')
-                    $("."+userid+" p").text("#{fn}")
+                    $("td."+userid+" p").text("#{fn}")
 
-                    _this.setACLVisualization(acl)
+                    #_this.setACLColor(acl)
 
-                    c = contact.toJSON()
-                    c.acl = acl
-                    contacts.push c
+                    if status is "*"
+                        c = contact.toJSON()
+                        c.acl = acl
+                        contacts.push c
 
                 error: (err) ->
                     #$("#"+userid).remove()
@@ -111,6 +115,7 @@ module.exports = ACLView = Backbone.View.extend(
 
             })
 
+        # Remove acl with errors
         errors.forEach (error) ->
             if error.type is "doc"
                 console.log ('remove tr line doc')
@@ -120,15 +125,48 @@ module.exports = ACLView = Backbone.View.extend(
                 console.log ('remove tr line sub')
 
 
-        # Check triggers
+        # Run triggers and advisor to find suspect ACL on unresolved ones
         @resolve(contacts, files)
+        @renderAllColorStatus(rule)
 
 
+    renderAllColorStatus: (rule) ->
+        _this = @
+        rule.docIDs.forEach (aclDoc) ->
+            rule.userIDs.forEach (aclUser) ->
+                console.log 'acl Doc : ' + JSON.stringify aclDoc
+                id = aclDoc.id + aclUser.id
+                line = $("#"+id)
 
-    setACLVisualization: (acl) ->
+                cssStatus = _this.getCssStatus(aclDoc.status, aclUser.status)
+                console.log ('css status : ' + cssStatus)
+                line.attr("class", cssStatus)
+
+
+    # Reject > Suspect > Accept > Star
+    getCssStatus: (status1, status2) ->
+        if status1 is "-" and status2 is "-"
+            return "danger"
+        else if status1 is "?" or status2 is "?"
+            return "warning"
+        else if status1 is "+"
+            return "success"
+        else
+            return "success"
+
+    # Attribute ACL color accordingly to their status
+    setACLColor: (acl) ->
+        console.log 'set acl color : ' + JSON.stringify acl
         id = acl.id
-        console.log "acl id : " + id
+        if acl.status is '-'
+            $("#"+id).attr('class', 'danger')
+        else if acl.status is '?'
+            $("#"+id).attr('class', 'warning')
+        else if acl.status is '+'
+            $("#"+id).attr('class', 'success')
+
         # TODO: FOR DEMO ONLY!!
+        ###
         # bruno
         if id is "0a127ad5493b54992ea501a80f0565a6"
             @$el.find('[data-idACLUser='+id+']').attr('class', 'warning')
@@ -139,54 +177,45 @@ module.exports = ACLView = Backbone.View.extend(
 
             return
 
-        # See https://bootswatch.com/cerulean/ for css themes
-        if acl.status is "?"
-            $("#"+id).attr('class', 'warning')
-            #$("#"+id).css("color", "orange")
-        else if acl.status is "-"
-            #$("#"+id).css("color", "red")
-            $("#"+id).attr('class', 'danger')
-        else if acl.status is "+" || acl.status is "*"
-            #$("#"+id).css("color", "green")
-            $("#"+id).attr('class', 'success')
+        ###
 
 
-    setACLSuspect: (trigger, acl) ->
+    # Called after an ACL evaluation
+    # This save the state in db
+    saveACLStatus: (acl, type, status) ->
+        # console.log 'acl : ', JSON.stringify acl
+
         # Update only if the acl status hasn't been set yet
-        # TODO: don't forget to uncomment this
-        console.log 'acl : ', JSON.stringify acl
         if acl.status is "*"
-
-            if trigger.type is 'who'
+            if type is 'user'
                 userIDs = @model.get 'userIDs'
-                console.log 'user ids : ' + JSON.stringify userIDs
-                userIDs = @setACL(userIDs, trigger, acl)
+                userIDs = @setACLStatus(userIDs, acl, status)
                 @model.set userIDs: userIDs
-                #console.log 'updated model : ', JSON.stringify @model
                 @model.save()
-
-            else if trigger.type is 'what'
+            else if type is 'doc'
                 docIDs = @model.get 'docIDs'
-                docIDs = @setACL(docIDs, trigger, acl)
-                @model.set docIDs: docIDs
-                @model.save()
-            else if trigger.type is 'which'
-                userIDs = @model.get 'userIDs'
-                docIDs = @model.get 'docIDs'
-                userIDs = @setACL(userIDs, trigger, acl)
-                docIDs = @setACL(docIDs, trigger, acl)
-                @model.set userIDs: userIDs
+                docIDs = @setACLStatus(docIDs, acl, status)
                 @model.set docIDs: docIDs
                 @model.save()
 
-            @setACLVisualization(acl)
+            ###
+            else if type is 'which'
+                userIDs = @model.get 'userIDs'
+                docIDs = @model.get 'docIDs'
+                userIDs = @setSuspectACL(userIDs, trigger, acl)
+                docIDs = @setSuspectACL(docIDs, trigger, acl)
+                @model.set userIDs: userIDs
+                @model.set docIDs: docIDs
+                @model.save()
+            ###
+
+            #@setACLColor(acl)
 
 
-    setACL: (list, trigger, acl) ->
+    setACLStatus: (list, acl, status) ->
         list.forEach (el) ->
             if el.id is acl.id
-                el.status = '?'
-                el.trigger = trigger
+                el.status = status
         return list
 
 
@@ -194,85 +223,100 @@ module.exports = ACLView = Backbone.View.extend(
         event.preventDefault()
         # Get id of the acl and its type
         id = $(event.currentTarget).data("idacl")
-        type = $(event.currentTarget).data("type")
+        docID = $(event.currentTarget).data("iddoc")
+        userID = $(event.currentTarget).data("iduser")
         console.log 'accept ' + id
-        @changeACLStatus(id, type, true)
+        @changeACLStatus(id, docID, userID, true)
 
     rejectACL: (event) ->
         event.preventDefault()
-        # Get id of the acl and its type
         id = $(event.currentTarget).data("idacl")
-        type = $(event.currentTarget).data("type")
+        docID = $(event.currentTarget).data("iddoc")
+        userID = $(event.currentTarget).data("iduser")
         console.log 'reject ' + id
-        @changeACLStatus(id, type, false)
+        @changeACLStatus(id, docID, userID, false)
 
 
-    changeACLStatus: (id, type, isAccept) ->
-        ###
-        if type is "doc"
-            docIDs = @model.get('docIDs')
-            for acl in docIDs
-                if acl.id is id
-                    if isAccept then acl.status = "+"  else acl.status = "-"
-                    @model.save()
-                    @setACLVisualization(acl)
-        if type is "user"
-            userIDs = @model.get('userIDs')
-            for acl in userIDs
-                if acl.id is id
-                    if isAccept then acl.status = "+"  else acl.status = "-"
-                    @model.save()
-                    @setACLVisualization(acl)
-        ###
+    changeACLStatus: (id, docID, userID, isAccept) ->
 
-        #id = $(event.currentTarget).data("idacl")
-        #id = id.split(":")[0]
-        #$("#"+id).attr('class', 'danger')
-        if isAccept
-            $("#"+id).attr('class', 'success')
-        else
-            $("#"+id).attr('class', 'danger')
-        return
+        docIDs = @model.get('docIDs')
+        userIDs = @model.get('userIDs')
+        if isAccept then status = "+" else status = "-"
+
+        for acl in docIDs
+            if acl.id is docID
+                acl.status = status
+                @model.save()
+        for acl in userIDs
+            if acl.id is userID
+                acl.status = status
+                @model.save()
+
+        acl =
+            id: id
+            status: status
+        @setACLColor(acl)
+
+
 
     # resolve the undetermined acls
     resolve: (users, docs) ->
         _this = @
         console.log 'triggers : ', JSON.stringify triggers
+        console.log 'users : ', JSON.stringify users
+
+        # Who triggers
         users.forEach (user) ->
-            if user.status is "*"
+            if user.acl.status is "*"
                 _this.evalTriggers user, null, 'who'
+        # What triggers
         docs.forEach (doc) ->
-            if doc.status is "*"
+            if doc.acl.status is "*"
                 _this.evalTriggers null, doc, 'what'
 
+        ###
+        # Which triggers
         users.forEach (user) ->
-            if user.status is "*"
+            if user.acl.status is "*"
                 docs.forEach (doc) ->
-                    if doc.status is "*"
+                    if doc.acl.status is "*"
                         _this.evalTriggers user, doc, 'which'
+        ###
 
     evalTriggers: (user, doc, triggerType) ->
         _this = @
+
         triggers.forEach (trigger) ->
             t = trigger.toJSON()
             if triggerType is t.type
-
                 if t.type is 'who'
+                    console.log 'eval who trigger : ' + JSON.stringify t.who
                     if _this.evalDoc(t.who, user)
-                        _this.setACLSuspect(t, user.acl)
+                        console.log 'suspect for user ' + JSON.stringify user
+                        _this.saveACLStatus(user.acl, 'user', '?')
+                        return
+                    _this.saveACLStatus(user.acl, 'user', '+')
                 else if t.type is 'what'
                     if _this.evalDoc(t.what, doc)
-                        _this.setACLSuspect(t, doc.acl)
+                        _this.saveACLStatus(doc.acl, 'doc', '?')
+                        return
+                    _this.saveACLStatus(doc.acl, 'doc', '+')
+
+                ###
                 else if t.type is 'which'
                     evalWho = _this.evalDoc(t.who, user)
                     evalWhat = _this.evalDoc(t.what, doc)
                     evalOk = evalWho && evalWhat
                     if evalOk
-                        _this.setACLSuspect(t, user.acl)
-                        _this.setACLSuspect(t, doc.acl)
+                        _this.saveACLStatus(t, user.acl)
+                        _this.saveACLStatus(t, doc.acl)
+                ###
 
 
+    # Each trigger consists of an att/val pair
+    # If the doc has it, it is evaluated as true
     evalDoc: (triggerRule, doc) ->
+        # Special case for tags, represented as array in docs
         if triggerRule.att is "tag" && doc.tags.length > 0
             if triggerRule.val in doc.tags
                 return true
@@ -280,6 +324,7 @@ module.exports = ACLView = Backbone.View.extend(
             if doc[triggerRule.att] is triggerRule.val
                 return true
         return false
+
 
 
     evalDocs: (docs, triggerRule) ->

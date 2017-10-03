@@ -21,11 +21,10 @@ div(id="#{rule.id}", class="container", style="display:block")
                     th Subjects
                     th Action
             tbody
-                each acl, i in rule.docIDs
+                each aclDoc, i in rule.docIDs
                     each aclUser, j in rule.userIDs
-                    
-                        tr(id="#{acl.id}#{aclUser.id}", data-idACLUser="#{aclUser.id}", data-idACLDoc="#{acl.id}", class="success")
-                            td(class="#{acl.id}")
+                        tr(id="#{aclDoc.id}#{aclUser.id}", data-status="*", data-idACLUser="#{aclUser.id}", data-idACLDoc="#{aclDoc.id}", class="success")
+                            td(class="#{aclDoc.id}")
                                 a(href="")
                                     p()
                             td(class="#{aclUser.id}")
@@ -39,9 +38,9 @@ div(id="#{rule.id}", class="container", style="display:block")
                                 p
                             td
                                 a(href="")
-                                    img(data-type= "doc", data-idacl="#{acl.id}#{aclUser.id}", data-iddoc="#{acl.id}", data-iduser="#{aclUser.id}", class="validate", src="./images/validate.png", height="25", width="25")
+                                    img(data-type= "doc", data-idacl="#{aclDoc.id}#{aclUser.id}", data-iddoc="#{aclDoc.id}", data-iduser="#{aclUser.id}", class="validate", src="./images/validate.png", height="25", width="25")
                                 a(href="")
-                                    img(data-type= "doc",  data-idacl="#{acl.id}#{aclUser.id}", data-iddoc="#{acl.id}", data-iduser="#{aclUser.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
+                                    img(data-type= "doc",  data-idacl="#{aclDoc.id}#{aclUser.id}", data-iddoc="#{aclDoc.id}", data-iduser="#{aclUser.id}", class="cancel", src="./images/cancel.png", height="25", width="25")
                     //tr
                     //    td
                     //        p 

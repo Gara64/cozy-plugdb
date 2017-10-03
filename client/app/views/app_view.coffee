@@ -36,7 +36,4 @@ module.exports = AppView = Backbone.View.extend(
         # Perfs view
         perfsView = new perfsView()
 
-
-
-
 )

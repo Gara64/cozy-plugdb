@@ -13,6 +13,8 @@ templateStats = require('../templates/stats')
 thresholdAdvisor = 1
 contactHistory = {}
 
+# The RuleListener listens all events related to sharing rules, ie
+# their creation/update/deleting. Updates include new ACL
 class RuleListener extends CozySocketListener
     models:
         'sharingrule': Rule
@@ -61,12 +63,12 @@ module.exports = RuleView = Backbone.View.extend(
         'click #addtrigger'               : 'showTriggerCreationForm'
         'click #createRule'               : 'createRule'
         'click #createTrigger'            : 'createTrigger'
-        'click a[name="showACL"]'        : 'showACL'
-        'click a[name="showTrigger"]'        : 'showTrigger'
+        'click a[name="showACL"]'         : 'showACL'
+        'click a[name="showTrigger"]'     : 'showTrigger'
         'click a[name="removeRule"]'      : 'removeRule'
-        'click a[name="removeTrigger"]'      : 'removeTrigger'
-        'change #triggertype'              : 'triggerForm'
-        'click a[name="showStats"]'         : 'showStats'
+        'click a[name="removeTrigger"]'   : 'removeTrigger'
+        'change #triggertype'             : 'triggerForm'
+        'click a[name="showStats"]'       : 'showStats'
 
     onChange : (event) ->
         event.preventDefault()

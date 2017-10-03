@@ -4,8 +4,6 @@ Realtimer = require('cozy-realtime-adapter')
 port = process.env.PORT || 9999
 host = process.env.HOST || 'localhost'
 
-console.log 'host : ' + host
-
 americano.start {name: 'plug', host: host, port: port}, (app, server) ->
     app.set('views', __dirname + '/client/public')
     app.engine( '.html', require('jade').__express )

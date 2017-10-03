@@ -4,11 +4,11 @@ cozydb = require('cozydb');
 module.exports = {
     contacts: {
         all: cozydb.defaultRequests.all
-    }
-    rule = {
+    },
+    rule: {
         all: cozydb.defaultRequests.all
-    }
-    triggers = {
+    },
+    trigger: {
         all: cozydb.defaultRequests.all
     }
 };

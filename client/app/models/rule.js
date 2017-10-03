@@ -6,7 +6,8 @@ module.exports = Rule = Backbone.Model.extend({
         filterUser: Object,
         docIDs: [Object],
         userIDs: [Object],
-        tags: [String]
+        tags: [String],
+        acls: Object
     },
 
     getSensitiveTags: function(callback) {

@@ -5,7 +5,6 @@ Triggers = require '../collections/triggers'
 triggers = new Triggers()
 
 module.exports = ACLView = Backbone.View.extend(
-    el: '#acl'
     template: require('../templates/acl')
 
     events :

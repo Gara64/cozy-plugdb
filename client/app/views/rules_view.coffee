@@ -254,10 +254,12 @@ module.exports = RuleView = Backbone.View.extend(
                 console.log 'remove old view'
 
                 #Remove view from DOM
-                #currentView.remove()
+                currentView.remove()
 
-            aclView = new ACLView({model: rule})
+            $("#acl").append("<div id="+rule.id+"></div>")
+            aclView = new ACLView({el: '#'+id, model: rule})
             currentView = aclView
+            console.log(aclView.el)
         else if style == 'display:block'
             $("#"+rule.id).attr('style', 'display:none')
         else

@@ -13,6 +13,8 @@ templateStats = require('../templates/stats')
 thresholdAdvisor = 1
 contactHistory = {}
 
+currentView = null
+
 # The RuleListener listens all events related to sharing rules, ie
 # their creation/update/deleting. Updates include new ACL
 class RuleListener extends CozySocketListener
@@ -117,7 +119,7 @@ module.exports = RuleView = Backbone.View.extend(
 
         @renderAdvisor(acls)
         @renderTriggers(tri)
-        @renderHack()
+        #@renderHack()
         return
 
 
@@ -248,7 +250,14 @@ module.exports = RuleView = Backbone.View.extend(
         style = $("#"+rule.id).attr('style')
         if style == undefined
             console.log 'create view'
+            if currentView?
+                console.log 'remove old view'
+
+                #Remove view from DOM
+                #currentView.remove()
+
             aclView = new ACLView({model: rule})
+            currentView = aclView
         else if style == 'display:block'
             $("#"+rule.id).attr('style', 'display:none')
         else
@@ -259,7 +268,11 @@ module.exports = RuleView = Backbone.View.extend(
         id = $(event.currentTarget).data("id")
         rule = @collection.get(id)
 
-        $("#stats").html templateStats({rule: rule.toJSON()})
+        id = rule.get('id')
+        nUser = rule.get('userIDs').length
+        nDoc = rule.get('docIDs').length
+
+        $("#stats").html templateStats({id: id, nUser: nUser, nDoc: nDoc})
         console.log 'looking for ' + "stats"+rule.id
         style = $("#stats"+rule.id).attr('style')
         if style == 'display:block'

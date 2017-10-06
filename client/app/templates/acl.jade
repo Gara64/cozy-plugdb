@@ -23,7 +23,8 @@ div(id="#{rule.id}", class="container", style="display:block")
             tbody
                 each aclDoc, i in rule.docIDs
                     each aclUser, j in rule.userIDs
-                        tr(id="#{aclDoc.id}#{aclUser.id}", data-status="*", data-idACLUser="#{aclUser.id}", data-idACLDoc="#{aclDoc.id}", class="success")
+                    
+                        tr(id="#{aclDoc.id}#{aclUser.id}",  data-idACLUser="#{aclUser.id}", data-idACLDoc="#{aclDoc.id}", class="success")
                             td(class="#{aclDoc.id}")
                                 a(href="")
                                     p()

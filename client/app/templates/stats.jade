@@ -37,11 +37,12 @@ div(id="stats#{id}", class="container", style="display:none")
                     b Secure Execution Environment
             div(class="panel-body")
                 p(id="SEEAclQuar") # ACL? inserted:
-                    i  3
+                    i  #{nSuspect}
                 p(id="SEEAclPlus") # ACL+ inserted:
-                    i  15
+                    i  #{nValid}
                 p(id="SEEAclMinus") # ACL- inserted:
-                    i  2
+                    i  #{nReject}
+                
 
 br
 br

@@ -274,7 +274,22 @@ module.exports = RuleView = Backbone.View.extend(
         nUser = rule.get('userIDs').length
         nDoc = rule.get('docIDs').length
 
-        $("#stats").html templateStats({id: id, nUser: nUser, nDoc: nDoc})
+        nSuspect = nValid =  nReject = 0
+        acls = rule.get('acls')
+        console.log 'acls stats : ' + JSON.stringify acls
+        Object.keys(acls).forEach (id) ->
+            acl = acls[id]
+            console.log 'status : ' + acl.status
+            if acl.status is '?'
+                nSuspect++
+            else if acl.status is '+'
+                nValid++
+            else if acl.status is '-'
+                nReject++
+
+        $("#stats").html templateStats({id: id, nUser: nUser, nDoc: nDoc,
+        nSuspect: nSuspect, nValid: nValid, nReject; nReject})
+
         console.log 'looking for ' + "stats"+rule.id
         style = $("#stats"+rule.id).attr('style')
         if style == 'display:block'

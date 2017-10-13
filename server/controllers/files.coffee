@@ -29,7 +29,7 @@ module.exports.find = (req, res, next) ->
     File.find req.params.fileid, (error, file)->
         if error
             return next(error)
-        console.log 'file : ', file
+        # console.log 'file : ', file
 
         res.send(file)
 

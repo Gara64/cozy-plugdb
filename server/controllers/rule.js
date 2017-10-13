@@ -20,6 +20,7 @@ module.exports.create = function(req, res, next) {
         filterDoc: body.filterDoc,
         filterUser: body.filterUser
     }
+    body.acls = {}
     console.log('create rule ', body)
     Rule.create(body, function(err, rule) {
         if(err) {

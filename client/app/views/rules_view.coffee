@@ -10,6 +10,8 @@ TriggerView = require './trigger_view'
 templateAdvisor = require('../templates/advisor')
 templateStats = require('../templates/stats')
 
+collectionRules = {}
+
 thresholdAdvisor = 1
 contactHistory = {}
 
@@ -83,6 +85,7 @@ module.exports = RuleView = Backbone.View.extend(
         @listenTo @collection, 'change:id', @render
         @listenTo @collection, 'change:userIDs', @updateHistory
         @listenTo @collection, 'add'   , @render
+        @listenTo @collection, 'update'   , @render
         @listenTo @collection, 'remove', @render
         @listenTo @collection, 'reset' , @render
         @listenTo @collection, 'ping', @render
@@ -102,7 +105,12 @@ module.exports = RuleView = Backbone.View.extend(
         return
 
     render: ->
+        console.log 'bam render rules'
         @collection.forEach (model) ->
+            console.log 'id model : ' + model.id
+            console.log 'userid model : ' + model.get('userIDs')
+            console.log 'userid model : ' + model.userIDs
+
             model.getSensitiveTags (err, tags) ->
                 model.set({"tags": tags})
 
@@ -119,6 +127,9 @@ module.exports = RuleView = Backbone.View.extend(
 
         @renderAdvisor(acls)
         @renderTriggers(tri)
+
+        collectionRules = @collection
+
         #@renderHack()
         return
 
@@ -243,7 +254,15 @@ module.exports = RuleView = Backbone.View.extend(
     showACL: (event) ->
         event.preventDefault()
         id = $(event.currentTarget).data("id")
-        rule = @collection.get(id)
+
+        # Force refetch to deal with this space bug that set userIDs and
+        # docIDs to []. To replay it : select acls for an empty rule, then
+        # select acls for a non-empty rule, select again the empty one and the
+        # non-empty again. Both user and docIDs are now empty. WTF :(.
+        rules = new Rules()
+        rules.fetch(reset:true, async: false)
+        rule = rules.get(id)
+
         status = $(event.currentTarget).data("status")
 
         console.log('display : ' + $("#"+rule.id).attr('style'))
@@ -268,7 +287,11 @@ module.exports = RuleView = Backbone.View.extend(
     showStats: (event) ->
         event.preventDefault()
         id = $(event.currentTarget).data("id")
-        rule = @collection.get(id)
+
+        # Fetch the rule for the same bug described in the showACL function
+        rules = new Rules()
+        rules.fetch(reset:true, async: false)
+        rule = rules.get(id)
 
         id = rule.get('id')
         nUser = rule.get('userIDs').length

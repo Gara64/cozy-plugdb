@@ -32,6 +32,9 @@ module.exports = ACLView = Backbone.View.extend(
             if acl is null
                 rule.userIDs.splice(rule.userIDs.indexOf(acl), 1)
 
+        console.log 'render rule userid after splice : ' + JSON.stringify rule.userIDs
+
+
         # TODO: DEMO ONLY
         ###
         if rule.id is "0a127ad5493b54992ea501a80f054972"
@@ -130,13 +133,12 @@ module.exports = ACLView = Backbone.View.extend(
         @renderAllColorStatus()
 
 
+
     # Build the ACL structure, that contains all the doc/user id and their
     # current status (-,+,*,?).
     # This is a hash table, the key is the concatenation of doc/user id
     buildACLs: (rule) ->
         acls = @model.get('acls')
-        userIDs = []
-        docIDs = []
 
         ###
         Object.keys(acls).forEach (aclID) ->
@@ -173,8 +175,8 @@ module.exports = ACLView = Backbone.View.extend(
 #        console.log 'acls built : ' + JSON.stringify acls
 
         # Save acls in db
-        console.log 'acls : ' + JSON.stringify acls
-        console.log 'save acls'
+        #console.log 'acls : ' + JSON.stringify acls
+        console.log 'userids : ' + JSON.stringify rule.userIDs
         console.log 'model id : ' + @model.get('id')
         @model.save()
 
@@ -242,6 +244,9 @@ module.exports = ACLView = Backbone.View.extend(
         # console.log 'acl : ', JSON.stringify acl
 
         acls = @model.get('acls')
+        rules = new Rules()
+        rules.fetch(reset:true, async: false)
+        rule = rules.get(id)
         # Iterate over all the acl to find the ones matching
         ###
         Object.keys(acls).forEach (aclID) ->
@@ -254,7 +259,9 @@ module.exports = ACLView = Backbone.View.extend(
         acl = acls[id]
         acl.status = status
         console.log 'acl status updated : ' + JSON.stringify acl
-        @model.save()
+        console.log 'userids : ' + JSON.stringify rule.userIDs
+        console.log 'rule id : ' + JSON.stringify rule.id
+        rule.save()
 
 
     setACLStatus: (list, acl, status) ->
@@ -281,12 +288,17 @@ module.exports = ACLView = Backbone.View.extend(
 
         acls = @model.get('acls')
         modelId = @model.get('id')
+
+        rules = new Rules()
+        rules.fetch(reset:true, async: false)
+        rule = rules.get(id)
+
         acl = acls[id]
         console.log 'acls : ' + JSON.stringify acls
-        console.log 'id : ' + modelId
+        console.log 'userids : ' + JSON.stringify rule.userIDs
         acl.status = status
         console.log 'save change acl status'
-        @model.save()
+        rule.save()
         @setACLColor(acl)
 
 
